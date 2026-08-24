@@ -5,10 +5,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/common/Button";
 import { EmptyState } from "@/components/common/EmptyState";
 import { CounterStrip } from "@/components/player/CounterStrip";
-import { CandidateTrail } from "@/components/player/CandidateTrail";
 import { resolveCodeLine } from "@/engine/builder";
 import { PlaybackBar } from "@/components/player/PlaybackBar";
-import { StepScrubber } from "@/components/player/StepScrubber";
+import { StepTimeline } from "@/components/player/StepTimeline";
 import { FrameView } from "@/components/viz/FrameView";
 import { legendRows } from "@/components/viz/tokens";
 import { getAlgorithm } from "@/content/algorithms";
@@ -192,7 +191,7 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
       className={cn("flex flex-col rounded-xl border border-hairline bg-card shadow-sm", className)}
     >
       <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
-        <h2 className="font-sans text-[14px] font-medium text-ink">Explanation</h2>
+        <h2 className="font-sans text-[14px] font-medium text-ink">Why this step?</h2>
         <span className="font-mono text-[12px] text-slate">
           Step {index + 1} of {run.steps.length}
         </span>
