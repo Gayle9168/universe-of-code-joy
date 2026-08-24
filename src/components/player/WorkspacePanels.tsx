@@ -775,104 +775,23 @@ export function VisualStage({
         })}
       </div>
 
-      {/* Floating Legend (Top Right) — derived from the frame on screen */}
-      {legend.length > 0 && (
-        <div className="absolute right-6 top-16 flex flex-col gap-2.5 rounded-xl border border-hairline bg-white/80 p-4 shadow-sm backdrop-blur-sm z-10 font-mono text-[11px] text-ink pointer-events-none">
-          {legend.map((row) => (
-            <span key={row.state} className="flex items-center gap-3">
-              <span
-                aria-hidden="true"
-                className="flex h-3 w-3 shrink-0 items-center justify-center rounded-full border border-hairline"
-                style={{ backgroundColor: row.fill }}
-              />
-              {row.label}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* View label — reflects the frame actually rendered */}
-      <div className="flex items-center justify-between p-4 pb-0 relative z-20">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex h-8 items-center gap-2 rounded-full border border-hairline bg-white px-4 font-mono text-[12px] text-slate shadow-sm">
-            {viewLabel}
-          </span>
-        </div>
-      </div>
-
-      {/* Canvas */}
-      <div className="flex flex-1 items-center justify-center min-h-0 relative z-0">
+      {/* Canvas — the array/graph/grid itself, given the majority of the height */}
+      <div className="flex min-h-0 flex-1 items-center justify-center px-6 pb-2 pt-8 relative z-0">
         {step ? (
-          <FrameView frame={step.frame} className="max-h-full" />
+          frame?.kind === "array" ? (
+            <ArrayCanvas frame={frame} />
+          ) : (
+            <FrameView frame={step.frame} className="max-h-full" />
+          )
         ) : (
           <p className="t-small text-slate">Preparing the visualization…</p>
         )}
       </div>
 
-      {/* Timeline and Playback Controls (Bottom Area) */}
-      <div className="mt-auto flex shrink-0 flex-col pt-4 pb-5 px-8 relative z-20">
-        {/* Pointer / window readout — mirrors the frame, never hardcoded text. */}
-        <div className="mb-3 flex items-center justify-between gap-6 font-mono text-[12px] text-ink">
-          <div className="flex min-w-0 items-center gap-6">
-            {pointers.length > 0 && (
-              <span className="flex items-center gap-2">
-                <svg
-                  aria-hidden="true"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-primary"
-                >
-                  <path d="M12 19V5M5 12l7-7 7 7" />
-                </svg>
-                <span className="flex items-center gap-2">
-                  {pointers.map((p) => (
-                    <span key={p.name} className="tabular-nums">
-                      <span className="text-slate">{p.name}</span> {p.index}
-                    </span>
-                  ))}
-                </span>
-              </span>
-            )}
-            {/* The window's extent is drawn on the array itself; repeating the
-                index range here just doubled it. The size is the useful part. */}
-            {ranges.length > 0 && (
-              <span className="flex min-w-0 items-center gap-2">
-                <svg
-                  aria-hidden="true"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-slate shrink-0"
-                >
-                  <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
-                  <path d="M3 10h18" />
-                </svg>
-                <span className="truncate tabular-nums">
-                  {ranges.map((r) => rangeSummary(r)).join(" · ")}
-                </span>
-              </span>
-            )}
-          </div>
-
-          {/* A5: the engine has always computed these; now they are shown. */}
-          <CounterStrip />
-        </div>
-
-        {/* The named, numbered step sequence. */}
-        {showScrubber && <StepTimeline className="border-t border-hairline pt-3" />}
-
-        <div className="mt-4 flex justify-center w-full">
-          {showPlaybackBar && (
-            <PlaybackBar className="border-0 bg-transparent p-0 shadow-none static w-full" />
-          )}
-        </div>
+      {/* Timeline and one-row control strip */}
+      <div className="mt-auto flex shrink-0 flex-col gap-3 border-t border-hairline px-6 pb-5 pt-4 relative z-20">
+        {showScrubber && <StepTimeline />}
+        {showPlaybackBar && <ControlStrip />}
       </div>
     </div>
   );
