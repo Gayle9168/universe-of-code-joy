@@ -150,12 +150,29 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
   /* Last known index per marker: a marker the current frame omits fades out in
      place rather than snapping to index 0. */
   const lastIndexRef = React.useRef<Record<string, number>>({});
-  const markers = names.map((name) => {
+  const baseMarkers = names.map((name) => {
     const live = frame.pointers.find((p) => p.name === name);
     if (live) lastIndexRef.current[name] = Math.max(0, Math.min(live.index, n - 1));
     const index = lastIndexRef.current[name] ?? 0;
     return { name, index, active: Boolean(live) };
   });
+
+  /* Markers that land on the same cell share the slot side by side instead of
+     stacking on top of each other (lo = hi = mid on the final frame). */
+  const lanes = new Map<number, string[]>();
+  for (const m of baseMarkers) {
+    if (!m.active) continue;
+    const bucket = lanes.get(m.index);
+    if (bucket) bucket.push(m.name);
+    else lanes.set(m.index, [m.name]);
+  }
+  const markers = baseMarkers.map((m) => {
+    const bucket = lanes.get(m.index);
+    if (!bucket || bucket.length < 2) return { ...m, lane: 0 };
+    const k = bucket.indexOf(m.name);
+    return { ...m, lane: (k - (bucket.length - 1) / 2) * 26 };
+  });
+
 
   const extent = win
     ? windowExtentPx(win.from, win.to, rowWidth, n, CELL_GAP)
