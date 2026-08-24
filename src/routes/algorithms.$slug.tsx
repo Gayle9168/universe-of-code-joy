@@ -37,7 +37,7 @@ function RightColumnPanels({
   const [tab, setTab] = React.useState<"code" | "input" | "about">("code");
 
   return (
-    <div className="flex w-full shrink-0 flex-col gap-6 min-h-0 lg:w-[37%]">
+    <div className="flex min-h-0 w-full min-w-0 flex-col gap-6">
       {/* Upper Panel with Tabs: Code, Input, About */}
       <div className="flex min-h-0 flex-[7] flex-col overflow-hidden rounded-2xl border border-hairline bg-card shadow-sm">
         <div
@@ -452,7 +452,7 @@ function AlgorithmWorkspace(): React.ReactElement {
       </header>
 
       {/* Main Workspace */}
-      <main className="flex min-h-0 flex-1 flex-col px-24 py-4">
+      <main className="flex min-h-0 flex-1 flex-col px-4 py-4 lg:px-8 xl:px-12 2xl:px-20">
         {/* Header Row */}
         <div className="mb-4 flex shrink-0 flex-col gap-2">
           <nav
