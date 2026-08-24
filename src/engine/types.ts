@@ -46,7 +46,26 @@ export type ArrayFrame = {
    */
   rangeRows?: number;
   swapPair?: [number, number];
+  /**
+   * The value being hunted, drawn as a card above the row. Presentation only —
+   * nothing in the engine reads it back.
+   */
+  target?: { label: string; value: number | string };
+  /**
+   * The single comparison this step is making, as three parts so the view can
+   * lay them out (`16` `>` `13`) plus the plain-English verdict under them.
+   */
+  comparison?: {
+    left: string;
+    op: string;
+    right: string;
+    verdict?: string;
+    tone?: "accent" | "error" | "warning";
+  };
+  /** What the comparison lets us conclude, shown as a callout under the strip. */
+  decision?: { title: string; detail?: string; tone?: "accent" | "error" | "warning" };
 };
+
 
 export type TreeFrame = {
   kind: "tree";
