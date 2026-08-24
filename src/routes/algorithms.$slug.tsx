@@ -531,7 +531,7 @@ function AlgorithmWorkspace(): React.ReactElement {
         </div>
 
         {/* Two-column workspace: canvas card left, code + reasoning right */}
-        <div className="hidden min-h-0 flex-1 gap-6 lg:grid lg:grid-cols-[58fr_42fr] xl:grid-cols-[64fr_36fr] 2xl:grid-cols-[68fr_32fr]">
+        <div className="grid min-h-0 flex-1 gap-6 grid-cols-[58fr_42fr] xl:grid-cols-[64fr_36fr] 2xl:grid-cols-[68fr_32fr]">
           <VisualStage
             module={mod}
             algoName={algo.name}
@@ -540,39 +540,6 @@ function AlgorithmWorkspace(): React.ReactElement {
           <RightColumnPanels algo={algo} module={mod} slug={modSlug} />
         </div>
 
-        {/* Below 1024px the three panels cannot share a screen legibly. */}
-        <div className="flex flex-1 items-start lg:hidden">
-          <div className="w-full rounded-2xl border border-hairline bg-card p-6 shadow-sm">
-            <h2 className="font-display text-[18px] font-semibold text-ink">
-              Interactive visualizations are designed for larger screens
-            </h2>
-            <p className="mt-2 font-sans text-[14px] leading-relaxed text-slate">
-              The animation, the code and the step-by-step explanation need to sit side by side.
-              Open this lesson on a tablet in landscape or a laptop to run it.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Link
-                to="/practice/$slug"
-                params={{ slug: practiceSlug ?? slug }}
-                disabled={!practiceSlug}
-                className={cn(
-                  "inline-flex h-10 items-center gap-2 rounded-full px-5 text-[14px] font-medium",
-                  practiceSlug
-                    ? "bg-primary text-primary-foreground"
-                    : "pointer-events-none bg-primary/40 text-primary-foreground",
-                )}
-              >
-                Practice <ArrowRight size={16} />
-              </Link>
-              <Link
-                to="/explore"
-                className="inline-flex h-10 items-center gap-2 rounded-full border border-hairline px-5 text-[14px] font-medium text-ink"
-              >
-                Back to Explore
-              </Link>
-            </div>
-          </div>
-        </div>
       </main>
 
       {mod && (
