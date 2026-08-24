@@ -348,8 +348,11 @@ function AlgorithmWorkspace(): React.ReactElement {
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden bg-paper">
+      <DesktopScaleFrame className="min-h-0 flex-1">
+        <div className="flex h-full w-full flex-col bg-paper">
       {/* Top Nav (Global) */}
       <header className="flex h-[68px] shrink-0 items-center justify-between border-b border-hairline bg-card px-24">
+
         <div className="flex items-center gap-12">
           <Link to="/" className="flex items-center gap-2">
             <AlgoraGlyph />
