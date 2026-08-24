@@ -2,15 +2,23 @@ import * as React from "react";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ArrayFrame, CellState } from "@/engine/types";
+import { cellCenter, scaleXFor, windowExtentPx } from "@/lib/vizTransitions";
 
 /**
  * DOM (not SVG) canvas for searching-style array frames: index labels above the
  * row, large rounded value cells, a dashed search-window bracket with labelled
  * boundary markers, a three-part comparison strip and a decision callout.
  *
- * Pure presentation — `(props: { frame }) => JSX`, no stores, no router. Static
- * styling only: this pass fixes the composition, transitions land separately.
+ * Pure presentation — `(props: { frame }) => JSX`, no stores, no router.
+ * Frame-to-frame changes animate: cells cross-fade between states, the bracket
+ * contracts, and the lo/hi/mid markers translate to their new cell centres.
+ * Geometry is measured from the rendered row, never hardcoded, and the global
+ * reduced-motion rules in `styles.css` collapse every transition to 0ms.
  */
+
+/** Gap between cells; must stay in sync with the `gap-2` utility on the rows. */
+const CELL_GAP = 8;
+const MAX_CELL = 72;
 
 const CELL_SURFACE: Record<CellState, string> = {
   idle: "border-hairline bg-card text-ink",
@@ -21,6 +29,18 @@ const CELL_SURFACE: Record<CellState, string> = {
   excluded: "border-hairline bg-paper text-slate-soft",
   compare: "border-primary bg-primary text-primary-foreground",
   sorted: "border-primary/30 bg-tint text-ink",
+};
+
+/** Cells the frame has taken out of play read as secondary, never removed. */
+const DIMMED: Partial<Record<CellState, string>> = {
+  excluded: "opacity-45",
+  visited: "opacity-60",
+};
+
+/** The emphasised states get a hair more presence as they take over. */
+const EMPHASIS: Partial<Record<CellState, string>> = {
+  found: "scale-[1.04] shadow-sm",
+  compare: "scale-[1.04] shadow-sm",
 };
 
 function stateOf(frame: ArrayFrame, index: number): CellState {
@@ -62,6 +82,49 @@ function describe(frame: ArrayFrame): string {
   return parts.join(" ");
 }
 
+/** Measures the rendered row so overlays can track real cell geometry. */
+function useMeasuredWidth<T extends HTMLElement>(): [React.RefObject<T | null>, number] {
+  const ref = React.useRef<T | null>(null);
+  const [width, setWidth] = React.useState(0);
+
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const update = () => setWidth(el.getBoundingClientRect().width);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return [ref, width];
+}
+
+interface ValueCellProps {
+  value: string | number;
+  state: CellState;
+}
+
+/** Memoized so playback re-renders only the cells whose state actually moved. */
+const ValueCell = React.memo(function ValueCell({
+  value,
+  state,
+}: ValueCellProps): React.ReactElement {
+  return (
+    <div
+      className={cn(
+        "flex h-[54px] items-center justify-center rounded-xl border font-mono text-[20px] font-medium tabular-nums xl:h-[58px] 2xl:h-[62px]",
+        "transition-[background-color,border-color,color,opacity,transform,box-shadow] duration-300 ease-out will-change-transform",
+        CELL_SURFACE[state],
+        DIMMED[state],
+        EMPHASIS[state],
+      )}
+    >
+      {String(value)}
+    </div>
+  );
+});
+
 export interface ArrayCanvasProps {
   frame: ArrayFrame;
   className?: string;
@@ -70,174 +133,216 @@ export interface ArrayCanvasProps {
 export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.ReactElement {
   const n = Math.max(1, frame.values.length);
   const win = windowExtent(frame);
+  const [rowRef, rowWidth] = useMeasuredWidth<HTMLDivElement>();
   const cols: React.CSSProperties = { gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` };
-  /* Caps the row so ten cells read at the reference size instead of stretching
-     across a 1536px card; narrower viewports shrink the cells, not the layout. */
-  const rowStyle: React.CSSProperties = { ...cols, maxWidth: `${n * 72}px` };
 
-  const pointerByIndex = new Map<number, ArrayFrame["pointers"]>();
-  for (const p of frame.pointers) {
-    const key = Math.max(0, Math.min(p.index, n - 1));
-    const bucket = pointerByIndex.get(key);
-    if (bucket) bucket.push(p);
-    else pointerByIndex.set(key, [p]);
+  /* Every pointer the run has shown so far keeps a mounted marker, so a marker
+     travels to its new cell instead of unmounting and reappearing. */
+  const [names, setNames] = React.useState<string[]>(() => frame.pointers.map((p) => p.name));
+  React.useEffect(() => {
+    setNames((prev) => {
+      const next = [...prev];
+      for (const p of frame.pointers) if (!next.includes(p.name)) next.push(p.name);
+      return next.length === prev.length ? prev : next;
+    });
+  }, [frame.pointers]);
+
+  /* Last known index per marker: a marker the current frame omits fades out in
+     place rather than snapping to index 0. */
+  const lastIndexRef = React.useRef<Record<string, number>>({});
+  const baseMarkers = names.map((name) => {
+    const live = frame.pointers.find((p) => p.name === name);
+    if (live) lastIndexRef.current[name] = Math.max(0, Math.min(live.index, n - 1));
+    const index = lastIndexRef.current[name] ?? 0;
+    return { name, index, active: Boolean(live) };
+  });
+
+  /* Markers that land on the same cell share the slot side by side instead of
+     stacking on top of each other (lo = hi = mid on the final frame). */
+  const lanes = new Map<number, string[]>();
+  for (const m of baseMarkers) {
+    if (!m.active) continue;
+    const bucket = lanes.get(m.index);
+    if (bucket) bucket.push(m.name);
+    else lanes.set(m.index, [m.name]);
   }
+  const markers = baseMarkers.map((m) => {
+    const bucket = lanes.get(m.index);
+    if (!bucket || bucket.length < 2) return { ...m, lane: 0 };
+    const k = bucket.indexOf(m.name);
+    return { ...m, lane: (k - (bucket.length - 1) / 2) * 26 };
+  });
+
+  const extent = win
+    ? windowExtentPx(win.from, win.to, rowWidth, n, CELL_GAP)
+    : { offset: 0, width: rowWidth, center: rowWidth / 2 };
 
   return (
     <div className={cn("flex w-full flex-col items-center", className)}>
       <span className="sr-only" role="img" aria-label={describe(frame)} />
 
-      {/* target */}
+      {/* target — stationary, only its value cross-fades */}
       {frame.target ? (
         <div className="flex flex-col items-center gap-1.5">
           <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
             {frame.target.label}
           </span>
-          <span className="flex h-14 min-w-[3.5rem] items-center justify-center rounded-xl border border-primary/40 bg-tint px-4 font-mono text-[24px] font-semibold tabular-nums text-primary">
-            {String(frame.target.value)}
+          <span className="flex h-14 min-w-[3.5rem] items-center justify-center rounded-xl border border-primary/40 bg-tint px-4 font-mono text-[24px] font-semibold tabular-nums text-primary transition-colors duration-300 ease-out">
+            <span key={String(frame.target.value)} className="viz-swap">
+              {String(frame.target.value)}
+            </span>
           </span>
         </div>
       ) : null}
 
-      {/* index labels */}
       <div
-        aria-hidden="true"
-        className={cn("mt-6 grid w-full gap-2 px-1", frame.target ? "" : "mt-0")}
-        style={rowStyle}
+        className={cn("w-full px-1", frame.target ? "mt-6" : "mt-0")}
+        style={{ maxWidth: `${n * MAX_CELL}px` }}
       >
-        {frame.values.map((_, i) => (
-          <span
-            key={`idx-${i}`}
-            className="text-center font-mono text-[11px] tabular-nums text-slate-soft"
-          >
-            {i}
-          </span>
-        ))}
-      </div>
-
-      {/* value cells */}
-      <div className="mt-1.5 grid w-full gap-2 px-1" style={rowStyle}>
-        {frame.values.map((value, i) => {
-          const state = stateOf(frame, i);
-          return (
-            <div
-              key={`cell-${i}`}
-              className={cn(
-                "flex h-[54px] items-center justify-center rounded-xl border font-mono text-[20px] font-medium tabular-nums xl:h-[58px] 2xl:h-[62px]",
-                CELL_SURFACE[state],
-              )}
-            >
-              {String(value)}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* dashed search-window bracket */}
-      {win ? (
-        <div className="mt-3 grid w-full gap-2 px-1" style={rowStyle}>
-          <div
-            className="flex flex-col items-center"
-            style={{ gridColumnStart: win.from + 1, gridColumnEnd: win.to + 2 }}
-          >
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
-              {win.label}
-            </span>
-            <span className="mt-1 h-px w-full border-t border-dashed border-primary/50" />
-          </div>
-        </div>
-      ) : null}
-
-      {/* lo / hi / mid markers */}
-      <div className="mt-2 grid w-full gap-2 px-1" style={rowStyle}>
-        {frame.values.map((_, i) => {
-          const marks = pointerByIndex.get(i);
-          return (
-            <div key={`ptr-${i}`} className="flex min-h-[34px] justify-center gap-2">
-              {marks?.map((p) => (
-                <span key={p.name} className="flex flex-col items-center leading-tight">
-                  <span className="font-mono text-[11px] font-medium text-primary">{p.name}</span>
-                  <span className="font-mono text-[13px] font-semibold tabular-nums text-primary">
-                    {p.index}
-                  </span>
-                </span>
-              ))}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* comparison strip */}
-      {frame.comparison ? (
-        <div className="mt-5 flex w-full max-w-[520px] items-stretch rounded-xl border border-hairline bg-card">
-          <div className="flex flex-1 flex-col items-center gap-0.5 px-4 py-3">
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
-              mid value
-            </span>
-            <span className="font-mono text-[20px] font-semibold tabular-nums text-primary">
-              {frame.comparison.left}
-            </span>
-          </div>
-          <div className="w-px self-stretch bg-hairline" />
-          <div className="flex flex-1 items-center justify-center px-4 py-3">
+        {/* index labels */}
+        <div aria-hidden="true" className="grid w-full gap-2" style={cols}>
+          {frame.values.map((_, i) => (
             <span
-              className={cn(
-                "font-mono text-[22px] font-semibold tabular-nums",
-                frame.comparison.tone === "error" ? "text-error" : "text-warning",
-              )}
+              key={`idx-${i}`}
+              className="text-center font-mono text-[11px] tabular-nums text-slate-soft"
             >
-              {frame.comparison.left} {frame.comparison.op} {frame.comparison.right}
+              {i}
             </span>
-          </div>
-          <div className="w-px self-stretch bg-hairline" />
-          <div className="flex flex-1 flex-col items-center gap-0.5 px-4 py-3">
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
-              target
-            </span>
-            <span className="font-mono text-[20px] font-semibold tabular-nums text-primary">
-              {frame.comparison.right}
-            </span>
-          </div>
+          ))}
         </div>
-      ) : null}
 
-      {/* decision callout */}
-      {frame.decision ? (
-        <div
-          className={cn(
-            "mt-3 flex w-full max-w-[580px] items-center gap-3 rounded-xl px-4 py-3",
-            frame.decision.tone === "error"
-              ? "bg-error-tint"
-              : frame.decision.tone === "accent"
-                ? "bg-tint"
-                : "bg-warning/10",
-          )}
-        >
-          <span
+        {/* value cells */}
+        <div ref={rowRef} className="mt-1.5 grid w-full gap-2" style={cols}>
+          {frame.values.map((value, i) => (
+            <ValueCell key={`cell-${i}`} value={value} state={stateOf(frame, i)} />
+          ))}
+        </div>
+
+        {/* dashed search-window bracket — one element that contracts */}
+        <div className="relative mt-3 h-[20px] w-full overflow-hidden">
+          <div
+            className="absolute left-0 top-0 w-full transition-[transform,opacity] duration-300 ease-out will-change-transform"
+            style={{
+              opacity: win ? 1 : 0,
+              transform: `translateX(${extent.center}px) translateX(-50%)`,
+            }}
+          >
+            <span className="block text-center font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
+              {win?.label ?? "search window"}
+            </span>
+          </div>
+          <div
             aria-hidden="true"
+            className="absolute left-0 top-[15px] h-px w-full origin-left border-t border-dashed border-primary/50 transition-[transform,opacity] duration-300 ease-out will-change-transform"
+            style={{
+              opacity: win ? 1 : 0,
+              transform: `translateX(${extent.offset}px) scaleX(${scaleXFor(extent.width, rowWidth)})`,
+            }}
+          />
+        </div>
+
+        {/* lo / hi / mid markers — persistent, they travel */}
+        <div className="relative mt-2 h-[34px] w-full">
+          {markers.map((m) => (
+            <span
+              key={m.name}
+              className="absolute left-0 top-0 flex flex-col items-center leading-tight transition-[transform,opacity] duration-300 ease-out will-change-transform"
+              style={{
+                opacity: m.active ? 1 : 0,
+                transform: `translateX(${cellCenter(m.index, rowWidth, n, CELL_GAP) + m.lane}px) translateX(-50%)`,
+              }}
+            >
+              <span className="font-mono text-[11px] font-medium text-primary">{m.name}</span>
+              <span className="font-mono text-[13px] font-semibold tabular-nums text-primary">
+                {m.index}
+              </span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* comparison strip — height reserved so frames never shift the layout */}
+      <div
+        className="mt-5 flex w-full max-w-[520px] items-stretch rounded-xl border border-hairline bg-card transition-opacity duration-300 ease-out"
+        style={{ opacity: frame.comparison ? 1 : 0 }}
+        aria-hidden={frame.comparison ? undefined : true}
+      >
+        <div className="flex flex-1 flex-col items-center gap-0.5 px-4 py-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+            mid value
+          </span>
+          <span
+            key={`left-${String(frame.comparison?.left ?? "")}`}
+            className="viz-swap font-mono text-[20px] font-semibold tabular-nums text-primary"
+          >
+            {frame.comparison?.left ?? "\u00a0"}
+          </span>
+        </div>
+        <div className="w-px self-stretch bg-hairline" />
+        <div className="flex flex-1 items-center justify-center px-4 py-3">
+          <span
+            key={`op-${String(frame.comparison?.left ?? "")}${frame.comparison?.op ?? ""}${String(frame.comparison?.right ?? "")}`}
             className={cn(
-              "flex size-8 shrink-0 items-center justify-center rounded-full text-card",
-              frame.decision.tone === "error"
-                ? "bg-error"
-                : frame.decision.tone === "accent"
-                  ? "bg-primary"
-                  : "bg-warning",
+              "viz-swap font-mono text-[22px] font-semibold tabular-nums transition-colors duration-300 ease-out",
+              frame.comparison?.tone === "error" ? "text-error" : "text-warning",
             )}
           >
-            <ArrowRight size={16} strokeWidth={2.2} />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block font-sans text-[14px] font-semibold text-ink">
-              {frame.decision.title}
-            </span>
-            {frame.decision.detail ? (
-              <span className="mt-0.5 block font-sans text-[13px] leading-snug text-slate">
-                {frame.decision.detail}
-              </span>
-            ) : null}
+            {frame.comparison
+              ? `${frame.comparison.left} ${frame.comparison.op} ${frame.comparison.right}`
+              : "\u00a0"}
           </span>
         </div>
-      ) : null}
+        <div className="w-px self-stretch bg-hairline" />
+        <div className="flex flex-1 flex-col items-center gap-0.5 px-4 py-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+            target
+          </span>
+          <span
+            key={`right-${String(frame.comparison?.right ?? "")}`}
+            className="viz-swap font-mono text-[20px] font-semibold tabular-nums text-primary"
+          >
+            {frame.comparison?.right ?? "\u00a0"}
+          </span>
+        </div>
+      </div>
+
+      {/* decision callout — stays in place, content cross-fades */}
+      <div
+        className={cn(
+          "mt-3 flex w-full max-w-[580px] items-center gap-3 rounded-xl px-4 py-3 transition-[background-color,opacity] duration-300 ease-out",
+          frame.decision?.tone === "error"
+            ? "bg-error-tint"
+            : frame.decision?.tone === "accent"
+              ? "bg-tint"
+              : "bg-warning/10",
+        )}
+        style={{ opacity: frame.decision ? 1 : 0 }}
+        aria-hidden={frame.decision ? undefined : true}
+      >
+        <span
+          aria-hidden="true"
+          className={cn(
+            "flex size-8 shrink-0 items-center justify-center rounded-full text-card transition-colors duration-300 ease-out",
+            frame.decision?.tone === "error"
+              ? "bg-error"
+              : frame.decision?.tone === "accent"
+                ? "bg-primary"
+                : "bg-warning",
+          )}
+        >
+          <ArrowRight size={16} strokeWidth={2.2} />
+        </span>
+        <span key={frame.decision?.title ?? "none"} className="viz-swap min-w-0 flex-1">
+          <span className="block font-sans text-[14px] font-semibold text-ink">
+            {frame.decision?.title ?? "\u00a0"}
+          </span>
+          {frame.decision?.detail ? (
+            <span className="mt-0.5 block font-sans text-[13px] leading-snug text-slate">
+              {frame.decision.detail}
+            </span>
+          ) : null}
+        </span>
+      </div>
     </div>
   );
 }

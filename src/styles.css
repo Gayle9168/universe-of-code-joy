@@ -257,6 +257,21 @@
   box-shadow: 0 0 0 4px var(--tint);
 }
 
+/* Content swap inside a fixed slot: the box stays put, only the text fades in.
+   The global reduced-motion rules above neutralise this animation. */
+@keyframes viz-swap-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@utility viz-swap {
+  animation: viz-swap-in 260ms ease-out;
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
