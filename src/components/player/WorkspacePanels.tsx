@@ -785,7 +785,7 @@ export function VisualStage({
       </div>
 
       {/* Timeline and one-row control strip */}
-      <div className="mt-auto flex shrink-0 flex-col gap-3 border-t border-hairline px-6 pb-5 pt-4 relative z-20">
+      <div className="relative z-20 mt-auto flex shrink-0 flex-col gap-3 border-t border-hairline bg-card px-6 pb-5 pt-4">
         {showScrubber && <StepTimeline />}
         {showPlaybackBar && <ControlStrip />}
       </div>
