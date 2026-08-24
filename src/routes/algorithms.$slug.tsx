@@ -103,7 +103,9 @@ import { Button } from "@/components/common/Button";
 import { Chip } from "@/components/common/Chip";
 import { ComplexityTag } from "@/components/common/ComplexityTag";
 import { DifficultyBadge } from "@/components/common/DifficultyBadge";
+import { DesktopScaleFrame } from "@/components/common/DesktopScaleFrame";
 import { EmptyState } from "@/components/common/EmptyState";
+
 import { Tooltip } from "@/components/common/Tooltip";
 import { CATEGORY_META, getAlgorithm } from "@/content/algorithms";
 import { getLessonByAlgorithm } from "@/content/lessons";
