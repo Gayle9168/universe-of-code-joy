@@ -25,10 +25,17 @@ export function DesktopScaleFrame({
   return (
     <div
       ref={ref}
-      className={cn("w-full", isScaled ? "overflow-x-hidden overflow-y-auto" : "h-full", className)}
+      className={cn(
+        "w-full",
+        isScaled
+          ? "flex h-full flex-col justify-center overflow-x-hidden overflow-y-auto"
+          : "h-full",
+        className,
+      )}
     >
       {isScaled ? (
-        <div style={{ height: scaledHeight(scale, designHeight) }}>
+        <div className="shrink-0" style={{ height: scaledHeight(scale, designHeight) }}>
+
           <div
             style={{
               width: designWidth,
