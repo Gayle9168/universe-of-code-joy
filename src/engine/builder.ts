@@ -78,7 +78,9 @@ export class StepBuilder {
     };
     if (aux !== undefined) step.aux = deepClone(aux);
     if (detail !== undefined) step.detail = detail;
+    if (timelineLabel !== undefined) step.timelineLabel = timelineLabel;
     if (isMilestone !== undefined) step.isMilestone = isMilestone;
+
 
     this.steps.push(step);
     return this;
