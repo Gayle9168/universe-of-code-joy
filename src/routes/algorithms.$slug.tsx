@@ -547,7 +547,11 @@ function AlgorithmWorkspace(): React.ReactElement {
         </div>
       </DesktopScaleFrame>
 
+      {mod && (
+        <CustomInputModal
+          isOpen={customInputOpen}
           onClose={() => setCustomInputOpen(false)}
+
           module={mod}
           slug={modSlug}
         />
