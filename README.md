@@ -1,14 +1,16 @@
-# Welcome to your Lovable project
+# Algora: See Algorithms Think
+
+Act as senior developer and desginer i am going to create start up Dsa algo and i create degin now i only wants web browser desktop big and medium size i wants fully pixel perfect with image fully perfect gap fonts perfect its mobile version but i wants desktop version and i also gives propmt of desgin dont gues use all capability Generate ONE complete, full-length desktop landing page as a single tall vertical screenshot (aspect ratio 9:20), rendered as a real, pixel-perfect SaaS product website — NOT an illustration, NOT a collage. Render the ENTIRE page from the top navigation all the way down to the footer, every section stacked in order, nothing cropped, nothing cut off. PRODUCT: "algora" — a gamified platform where CS students master algorithms through synchronized visualization, code, and plain-English explanation. Tagline: "See the algorithm think." VISUAL SYSTEM — LIGHT THEME (strict): - Background: warm off-white paper #F7F9F8. Elevated cards: pure white #FFFFFF. Hairline borders #E4E9E7. - Text: near-black ink #0E1513 for headings, muted slate #5B6763 for secondary text. - ONE accent color: teal #0E9C86 (with a lighter #14B8A6 for highlights). Use teal only for primary buttons, active states, progress, links, and the logo glyph. - NO dark backgrounds anywhere, NO black panels, NO purple, NO rainbow gradients, NO glowing blobs or orbs, NO stock photos of people, NO emojis. Flat solid colors, crisp edges, soft realistic light shadows only. - Type: Instrument Sans for headlines (large, tight, geometric). JetBrains Mono for code, badges, stats, and labels. - Corners 12–16px, 1px hairline borders, generous whitespace, strong 1280px centered grid, high contrast, WCAG-AA. Ultra high-fidelity, 4k, clean. TOP NAV (sticky, white, thin, hairline bottom border): left = "algora" wordmark in mono with a small teal two-node graph glyph. Center links: "Learn · Visualizer · Paths · Compete · Pricing" (teal dot separators). Right = ghost "Log in" + solid teal "Start free" button (rounded). HERO (two columns, light): - Left: small mono pill badge "◆ ALGORITHM MASTERY, GAMIFIED" (teal text on pale teal tint). Huge ink headline "See the algorithm think." (the period as a small teal square). Subhead in slate: "Master data structures and interview prep through synchronized visualization, code, and plain-English explanation." Buttons: solid teal "Start free — no card" + ghost outline "▶ Watch a traversal". Mono trust row in slate: "120k+ students · 480 lessons · 4.9★". - Right: the FLAGSHIP VISUALIZER as a clean WHITE card with hairline border. Inside, top-to-bottom: (1) a binary tree of 8 numbered nodes with connecting edges — node 1 filled teal labeled "Current", nodes 2 & 4 pale-teal "Visited", the rest white/gray "Unvisited"; a small legend top-right; a playback bar (pause/play/step) + a teal speed slider "1.0x"; header "Step 4 / 11". (2) a light code editor pane (white bg, subtle line numbers) with JetBrains Mono Python BFS code, line 7 highlighted with a pale-teal row; a small "Python ▾" selector. (3) an "Explanation" card, pale surface, plain-English text describing the current dequeue step. SOCIAL PROOF STRIP: centered slate label "Trusted by students at" over a row of 5 grayscale university logos (MIT, Stanford, Berkeley, Carnegie Mellon, Waterloo), all monochrome and evenly spaced on the paper background (no dark box). GAMIFICATION SECTION — centered heading "Progress you can feel". Four WHITE cards in a row, each with a mono sublabel: 1) "Mastery Map — Build skills. Unlock nodes." a small skill tree, unlocked nodes teal with check, locked nodes gray with a lock; link "View all skills →". 2) "XP & Levels — Every step earns XP." a teal progress ring around big "Lvl 12", "2,150 / 2,400 XP", a teal "+40 XP" chip; link "See rewards →". 3) "Streak — Consistency compounds." a teal flame, bold "23-day streak", a M–S week row with teal checkmarks; link "View calendar →". 4) "Leagues — Compete. Climb. Win." a mini leaderboard (Arjun 3,250 · Mei 3,120 · Jordan 2,980) with a teal-highlighted "12 You 2,150 XP" row; link "View leaderboard →". FEATURE ROW: three columns divided by thin vertical rules, each with a small teal line icon (24px, consistent stroke): "Synced code + visuals", "Step-through debugger", "Spaced-repetition review" — each a short slate sentence + teal "Learn more →". CTA BAND: a soft pale-teal tinted panel (NOT dark), centered ink headline "Start your first traversal today", solid teal "Create free account" button, small mono slate line "No credit card. Reduced-motion friendly." FOOTER (light, white or paper, hairline top border): left = algora wordmark + glyph + "© 2026 Algora". Right = four mono-labeled link columns: PRODUCT (Visualizer, Paths, Compete, Pricing, Changelog), LEARN (Data Structures, Algorithms, Interview Prep, Study Plans, Glossary), COMPANY (About, Blog, Careers, Contact), LEGAL (Terms, Privacy, Security, Cookies). IMPORTANT: keep it ONE continuous light page, fully rendered end-to-end, realistic legible placeholder copy (no lorem, no misspellings), consistent alignment, and a single cohesive light design language throughout.
 
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/abc2c40b-5833-44df-a595-405848e5ffeb).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +22,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS

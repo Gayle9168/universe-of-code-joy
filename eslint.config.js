@@ -6,7 +6,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", ".output", ".vinxi"] },
+  { ignores: ["dist", ".output", ".vinxi", "coverage", "playwright-report", "test-results"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -30,6 +30,34 @@ export default tseslint.config(
                 "TanStack Start does not use the Next.js `server-only` package. Rename the module to `*.server.ts` or mark it with `@tanstack/react-start/server-only`.",
             },
           ],
+        },
+      ],
+      "no-restricted-properties": [
+        "error",
+        {
+          property: "toMatchSnapshot",
+          message:
+            "Criterion S11.4: Snapshot tests are strictly forbidden. Use explicit semantic assertions (toBe, toEqual, invariants) instead.",
+        },
+        {
+          property: "toMatchInlineSnapshot",
+          message:
+            "Criterion S11.4: Snapshot tests are strictly forbidden. Use explicit semantic assertions (toBe, toEqual, invariants) instead.",
+        },
+        {
+          property: "toMatchFileSnapshot",
+          message:
+            "Criterion S11.4: Snapshot tests are strictly forbidden. Use explicit semantic assertions (toBe, toEqual, invariants) instead.",
+        },
+        {
+          property: "toThrowErrorMatchingSnapshot",
+          message:
+            "Criterion S11.4: Snapshot tests are strictly forbidden. Use explicit semantic assertions (toBe, toEqual, invariants) instead.",
+        },
+        {
+          property: "toThrowErrorMatchingInlineSnapshot",
+          message:
+            "Criterion S11.4: Snapshot tests are strictly forbidden. Use explicit semantic assertions (toBe, toEqual, invariants) instead.",
         },
       ],
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
