@@ -58,7 +58,7 @@ export class StepBuilder {
       return this;
     }
 
-    const { frame, aux, codeLine, narration, detail, phase, isMilestone } = args;
+    const { frame, aux, codeLine, narration, detail, phase, timelineLabel, isMilestone } = args;
 
     if (!Number.isInteger(codeLine) || codeLine < 1 || codeLine > this.pseudocode.length) {
       throw new Error(
