@@ -10,7 +10,6 @@ import { StepTimeline } from "@/components/player/StepTimeline";
 import { ArrayCanvas } from "@/components/viz/ArrayCanvas";
 import { FrameView } from "@/components/viz/FrameView";
 import { getAlgorithm } from "@/content/algorithms";
-import { getProblem } from "@/content/problems";
 import type { Algorithm } from "@/content/types";
 import type { AlgorithmModule, InputField, AuxPanel } from "@/engine/types";
 import { cn } from "@/lib/utils";
@@ -162,6 +161,7 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
   const run = usePlayerStore((s) => s.run);
   const index = usePlayerStore((s) => s.index);
   const step = useCurrentStep();
+  const goNext = usePlayerStore((s) => s.next);
 
   if (!run || !step) {
     return (
@@ -233,7 +233,7 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
               <button
                 type="button"
                 aria-label="Next step (→)"
-                onClick={() => usePlayerStore.getState().next()}
+                onClick={goNext}
                 className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-card text-primary transition-colors hover:bg-card/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               >
                 <ArrowRight size={16} strokeWidth={1.8} />
