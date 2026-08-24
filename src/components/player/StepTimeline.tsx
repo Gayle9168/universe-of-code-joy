@@ -41,7 +41,7 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "mt-[13px] h-px w-6 shrink-0",
+                    "mt-[13px] h-px w-6 shrink-0 transition-colors duration-300 ease-out",
                     isPast || isActive ? "bg-primary/40" : "bg-hairline",
                   )}
                 />
@@ -56,9 +56,10 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
               >
                 <span
                   className={cn(
-                    "flex size-7 shrink-0 items-center justify-center rounded-full border font-mono text-[11px] tabular-nums transition-colors",
+                    "flex size-7 shrink-0 items-center justify-center rounded-full border font-mono text-[11px] tabular-nums",
+                    "transition-[background-color,border-color,color,transform] duration-300 ease-out",
                     isActive
-                      ? "border-primary bg-primary text-primary-foreground"
+                      ? "scale-110 border-primary bg-primary text-primary-foreground"
                       : isPast
                         ? "border-primary/40 bg-tint text-primary"
                         : "border-hairline bg-card text-slate group-hover:border-primary/40",
@@ -68,7 +69,7 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                 </span>
                 <span
                   className={cn(
-                    "w-full truncate text-center font-mono text-[10px] uppercase tracking-[0.08em]",
+                    "w-full truncate text-center font-mono text-[10px] uppercase tracking-[0.08em] transition-colors duration-300 ease-out",
                     isActive ? "text-ink" : "text-slate",
                   )}
                   title={label}
@@ -76,6 +77,7 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                   {label}
                 </span>
               </button>
+
             </li>
           );
         })}
