@@ -811,12 +811,9 @@ export function VisualStage({
       </div>
 
       {/* Timeline and Playback Controls (Bottom Area) */}
-      <div className="mt-auto flex shrink-0 flex-col pt-4 pb-6 px-8 relative z-20">
-        {/* Status strip — mirrors the frame and counters, not hardcoded text.
-            Three fixed columns: the outer two are width-locked so the trail in
-            the middle cannot shove the pointers or the counters sideways as it
-            grows. */}
-        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 font-mono text-[12px] text-ink mb-6">
+      <div className="mt-auto flex shrink-0 flex-col pt-4 pb-5 px-8 relative z-20">
+        {/* Pointer / window readout — mirrors the frame, never hardcoded text. */}
+        <div className="mb-3 flex items-center justify-between gap-6 font-mono text-[12px] text-ink">
           <div className="flex min-w-0 items-center gap-6">
             {pointers.length > 0 && (
               <span className="flex items-center gap-2">
@@ -865,21 +862,20 @@ export function VisualStage({
             )}
           </div>
 
-          {/* C2: the halving, as a number you can watch shrink. */}
-          <CandidateTrail className="justify-self-center" />
-
           {/* A5: the engine has always computed these; now they are shown. */}
-          <CounterStrip className="justify-self-end" />
+          <CounterStrip />
         </div>
 
-        <StepScrubber />
+        {/* The named, numbered step sequence. */}
+        {showScrubber && <StepTimeline className="border-t border-hairline pt-3" />}
 
-        <div className="mt-6 flex justify-center w-full">
+        <div className="mt-4 flex justify-center w-full">
           {showPlaybackBar && (
             <PlaybackBar className="border-0 bg-transparent p-0 shadow-none static w-full" />
           )}
         </div>
       </div>
+
     </div>
   );
 }
