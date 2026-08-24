@@ -151,10 +151,14 @@ interface FrameSpec {
   survivor?: { from: number; to: number };
   found?: number;
   label: string;
+  /** The value being hunted, drawn as a card above the row. */
+  target?: number;
+  comparison?: ArrayFrame["comparison"];
+  decision?: ArrayFrame["decision"];
 }
 
 function frameFor(values: number[], spec: FrameSpec): ArrayFrame {
-  const { lo, hi, mid, showMidMath, survivor, found, label } = spec;
+  const { lo, hi, mid, showMidMath, survivor, found, label, target, comparison, decision } = spec;
   const states: Record<number, CellState> = {};
   for (let i = 0; i < values.length; i += 1) {
     states[i] = i < lo || i > hi ? "excluded" : "idle";
@@ -197,8 +201,12 @@ function frameFor(values: number[], spec: FrameSpec): ArrayFrame {
     // whole run instead of growing on probe steps and shrinking on narrow steps.
     pointerNotes: true,
     ranges: lo <= hi ? [{ from: lo, to: hi, label, tone: "tint" }] : [],
+    ...(target !== undefined ? { target: { label: "target", value: target } } : {}),
+    ...(comparison ? { comparison } : {}),
+    ...(decision ? { decision } : {}),
   };
 }
+
 
 function run(parsed: Record<string, unknown>): AlgorithmRun {
   const original = parsed["values"] as number[];
