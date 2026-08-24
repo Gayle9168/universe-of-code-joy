@@ -1,4 +1,5 @@
 export * from "@/components/player/PlaybackBar";
+export * from "@/components/player/ControlStrip";
 export * from "@/components/player/StepScrubber";
 export * from "@/components/player/StepTimeline";
 

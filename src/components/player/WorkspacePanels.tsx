@@ -4,18 +4,15 @@ import { ArrowRight, Check, Copy, Dices, MonitorPlay, Play } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/common/Button";
 import { EmptyState } from "@/components/common/EmptyState";
-import { CounterStrip } from "@/components/player/CounterStrip";
 import { resolveCodeLine } from "@/engine/builder";
-import { PlaybackBar } from "@/components/player/PlaybackBar";
+import { ControlStrip } from "@/components/player/ControlStrip";
 import { StepTimeline } from "@/components/player/StepTimeline";
+import { ArrayCanvas } from "@/components/viz/ArrayCanvas";
 import { FrameView } from "@/components/viz/FrameView";
-import { legendRows } from "@/components/viz/tokens";
 import { getAlgorithm } from "@/content/algorithms";
-import { getProblem } from "@/content/problems";
 import type { Algorithm } from "@/content/types";
-import type { AlgorithmModule, InputField, AuxPanel, Frame } from "@/engine/types";
+import type { AlgorithmModule, InputField, AuxPanel } from "@/engine/types";
 import { cn } from "@/lib/utils";
-import { rangeSummary } from "@/lib/candidates";
 import { useIsReducedMotion } from "@/hooks/useReducedMotionSync";
 import { usePlayerStore, useCurrentStep } from "@/stores/playerStore";
 import { usePrefsStore, type CodeLanguage } from "@/stores/prefsStore";
@@ -164,6 +161,7 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
   const run = usePlayerStore((s) => s.run);
   const index = usePlayerStore((s) => s.index);
   const step = useCurrentStep();
+  const goNext = usePlayerStore((s) => s.next);
 
   if (!run || !step) {
     return (
@@ -175,16 +173,11 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
     );
   }
 
-  const previous = [index - 2, index - 1]
-    .filter((i) => i >= 0)
-    .map((i) => run.steps[i])
-    .filter((s): s is NonNullable<typeof s> => Boolean(s));
-
-  // The run knows its slug, so the cards stay correct without the call sites
-  // having to thread the algorithm down. A problem module's slug is a question
-  // slug, not a catalog slug, so fall back through the question to the algorithm
-  // it teaches — otherwise these cards vanish on every question visualizer.
-  const algo = getAlgorithm(run.slug) ?? getAlgorithm(getProblem(run.slug)?.algorithmSlug ?? "");
+  const nextStep = run.steps[index + 1];
+  const frame = step.frame;
+  /* Current State reads the frame's own pointers, so it can never disagree with
+     the markers drawn on the canvas. */
+  const pointers = frame.kind === "array" ? frame.pointers : [];
 
   return (
     <div
@@ -200,77 +193,53 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
       <div
         aria-live="polite"
         aria-atomic="true"
-        className="flex-1 space-y-4 p-5 min-h-0 overflow-y-auto"
+        className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5"
       >
-        <div className="hidden">
-          {previous.length > 0 && (
-            <ol className="space-y-1" aria-hidden="true">
-              {previous.map((s) => (
-                <li key={s.i} className="t-small text-slate/80">
-                  {s.narration}
-                </li>
-              ))}
-            </ol>
-          )}
-        </div>
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-sans text-[13px] font-semibold text-ink mb-2">What happened?</h3>
-            <ul className="space-y-1.5">
-              <li className="flex items-start gap-2">
-                <Check className="h-4 w-4 shrink-0 text-primary mt-0.5" strokeWidth={2.5} />
-                <span className="font-sans text-[13px] text-ink">{step.narration}</span>
-              </li>
-              {step.detail && (
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 shrink-0 text-primary mt-0.5" strokeWidth={2.5} />
-                  <span className="font-sans text-[13px] text-ink">{step.detail}</span>
-                </li>
-              )}
-            </ul>
-          </div>
+        <p className="font-sans text-[13px] leading-relaxed text-ink">
+          {step.narration}
+          {step.detail ? <span className="mt-1.5 block text-slate">{step.detail}</span> : null}
+        </p>
 
-          {algo && (
-            <div className="grid grid-cols-2 gap-4 pt-2">
-              <div className="rounded-xl bg-tint p-4">
-                <div className="flex items-center gap-2 mb-2 text-primary font-medium text-[13px]">
-                  <svg
-                    aria-hidden="true"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                  </svg>
-                  Why?
+        {pointers.length > 0 ? (
+          <div>
+            <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+              Current state
+            </h3>
+            <dl className="flex flex-wrap gap-2">
+              {pointers.map((p) => (
+                <div
+                  key={p.name}
+                  className="flex min-w-[74px] flex-col rounded-lg border border-hairline bg-paper px-3 py-2"
+                >
+                  <dt className="font-mono text-[11px] text-slate">{p.name}</dt>
+                  <dd className="font-mono text-[16px] font-semibold tabular-nums text-ink">
+                    {p.index}
+                  </dd>
                 </div>
-                <p className="font-sans text-[12px] leading-relaxed text-ink/80">{algo.oneLiner}</p>
-              </div>
-              <div className="rounded-xl bg-[#F4FBF9] p-4 border border-tint">
-                <div className="flex items-center gap-2 mb-2 text-primary font-medium text-[13px]">
-                  <svg
-                    aria-hidden="true"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                  </svg>
-                  Where it is used
-                </div>
-                <p className="font-sans text-[12px] leading-relaxed text-ink/80">
-                  {algo.realWorldUses.join(" · ")}
-                </p>
-              </div>
-            </div>
-          )}
+              ))}
+            </dl>
+          </div>
+        ) : null}
+
+        <div>
+          <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+            What happens next?
+          </h3>
+          <div className="flex items-start gap-3 rounded-lg bg-tint px-3 py-3">
+            <p className="min-w-0 flex-1 font-sans text-[13px] leading-relaxed text-ink">
+              {nextStep ? nextStep.narration : "This is the final step of the run."}
+            </p>
+            {nextStep ? (
+              <button
+                type="button"
+                aria-label="Next step (→)"
+                onClick={goNext}
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-card text-primary transition-colors hover:bg-card/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+              >
+                <ArrowRight size={16} strokeWidth={1.8} />
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>
@@ -446,6 +415,41 @@ export function AboutPane({ algo }: { algo: Algorithm }): React.ReactElement {
         <h2 className="t-mono-label mb-1.5">Summary</h2>
         <p className="t-body text-slate">{algo.summary}</p>
       </section>
+      {/* Complexity, category and tags moved here from the old bottom strip. */}
+      <section>
+        <h2 className="t-mono-label mb-1.5">Complexity</h2>
+        <dl className="grid grid-cols-2 gap-2">
+          {[
+            { k: "Time (avg)", v: algo.timeAvg },
+            { k: "Time (worst)", v: algo.timeWorst },
+            { k: "Space", v: algo.space },
+            { k: "Category", v: algo.category },
+          ].map((row) => (
+            <div
+              key={row.k}
+              className="flex flex-col rounded-lg border border-hairline bg-paper px-3 py-2"
+            >
+              <dt className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate">
+                {row.k}
+              </dt>
+              <dd className="font-mono text-[13px] text-ink">{row.v}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+      <section>
+        <h2 className="t-mono-label mb-1.5">Tags</h2>
+        <ul className="flex flex-wrap gap-2">
+          {algo.tags.map((t) => (
+            <li
+              key={t}
+              className="inline-flex rounded-full border border-hairline bg-card px-3 py-1 font-mono text-xs text-slate"
+            >
+              {t.replace(/-/g, " ")}
+            </li>
+          ))}
+        </ul>
+      </section>
       <section>
         <h2 className="t-mono-label mb-1.5">Real-world uses</h2>
         <ul className="space-y-1">
@@ -576,15 +580,6 @@ export function SidePanel({
 
 /* ---------------- visual column ---------------- */
 
-/** What the stage is actually showing, so the label cannot drift from the frame. */
-const FRAME_VIEW_LABEL: Record<Frame["kind"], string> = {
-  array: "Array view",
-  tree: "Tree view",
-  graph: "Graph view",
-  grid: "Grid view",
-  table: "Table view",
-};
-
 export interface VisualStageProps {
   /** Undefined means this slug has no engine module yet. */
   module: AlgorithmModule | undefined;
@@ -609,12 +604,6 @@ export function VisualStage({
   const index = usePlayerStore((s) => s.index);
 
   const frame = step?.frame;
-  const legend = frame && run ? legendRows(frame, run.slug) : [];
-  const viewLabel = frame ? FRAME_VIEW_LABEL[frame.kind] : "Visualization";
-  // Pointers and ranges only exist on array frames; the other kinds carry their
-  // state in the aux panels already rendered on the left.
-  const pointers = frame?.kind === "array" ? frame.pointers : [];
-  const ranges = frame?.kind === "array" ? frame.ranges : [];
 
   if (!mod) {
     return (
@@ -775,104 +764,23 @@ export function VisualStage({
         })}
       </div>
 
-      {/* Floating Legend (Top Right) — derived from the frame on screen */}
-      {legend.length > 0 && (
-        <div className="absolute right-6 top-16 flex flex-col gap-2.5 rounded-xl border border-hairline bg-white/80 p-4 shadow-sm backdrop-blur-sm z-10 font-mono text-[11px] text-ink pointer-events-none">
-          {legend.map((row) => (
-            <span key={row.state} className="flex items-center gap-3">
-              <span
-                aria-hidden="true"
-                className="flex h-3 w-3 shrink-0 items-center justify-center rounded-full border border-hairline"
-                style={{ backgroundColor: row.fill }}
-              />
-              {row.label}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* View label — reflects the frame actually rendered */}
-      <div className="flex items-center justify-between p-4 pb-0 relative z-20">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex h-8 items-center gap-2 rounded-full border border-hairline bg-white px-4 font-mono text-[12px] text-slate shadow-sm">
-            {viewLabel}
-          </span>
-        </div>
-      </div>
-
-      {/* Canvas */}
-      <div className="flex flex-1 items-center justify-center min-h-0 relative z-0">
+      {/* Canvas — the array/graph/grid itself, given the majority of the height */}
+      <div className="flex min-h-0 flex-1 items-center justify-center px-6 pb-2 pt-8 relative z-0">
         {step ? (
-          <FrameView frame={step.frame} className="max-h-full" />
+          frame?.kind === "array" ? (
+            <ArrayCanvas frame={frame} />
+          ) : (
+            <FrameView frame={step.frame} className="max-h-full" />
+          )
         ) : (
           <p className="t-small text-slate">Preparing the visualization…</p>
         )}
       </div>
 
-      {/* Timeline and Playback Controls (Bottom Area) */}
-      <div className="mt-auto flex shrink-0 flex-col pt-4 pb-5 px-8 relative z-20">
-        {/* Pointer / window readout — mirrors the frame, never hardcoded text. */}
-        <div className="mb-3 flex items-center justify-between gap-6 font-mono text-[12px] text-ink">
-          <div className="flex min-w-0 items-center gap-6">
-            {pointers.length > 0 && (
-              <span className="flex items-center gap-2">
-                <svg
-                  aria-hidden="true"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-primary"
-                >
-                  <path d="M12 19V5M5 12l7-7 7 7" />
-                </svg>
-                <span className="flex items-center gap-2">
-                  {pointers.map((p) => (
-                    <span key={p.name} className="tabular-nums">
-                      <span className="text-slate">{p.name}</span> {p.index}
-                    </span>
-                  ))}
-                </span>
-              </span>
-            )}
-            {/* The window's extent is drawn on the array itself; repeating the
-                index range here just doubled it. The size is the useful part. */}
-            {ranges.length > 0 && (
-              <span className="flex min-w-0 items-center gap-2">
-                <svg
-                  aria-hidden="true"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-slate shrink-0"
-                >
-                  <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
-                  <path d="M3 10h18" />
-                </svg>
-                <span className="truncate tabular-nums">
-                  {ranges.map((r) => rangeSummary(r)).join(" · ")}
-                </span>
-              </span>
-            )}
-          </div>
-
-          {/* A5: the engine has always computed these; now they are shown. */}
-          <CounterStrip />
-        </div>
-
-        {/* The named, numbered step sequence. */}
-        {showScrubber && <StepTimeline className="border-t border-hairline pt-3" />}
-
-        <div className="mt-4 flex justify-center w-full">
-          {showPlaybackBar && (
-            <PlaybackBar className="border-0 bg-transparent p-0 shadow-none static w-full" />
-          )}
-        </div>
+      {/* Timeline and one-row control strip */}
+      <div className="mt-auto flex shrink-0 flex-col gap-3 border-t border-hairline px-6 pb-5 pt-4 relative z-20">
+        {showScrubber && <StepTimeline />}
+        {showPlaybackBar && <ControlStrip />}
       </div>
     </div>
   );

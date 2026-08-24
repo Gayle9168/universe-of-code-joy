@@ -37,7 +37,7 @@ function RightColumnPanels({
   const [tab, setTab] = React.useState<"code" | "input" | "about">("code");
 
   return (
-    <div className="flex w-full shrink-0 flex-col gap-6 min-h-0 lg:w-[37%]">
+    <div className="flex min-h-0 w-full min-w-0 flex-col gap-6">
       {/* Upper Panel with Tabs: Code, Input, About */}
       <div className="flex min-h-0 flex-[7] flex-col overflow-hidden rounded-2xl border border-hairline bg-card shadow-sm">
         <div
@@ -452,7 +452,7 @@ function AlgorithmWorkspace(): React.ReactElement {
       </header>
 
       {/* Main Workspace */}
-      <main className="flex min-h-0 flex-1 flex-col px-24 py-4">
+      <main className="flex min-h-0 flex-1 flex-col px-4 py-4 lg:px-8 xl:px-12 2xl:px-20">
         {/* Header Row */}
         <div className="mb-4 flex shrink-0 flex-col gap-2">
           <nav
@@ -483,26 +483,35 @@ function AlgorithmWorkspace(): React.ReactElement {
             )}
           </nav>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="font-display text-[26px] font-semibold tracking-tight text-ink">
-                {heading}
-              </h1>
-              {headingDifficulty && <DifficultyBadge difficulty={headingDifficulty} />}
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
+            <div className="min-w-0">
+              <div className="flex min-w-0 items-center gap-3">
+                <h1 className="truncate font-display text-[26px] font-semibold tracking-tight text-ink">
+                  {heading}
+                </h1>
+                {headingDifficulty && <DifficultyBadge difficulty={headingDifficulty} />}
+              </div>
+              <p className="mt-1 truncate font-sans text-[14px] text-slate">{algo.oneLiner}</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-3">
               <button
+                type="button"
                 onClick={onCompleteLesson}
                 disabled={lessonDone || !lesson}
+                aria-pressed={lessonDone}
                 className={cn(
-                  "inline-flex h-10 items-center justify-center gap-2 rounded-full border border-primary px-5 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+                  "inline-flex h-10 items-center justify-center gap-2 rounded-full border px-5 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
                   lessonDone
-                    ? "bg-transparent text-primary/60 border-primary/30 cursor-default"
-                    : "text-primary hover:bg-tint cursor-pointer",
+                    ? "cursor-default border-primary/30 bg-tint text-primary"
+                    : "cursor-pointer border-hairline text-ink hover:bg-tint",
                 )}
               >
-                {lessonDone && <Check size={16} strokeWidth={2} />}
-                {lessonDone ? "Lesson complete" : "Mark as complete"}
+                {lessonDone ? (
+                  <Check size={16} strokeWidth={2} />
+                ) : (
+                  <Bookmark size={16} strokeWidth={1.5} />
+                )}
+                {lessonDone ? "Saved" : "Bookmark"}
               </button>
               <Link
                 to="/practice/$slug"
@@ -521,88 +530,46 @@ function AlgorithmWorkspace(): React.ReactElement {
           </div>
         </div>
 
-        {/* 2-Column Grid */}
-        <div className="flex min-h-0 flex-1 gap-6">
-          {/* Left Column - VisualStage (63%) */}
+        {/* Two-column workspace: canvas card left, code + reasoning right */}
+        <div className="hidden min-h-0 flex-1 gap-6 lg:grid lg:grid-cols-[58fr_42fr] xl:grid-cols-[64fr_36fr] 2xl:grid-cols-[68fr_32fr]">
           <VisualStage
             module={mod}
             algoName={algo.name}
-            className="flex flex-1 flex-col min-h-0 rounded-2xl border border-hairline bg-card shadow-sm lg:w-[63%]"
+            className="flex min-w-0 flex-col min-h-0 rounded-2xl border border-hairline bg-card shadow-sm"
           />
-
-          {/* Right Column - Code/Input/About top panel + ExplainPane bottom panel (37%) */}
           <RightColumnPanels algo={algo} module={mod} slug={modSlug} />
         </div>
 
-        {/* Bottom Strip */}
-        <div className="mt-4 flex shrink-0 items-center justify-between rounded-xl border border-hairline bg-card px-6 py-4 shadow-sm">
-          <div className="flex items-center gap-8 font-mono text-[12px]">
-            <div className="flex items-center gap-2 text-ink">
-              <svg
-                aria-hidden="true"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
+        {/* Below 1024px the three panels cannot share a screen legibly. */}
+        <div className="flex flex-1 items-start lg:hidden">
+          <div className="w-full rounded-2xl border border-hairline bg-card p-6 shadow-sm">
+            <h2 className="font-display text-[18px] font-semibold text-ink">
+              Interactive visualizations are designed for larger screens
+            </h2>
+            <p className="mt-2 font-sans text-[14px] leading-relaxed text-slate">
+              The animation, the code and the step-by-step explanation need to sit side by side.
+              Open this lesson on a tablet in landscape or a laptop to run it.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                to="/practice/$slug"
+                params={{ slug: practiceSlug ?? slug }}
+                disabled={!practiceSlug}
+                className={cn(
+                  "inline-flex h-10 items-center gap-2 rounded-full px-5 text-[14px] font-medium",
+                  practiceSlug
+                    ? "bg-primary text-primary-foreground"
+                    : "pointer-events-none bg-primary/40 text-primary-foreground",
+                )}
               >
-                <path d="M12 2L2 7l10 5 10-5-10-5Z" />
-                <path d="m2 17 10 5 10-5" />
-                <path d="m2 12 10 5 10-5" />
-              </svg>
-              <span>Algorithm Properties</span>
-            </div>
-            <div className="h-6 w-px bg-hairline" />
-            <div className="flex flex-col">
-              <span className="text-slate mb-0.5 text-[10px] uppercase tracking-wider">
-                Time Complexity
-              </span>
-              <span className="text-primary font-medium">{algo.timeAvg}</span>
-            </div>
-            <div className="h-6 w-px bg-hairline" />
-            <div className="flex flex-col">
-              <span className="text-slate mb-0.5 text-[10px] uppercase tracking-wider">
-                Space Complexity
-              </span>
-              <span className="text-primary font-medium">{algo.space}</span>
-            </div>
-            <div className="h-6 w-px bg-hairline" />
-            <div className="flex flex-col">
-              <span className="text-slate mb-0.5 text-[10px] uppercase tracking-wider">
-                Category
-              </span>
-              <span className="text-ink font-medium">{CATEGORY_META[algo.category].label}</span>
-            </div>
-            <div className="h-6 w-px bg-hairline" />
-            <div className="flex flex-col">
-              <span className="text-slate mb-0.5 text-[10px] uppercase tracking-wider">Tags</span>
-              <span className="text-ink font-medium">
-                {algo.tags
-                  .slice(0, 2)
-                  .map((t) => t.replace(/-/g, " "))
-                  .map((t) => t.charAt(0).toUpperCase() + t.slice(1))
-                  .join(", ")}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4 w-[240px]">
-              <div className="flex-1 flex flex-col gap-1.5">
-                <div className="flex justify-between font-mono text-[10px]">
-                  <span className="text-ink">Learning Progress</span>
-                  <span className="text-primary font-medium">{Math.floor(progressPct(xp))}%</span>
-                </div>
-                <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
-                  <div
-                    className="h-full bg-primary transition-[width] duration-500"
-                    style={{ width: `${progressPct(xp)}%` }}
-                  />
-                </div>
-              </div>
-              <div className="font-mono text-[10px] text-slate leading-tight w-24">
-                You are discovering level {level + 1}
-              </div>
+                Practice <ArrowRight size={16} />
+              </Link>
+              <Link
+                to="/explore"
+                className="inline-flex h-10 items-center gap-2 rounded-full border border-hairline px-5 text-[14px] font-medium text-ink"
+              >
+                Back to Explore
+              </Link>
             </div>
           </div>
         </div>
