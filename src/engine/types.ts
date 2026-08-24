@@ -152,6 +152,9 @@ export type Step = {
   detail?: string;
   /** e.g. 'partition', 'relax-edges' — used for the timeline */
   phase: string;
+  /** Short human label for the timeline node, e.g. 'Compare'. Falls back to `phase`. */
+  timelineLabel?: string;
+
   /** comparisons, swaps, visits, pushes... */
   counters: Record<string, number>;
   /** scrubber tick marks + quiz anchor points */
