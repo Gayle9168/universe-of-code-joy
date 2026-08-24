@@ -230,11 +230,12 @@ function run(parsed: Record<string, unknown>): AlgorithmRun {
   b.bump("linear worst", values.length);
 
   b.emit({
-    frame: frameFor(values, { lo, hi, mid: null, label: windowLabel(lo, hi) }),
+    frame: frameFor(values, { lo, hi, mid: null, label: windowLabel(lo, hi), target }),
     codeLine: 3,
     narration: `We start by looking at the whole sorted list and hunting for ${target}.`,
     detail: `${wasSorted ? "Binary search only works on sorted data, and this list already is." : "The list was sorted first, because binary search only works on sorted data."} All ${plural(values.length, "value")} are still candidates.`,
     phase: "setup",
+    timelineLabel: "Setup",
     isMilestone: true,
   });
 
@@ -244,12 +245,24 @@ function run(parsed: Record<string, unknown>): AlgorithmRun {
     const size = hi - lo + 1;
 
     b.emit({
-      frame: frameFor(values, { lo, hi, mid, showMidMath: true, label: windowLabel(lo, hi) }),
+      frame: frameFor(values, {
+        lo,
+        hi,
+        mid,
+        showMidMath: true,
+        label: windowLabel(lo, hi),
+        target,
+        decision: {
+          title: `mid = floor((${lo} + ${hi}) / 2) = ${mid}`,
+          detail: `Index ${mid} holds ${midValue}. That is the only cell we need to read.`,
+        },
+      }),
       codeLine: 5,
       narration: `The middle of the window is index ${mid}, which holds ${midValue}.`,
       // B3: the one line of arithmetic in the algorithm, with the live numbers in it.
       detail: `mid = floor((lo + hi) / 2) = floor((${lo} + ${hi}) / 2) = ${mid}.${size === 1 ? " Only one candidate is left, so this look settles it." : ` One look rules out about half of the ${plural(size, "candidate")}.`}`,
       phase: "probe",
+      timelineLabel: "Find mid",
       isMilestone: true,
     });
 
@@ -261,10 +274,25 @@ function run(parsed: Record<string, unknown>): AlgorithmRun {
     if (midValue === target) {
       foundIndex = mid;
       b.emit({
-        frame: frameFor(values, { lo, hi, mid, showMidMath: true, label: windowLabel(lo, hi) }),
+        frame: frameFor(values, {
+          lo,
+          hi,
+          mid,
+          showMidMath: true,
+          label: windowLabel(lo, hi),
+          target,
+          comparison: {
+            left: String(midValue),
+            op: "=",
+            right: String(target),
+            verdict: "the middle value is the target",
+            tone: "accent",
+          },
+        }),
         codeLine: 6,
         narration: `Is ${midValue} equal to ${target}? Yes.`,
         phase: "compare",
+        timelineLabel: "Compare",
       });
       b.emit({
         frame: frameFor(values, {
@@ -273,11 +301,24 @@ function run(parsed: Record<string, unknown>): AlgorithmRun {
           mid,
           found: mid,
           label: windowLabel(mid, mid),
+          target,
+          comparison: {
+            left: String(midValue),
+            op: "=",
+            right: String(target),
+            verdict: `found at index ${mid}`,
+            tone: "accent",
+          },
+          decision: {
+            title: `Found ${target} at index ${mid}`,
+            detail: `${plural(comparisons, "comparison")} instead of up to ${plural(values.length, "comparison")}.`,
+          },
         }),
         codeLine: 7,
         narration: `The middle value is exactly ${target}, so the search is over.`,
         detail: `Found after ${plural(comparisons, "comparison")}. Checking left to right would have taken up to ${plural(values.length, "comparison")}.`,
         phase: "found",
+        timelineLabel: "Found",
         isMilestone: true,
       });
       break;
@@ -298,6 +339,21 @@ function run(parsed: Record<string, unknown>): AlgorithmRun {
         // discard reads as a consequence rather than a sudden colour change.
         survivor: { from: nextLo, to: nextHi },
         label: windowLabel(lo, hi),
+        target,
+        comparison: {
+          left: String(midValue),
+          op: goesRight ? "<" : ">",
+          right: String(target),
+          verdict: goesRight
+            ? `the target must be to the right of index ${mid}`
+            : `the target must be to the left of index ${mid}`,
+          tone: goesRight ? "accent" : "warning",
+        },
+        decision: {
+          title: goesRight ? "Discard the left half" : "Discard the right half",
+          detail: `The list is sorted, so that one comparison rules out ${plural(dropped, "candidate")}.`,
+          tone: goesRight ? "accent" : "warning",
+        },
       }),
       codeLine: goesRight ? 8 : 10,
       narration: goesRight
@@ -305,6 +361,7 @@ function run(parsed: Record<string, unknown>): AlgorithmRun {
         : `${midValue} is bigger than ${target}, so the target can only be to the left.`,
       detail: `The list is sorted, so every value on the ${goesRight ? "left" : "right"} of ${midValue} is ${goesRight ? "smaller" : "bigger"} too. That single comparison rules out ${plural(dropped, "candidate")}.`,
       phase: "compare",
+      timelineLabel: "Compare",
     });
 
     const remaining = Math.max(0, nextHi - nextLo + 1);
@@ -314,6 +371,11 @@ function run(parsed: Record<string, unknown>): AlgorithmRun {
         hi: nextHi,
         mid: null,
         label: windowLabel(nextLo, nextHi, size),
+        target,
+        decision: {
+          title: goesRight ? `lo moves to ${nextLo}` : `hi moves to ${nextHi}`,
+          detail: `${plural(size, "candidate")} → ${remaining}. Halving every step is what makes this O(log n).`,
+        },
       }),
       codeLine: goesRight ? 9 : 11,
       narration: goesRight
@@ -325,6 +387,7 @@ function run(parsed: Record<string, unknown>): AlgorithmRun {
           ? `${plural(size, "candidate")} → 0. The last candidate has been ruled out, so there is nowhere left to look.`
           : `${plural(size, "candidate")} → ${remaining}. Halving on every step is what makes this O(log n) instead of O(n).`,
       phase: goesRight ? "narrow-right" : "narrow-left",
+      timelineLabel: "Eliminate",
       // B5: the scrubber used to tick everywhere *except* the halving steps.
       isMilestone: true,
     });
@@ -335,14 +398,27 @@ function run(parsed: Record<string, unknown>): AlgorithmRun {
 
   if (foundIndex === -1) {
     b.emit({
-      frame: frameFor(values, { lo, hi, mid: null, label: windowLabel(lo, hi) }),
+      frame: frameFor(values, {
+        lo,
+        hi,
+        mid: null,
+        label: windowLabel(lo, hi),
+        target,
+        decision: {
+          title: `${target} is not in this list`,
+          detail: `lo (${lo}) passed hi (${hi}), so the window is empty.`,
+          tone: "error",
+        },
+      }),
       codeLine: 12,
       narration: `lo (${lo}) has passed hi (${hi}), so the window is empty and ${target} is not in this list.`,
       detail: `The pointers crossing is the stop condition: there is nowhere left that could still hold ${target}. It took ${plural(comparisons, "comparison")} to rule out all ${plural(values.length, "value")}.`,
       phase: "done",
+      timelineLabel: "Not found",
       isMilestone: true,
     });
   }
+
 
   const inputSummary = wasSorted
     ? `[${values.join(", ")}] (already sorted), target ${target}`
