@@ -547,8 +547,8 @@ function AlgorithmWorkspace(): React.ReactElement {
               Interactive visualizations are designed for larger screens
             </h2>
             <p className="mt-2 font-sans text-[14px] leading-relaxed text-slate">
-              The animation, the code and the step-by-step explanation need to sit side by side. Open
-              this lesson on a tablet in landscape or a laptop to run it.
+              The animation, the code and the step-by-step explanation need to sit side by side.
+              Open this lesson on a tablet in landscape or a laptop to run it.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
