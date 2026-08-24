@@ -272,7 +272,6 @@
   animation: viz-swap-in 260ms ease-out;
 }
 
-
 @layer base {
   * {
     border-color: var(--color-border);

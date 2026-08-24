@@ -77,7 +77,6 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                   {label}
                 </span>
               </button>
-
             </li>
           );
         })}

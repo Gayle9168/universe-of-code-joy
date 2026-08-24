@@ -127,7 +127,6 @@ export function CodePane({ className }: { className?: string }): React.ReactElem
                   ? "border-l-2 border-primary bg-tint text-ink"
                   : "border-l-2 border-transparent text-slate",
               )}
-
             >
               {isActive ? (
                 <div className="flex w-6 shrink-0 select-none items-center justify-end text-primary">
@@ -250,7 +249,6 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
           </div>
         </div>
       </div>
-
     </div>
   );
 }
