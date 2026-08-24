@@ -28,6 +28,8 @@ export interface EmitArgs {
   narration: string;
   detail?: string;
   phase: string;
+  /** Short label for the numbered step timeline; defaults to `phase` in the view. */
+  timelineLabel?: string;
   isMilestone?: boolean;
 }
 
@@ -58,7 +60,7 @@ export class StepBuilder {
       return this;
     }
 
-    const { frame, aux, codeLine, narration, detail, phase, isMilestone } = args;
+    const { frame, aux, codeLine, narration, detail, phase, timelineLabel, isMilestone } = args;
 
     if (!Number.isInteger(codeLine) || codeLine < 1 || codeLine > this.pseudocode.length) {
       throw new Error(
@@ -78,6 +80,7 @@ export class StepBuilder {
     };
     if (aux !== undefined) step.aux = deepClone(aux);
     if (detail !== undefined) step.detail = detail;
+    if (timelineLabel !== undefined) step.timelineLabel = timelineLabel;
     if (isMilestone !== undefined) step.isMilestone = isMilestone;
 
     this.steps.push(step);
