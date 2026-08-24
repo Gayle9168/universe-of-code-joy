@@ -584,7 +584,10 @@ export function ArrayView({ frame, className }: ArrayViewProps): React.ReactElem
           );
         })}
       </svg>
+      {frame.comparison ? <ComparisonStrip comparison={frame.comparison} /> : null}
+      {frame.decision ? <DecisionCallout decision={frame.decision} /> : null}
     </div>
+
   );
 }
 
