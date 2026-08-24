@@ -89,8 +89,15 @@ function describe(frame: ArrayFrame): string {
   if (frame.swapPair) {
     parts.push(`Swapping positions ${frame.swapPair[0] + 1} and ${frame.swapPair[1] + 1}.`);
   }
+  if (frame.target) parts.push(`${frame.target.label} ${String(frame.target.value)}.`);
+  if (frame.comparison) {
+    const { left, op, right, verdict } = frame.comparison;
+    parts.push(`Comparing ${left} ${op} ${right}.${verdict ? ` ${verdict}.` : ""}`);
+  }
+  if (frame.decision) parts.push(`${frame.decision.title}.`);
   return parts.join(" ");
 }
+
 
 /**
  * Distance from each index to the nearest cell that is *not* excluded.
