@@ -250,7 +250,7 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
               className="absolute left-0 top-0 flex flex-col items-center leading-tight transition-[transform,opacity] duration-300 ease-out will-change-transform"
               style={{
                 opacity: m.active ? 1 : 0,
-                transform: `translateX(${cellCenter(m.index, rowWidth, n, CELL_GAP)}px) translateX(-50%)`,
+                transform: `translateX(${cellCenter(m.index, rowWidth, n, CELL_GAP) + m.lane}px) translateX(-50%)`,
               }}
             >
               <span className="font-mono text-[11px] font-medium text-primary">{m.name}</span>
