@@ -176,10 +176,94 @@ function pointerFanOut(
   return offsets;
 }
 
+/**
+ * Tone -> token classes for the semantic strips drawn around the row. Kept as
+ * whole class strings so Tailwind can see them as literals.
+ */
+const TONE_TEXT: Record<"accent" | "warning" | "error", string> = {
+  accent: "text-primary",
+  warning: "text-viz-frontier-ink",
+  error: "text-error",
+};
+
+const TONE_SURFACE: Record<"accent" | "warning" | "error", string> = {
+  accent: "border-tint bg-tint",
+  warning: "border-viz-frontier bg-viz-frontier/40",
+  error: "border-error/30 bg-error-tint",
+};
+
+/** The value being hunted, as a card above the row. */
+function TargetCard({ target }: { target: NonNullable<ArrayFrame["target"]> }): React.ReactElement {
+  return (
+    <div className="mb-2 flex justify-center">
+      <div className="flex flex-col items-center gap-1">
+        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+          {target.label}
+        </span>
+        <span className="flex h-11 min-w-[3rem] items-center justify-center rounded-xl border border-primary bg-tint px-3 font-mono text-[18px] font-semibold text-primary shadow-sm tabular-nums">
+          {String(target.value)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** `16 > 13` plus the plain-English verdict, under the row. */
+function ComparisonStrip({
+  comparison,
+}: {
+  comparison: NonNullable<ArrayFrame["comparison"]>;
+}): React.ReactElement {
+  const tone = comparison.tone ?? "accent";
+  return (
+    <div className="mt-1 flex flex-col items-center gap-1.5">
+      <div className="flex items-center gap-3 font-mono text-[20px] tabular-nums text-ink">
+        <span className="flex h-10 min-w-[2.75rem] items-center justify-center rounded-lg border border-hairline bg-paper px-2">
+          {comparison.left}
+        </span>
+        <span className={cn("text-[22px] font-semibold", TONE_TEXT[tone])}>{comparison.op}</span>
+        <span className="flex h-10 min-w-[2.75rem] items-center justify-center rounded-lg border border-hairline bg-paper px-2">
+          {comparison.right}
+        </span>
+      </div>
+      {comparison.verdict ? (
+        <span className="font-sans text-[12px] text-slate">{comparison.verdict}</span>
+      ) : null}
+    </div>
+  );
+}
+
+/** What the comparison lets us conclude. */
+function DecisionCallout({
+  decision,
+}: {
+  decision: NonNullable<ArrayFrame["decision"]>;
+}): React.ReactElement {
+  const tone = decision.tone ?? "accent";
+  return (
+    <div className="mt-3 flex justify-center">
+      <div
+        className={cn(
+          "max-w-[560px] rounded-xl border px-4 py-2.5 text-center",
+          TONE_SURFACE[tone],
+        )}
+      >
+        <p className={cn("font-mono text-[13px] font-medium", TONE_TEXT[tone])}>{decision.title}</p>
+        {decision.detail ? (
+          <p className="mt-0.5 font-sans text-[12px] leading-relaxed text-ink/70">
+            {decision.detail}
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export interface ArrayViewProps {
   frame: ArrayFrame;
   className?: string;
 }
+
 
 export function ArrayView({ frame, className }: ArrayViewProps): React.ReactElement {
   const reduced = useReducedMotion() ?? false;
