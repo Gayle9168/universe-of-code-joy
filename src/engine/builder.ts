@@ -28,8 +28,11 @@ export interface EmitArgs {
   narration: string;
   detail?: string;
   phase: string;
+  /** Short label for the numbered step timeline; defaults to `phase` in the view. */
+  timelineLabel?: string;
   isMilestone?: boolean;
 }
+
 
 function deepClone<T>(value: T): T {
   return typeof structuredClone === "function"
