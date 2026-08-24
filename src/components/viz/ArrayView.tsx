@@ -318,7 +318,9 @@ export function ArrayView({ frame, className }: ArrayViewProps): React.ReactElem
 
   return (
     <div className={cn("w-full", className)}>
+      {frame.target ? <TargetCard target={frame.target} /> : null}
       <svg
+
         role="img"
         aria-label={label}
         viewBox={`0 0 ${width} ${height}`}
