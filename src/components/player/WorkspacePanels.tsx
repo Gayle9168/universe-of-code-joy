@@ -173,16 +173,11 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
     );
   }
 
-  const previous = [index - 2, index - 1]
-    .filter((i) => i >= 0)
-    .map((i) => run.steps[i])
-    .filter((s): s is NonNullable<typeof s> => Boolean(s));
-
-  // The run knows its slug, so the cards stay correct without the call sites
-  // having to thread the algorithm down. A problem module's slug is a question
-  // slug, not a catalog slug, so fall back through the question to the algorithm
-  // it teaches — otherwise these cards vanish on every question visualizer.
-  const algo = getAlgorithm(run.slug) ?? getAlgorithm(getProblem(run.slug)?.algorithmSlug ?? "");
+  const nextStep = run.steps[index + 1];
+  const frame = step.frame;
+  /* Current State reads the frame's own pointers, so it can never disagree with
+     the markers drawn on the canvas. */
+  const pointers = frame.kind === "array" ? frame.pointers : [];
 
   return (
     <div
@@ -198,77 +193,53 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
       <div
         aria-live="polite"
         aria-atomic="true"
-        className="flex-1 space-y-4 p-5 min-h-0 overflow-y-auto"
+        className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5"
       >
-        <div className="hidden">
-          {previous.length > 0 && (
-            <ol className="space-y-1" aria-hidden="true">
-              {previous.map((s) => (
-                <li key={s.i} className="t-small text-slate/80">
-                  {s.narration}
-                </li>
-              ))}
-            </ol>
-          )}
-        </div>
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-sans text-[13px] font-semibold text-ink mb-2">What happened?</h3>
-            <ul className="space-y-1.5">
-              <li className="flex items-start gap-2">
-                <Check className="h-4 w-4 shrink-0 text-primary mt-0.5" strokeWidth={2.5} />
-                <span className="font-sans text-[13px] text-ink">{step.narration}</span>
-              </li>
-              {step.detail && (
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 shrink-0 text-primary mt-0.5" strokeWidth={2.5} />
-                  <span className="font-sans text-[13px] text-ink">{step.detail}</span>
-                </li>
-              )}
-            </ul>
-          </div>
+        <p className="font-sans text-[13px] leading-relaxed text-ink">
+          {step.narration}
+          {step.detail ? <span className="mt-1.5 block text-slate">{step.detail}</span> : null}
+        </p>
 
-          {algo && (
-            <div className="grid grid-cols-2 gap-4 pt-2">
-              <div className="rounded-xl bg-tint p-4">
-                <div className="flex items-center gap-2 mb-2 text-primary font-medium text-[13px]">
-                  <svg
-                    aria-hidden="true"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                  </svg>
-                  Why?
+        {pointers.length > 0 ? (
+          <div>
+            <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+              Current state
+            </h3>
+            <dl className="flex flex-wrap gap-2">
+              {pointers.map((p) => (
+                <div
+                  key={p.name}
+                  className="flex min-w-[74px] flex-col rounded-lg border border-hairline bg-paper px-3 py-2"
+                >
+                  <dt className="font-mono text-[11px] text-slate">{p.name}</dt>
+                  <dd className="font-mono text-[16px] font-semibold tabular-nums text-ink">
+                    {p.index}
+                  </dd>
                 </div>
-                <p className="font-sans text-[12px] leading-relaxed text-ink/80">{algo.oneLiner}</p>
-              </div>
-              <div className="rounded-xl bg-[#F4FBF9] p-4 border border-tint">
-                <div className="flex items-center gap-2 mb-2 text-primary font-medium text-[13px]">
-                  <svg
-                    aria-hidden="true"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                  </svg>
-                  Where it is used
-                </div>
-                <p className="font-sans text-[12px] leading-relaxed text-ink/80">
-                  {algo.realWorldUses.join(" · ")}
-                </p>
-              </div>
-            </div>
-          )}
+              ))}
+            </dl>
+          </div>
+        ) : null}
+
+        <div>
+          <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+            What happens next?
+          </h3>
+          <div className="flex items-start gap-3 rounded-lg bg-tint px-3 py-3">
+            <p className="min-w-0 flex-1 font-sans text-[13px] leading-relaxed text-ink">
+              {nextStep ? nextStep.narration : "This is the final step of the run."}
+            </p>
+            {nextStep ? (
+              <button
+                type="button"
+                aria-label="Next step (→)"
+                onClick={() => usePlayerStore.getState().next()}
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-card text-primary transition-colors hover:bg-card/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+              >
+                <ArrowRight size={16} strokeWidth={1.8} />
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>
