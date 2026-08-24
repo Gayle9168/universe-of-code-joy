@@ -874,7 +874,6 @@ export function VisualStage({
           )}
         </div>
       </div>
-
     </div>
   );
 }

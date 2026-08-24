@@ -66,7 +66,6 @@ export type ArrayFrame = {
   decision?: { title: string; detail?: string; tone?: "accent" | "error" | "warning" };
 };
 
-
 export type TreeFrame = {
   kind: "tree";
   nodes: Array<{

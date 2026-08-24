@@ -98,7 +98,6 @@ function describe(frame: ArrayFrame): string {
   return parts.join(" ");
 }
 
-
 /**
  * Distance from each index to the nearest cell that is *not* excluded.
  *
@@ -271,7 +270,6 @@ export interface ArrayViewProps {
   className?: string;
 }
 
-
 export function ArrayView({ frame, className }: ArrayViewProps): React.ReactElement {
   const reduced = useReducedMotion() ?? false;
   const n = frame.values.length;
@@ -327,7 +325,6 @@ export function ArrayView({ frame, className }: ArrayViewProps): React.ReactElem
     <div className={cn("w-full", className)}>
       {frame.target ? <TargetCard target={frame.target} /> : null}
       <svg
-
         role="img"
         aria-label={label}
         viewBox={`0 0 ${width} ${height}`}
@@ -594,7 +591,6 @@ export function ArrayView({ frame, className }: ArrayViewProps): React.ReactElem
       {frame.comparison ? <ComparisonStrip comparison={frame.comparison} /> : null}
       {frame.decision ? <DecisionCallout decision={frame.decision} /> : null}
     </div>
-
   );
 }
 

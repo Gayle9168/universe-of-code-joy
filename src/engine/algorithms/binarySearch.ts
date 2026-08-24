@@ -207,7 +207,6 @@ function frameFor(values: number[], spec: FrameSpec): ArrayFrame {
   };
 }
 
-
 function run(parsed: Record<string, unknown>): AlgorithmRun {
   const original = parsed["values"] as number[];
   const target = parsed["target"] as number;
@@ -418,7 +417,6 @@ function run(parsed: Record<string, unknown>): AlgorithmRun {
       isMilestone: true,
     });
   }
-
 
   const inputSummary = wasSorted
     ? `[${values.join(", ")}] (already sorted), target ${target}`
