@@ -197,7 +197,8 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
         aria-atomic="true"
         className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5"
       >
-        <p className="font-sans text-[13px] leading-relaxed text-ink">
+        {/* Keyed on the step so only the text cross-fades — the panel stays put. */}
+        <p key={`why-${index}`} className="viz-swap font-sans text-[13px] leading-relaxed text-ink">
           {step.narration}
           {step.detail ? <span className="mt-1.5 block text-slate">{step.detail}</span> : null}
         </p>
@@ -215,7 +216,9 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
                 >
                   <dt className="font-mono text-[11px] text-slate">{p.name}</dt>
                   <dd className="font-mono text-[16px] font-semibold tabular-nums text-ink">
-                    {p.index}
+                    <span key={`${p.name}-${p.index}`} className="viz-swap">
+                      {p.index}
+                    </span>
                   </dd>
                 </div>
               ))}
@@ -228,7 +231,10 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
             What happens next?
           </h3>
           <div className="flex items-start gap-3 rounded-lg bg-tint px-3 py-3">
-            <p className="min-w-0 flex-1 font-sans text-[13px] leading-relaxed text-ink">
+            <p
+              key={`next-${index}`}
+              className="viz-swap min-w-0 flex-1 font-sans text-[13px] leading-relaxed text-ink"
+            >
               {nextStep ? nextStep.narration : "This is the final step of the run."}
             </p>
             {nextStep ? (
@@ -244,6 +250,7 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
           </div>
         </div>
       </div>
+
     </div>
   );
 }
