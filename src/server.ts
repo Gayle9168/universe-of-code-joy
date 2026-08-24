@@ -44,18 +44,64 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+export function applySecurityHeaders(response: Response, request: Request): Response {
+  const newHeaders = new Headers(response.headers);
+  newHeaders.set("X-Content-Type-Options", "nosniff");
+  newHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  newHeaders.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  newHeaders.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "connect-src 'self'",
+    "worker-src 'self' blob:",
+    "img-src 'self' data: blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+  newHeaders.set("Content-Security-Policy", csp);
+
+  let pathname = "";
+  try {
+    pathname = new URL(request.url, "http://localhost").pathname;
+  } catch {
+    pathname = request.url;
+  }
+
+  const authenticatedPaths = ["/dashboard", "/settings", "/review", "/notifications"];
+  const isAuthPath = authenticatedPaths.some((path) => pathname.startsWith(path));
+
+  if (isAuthPath) {
+    newHeaders.set("X-Frame-Options", "SAMEORIGIN");
+  }
+
+  const body = [101, 204, 205, 304].includes(response.status) ? null : response.body;
+
+  return new Response(body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: newHeaders,
+  });
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const normalizedResponse = await normalizeCatastrophicSsrResponse(response);
+      return applySecurityHeaders(normalizedResponse, request);
     } catch (error) {
       console.error(error);
-      return new Response(renderErrorPage(), {
+      const errorResponse = new Response(renderErrorPage(), {
         status: 500,
         headers: { "content-type": "text/html; charset=utf-8" },
       });
+      return applySecurityHeaders(errorResponse, request);
     }
   },
 };
