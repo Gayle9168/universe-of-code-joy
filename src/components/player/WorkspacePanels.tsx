@@ -576,15 +576,6 @@ export function SidePanel({
 
 /* ---------------- visual column ---------------- */
 
-/** What the stage is actually showing, so the label cannot drift from the frame. */
-const FRAME_VIEW_LABEL: Record<Frame["kind"], string> = {
-  array: "Array view",
-  tree: "Tree view",
-  graph: "Graph view",
-  grid: "Grid view",
-  table: "Table view",
-};
-
 export interface VisualStageProps {
   /** Undefined means this slug has no engine module yet. */
   module: AlgorithmModule | undefined;
@@ -609,12 +600,6 @@ export function VisualStage({
   const index = usePlayerStore((s) => s.index);
 
   const frame = step?.frame;
-  const legend = frame && run ? legendRows(frame, run.slug) : [];
-  const viewLabel = frame ? FRAME_VIEW_LABEL[frame.kind] : "Visualization";
-  // Pointers and ranges only exist on array frames; the other kinds carry their
-  // state in the aux panels already rendered on the left.
-  const pointers = frame?.kind === "array" ? frame.pointers : [];
-  const ranges = frame?.kind === "array" ? frame.ranges : [];
 
   if (!mod) {
     return (
