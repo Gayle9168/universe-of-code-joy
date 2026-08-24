@@ -15,10 +15,7 @@ export const DESIGN_HEIGHT = 900;
  * Never upscales (caps at 1) and returns 1 before the container is measured,
  * so the server render and the first client render agree.
  */
-export function fitScale(
-  containerWidth: number,
-  designWidth: number = DESIGN_WIDTH,
-): number {
+export function fitScale(containerWidth: number, designWidth: number = DESIGN_WIDTH): number {
   const design = designWidth > 0 ? designWidth : DESIGN_WIDTH;
   if (!Number.isFinite(containerWidth) || containerWidth <= 0) return 1;
   return Math.min(1, containerWidth / design);

@@ -352,200 +352,198 @@ function AlgorithmWorkspace(): React.ReactElement {
     <div className="flex h-screen w-full flex-col overflow-hidden bg-paper">
       <DesktopScaleFrame className="min-h-0 flex-1">
         <div className="flex h-full w-full flex-col bg-paper">
-      {/* Top Nav (Global) */}
-      <header className="flex h-[68px] shrink-0 items-center justify-between border-b border-hairline bg-card px-24">
-
-        <div className="flex items-center gap-12">
-          <Link to="/" className="flex items-center gap-2">
-            <AlgoraGlyph />
-            <span className="font-mono text-[22px] font-medium tracking-tight text-foreground">
-              algora
-            </span>
-          </Link>
-          <nav className="flex items-center gap-8 font-mono text-[14px]">
-            <Link
-              to="/explore"
-              className="flex items-center gap-2 text-slate hover:text-ink transition-colors"
-            >
-              <svg
-                aria-hidden="true"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <line x1="9" y1="3" x2="9" y2="21" />
-              </svg>
-              Explore
-            </Link>
-            <Link
-              to="/algorithms/$slug"
-              params={{ slug }}
-              className="flex items-center gap-2 text-primary font-medium"
-            >
-              <MonitorPlay size={16} />
-              Visualizer
-            </Link>
-            <Link
-              to="/practice/$slug"
-              params={{ slug: practiceSlug ?? slug }}
-              disabled={!practiceSlug}
-              className={cn(
-                "flex items-center gap-2 transition-colors",
-                practiceSlug
-                  ? "text-slate hover:text-ink"
-                  : "pointer-events-none cursor-default text-slate/40",
-              )}
-            >
-              <svg
-                aria-hidden="true"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-              Practice
-            </Link>
-            <Link
-              to="/explore"
-              className="flex items-center gap-2 text-slate hover:text-ink transition-colors"
-            >
-              <svg
-                aria-hidden="true"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 20h9" />
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-              </svg>
-              Playground
-            </Link>
-          </nav>
-        </div>
-        <div className="flex shrink-0 items-center gap-4">
-          <span className="inline-flex h-9 items-center gap-2 rounded-full bg-tint px-3 font-mono text-[13px] text-primary">
-            <Flame className="h-4 w-4 text-primary" strokeWidth={1.8} /> {streak}
-          </span>
-          <span className="inline-flex h-9 items-center rounded-full border border-hairline px-3 font-mono text-[13px] text-ink">
-            {formatXp(xp)} XP
-          </span>
-          <button className="text-slate hover:text-ink transition-colors">
-            <Bell className="h-5 w-5" strokeWidth={1.5} />
-          </button>
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-tint font-mono text-[12px] text-primary">
-            AL
-          </span>
-        </div>
-      </header>
-
-      {/* Main Workspace */}
-      <main className="flex min-h-0 flex-1 flex-col px-4 py-4 lg:px-8 xl:px-12 2xl:px-20">
-        {/* Header Row */}
-        <div className="mb-4 flex shrink-0 flex-col gap-2">
-          <nav
-            aria-label="Breadcrumb"
-            className="flex items-center gap-2 font-mono text-[12px] text-slate"
-          >
-            <Link to="/explore" className="hover:text-ink">
-              Explore
-            </Link>
-            <span>&gt;</span>
-            <span>{CATEGORY_META[algo.category].label}</span>
-            <span>&gt;</span>
-            {problemForTitle ? (
-              <>
+          {/* Top Nav (Global) */}
+          <header className="flex h-[68px] shrink-0 items-center justify-between border-b border-hairline bg-card px-24">
+            <div className="flex items-center gap-12">
+              <Link to="/" className="flex items-center gap-2">
+                <AlgoraGlyph />
+                <span className="font-mono text-[22px] font-medium tracking-tight text-foreground">
+                  algora
+                </span>
+              </Link>
+              <nav className="flex items-center gap-8 font-mono text-[14px]">
+                <Link
+                  to="/explore"
+                  className="flex items-center gap-2 text-slate hover:text-ink transition-colors"
+                >
+                  <svg
+                    aria-hidden="true"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <line x1="9" y1="3" x2="9" y2="21" />
+                  </svg>
+                  Explore
+                </Link>
                 <Link
                   to="/algorithms/$slug"
                   params={{ slug }}
-                  search={{}}
-                  className="font-medium hover:text-ink"
+                  className="flex items-center gap-2 text-primary font-medium"
                 >
-                  {algo.name}
+                  <MonitorPlay size={16} />
+                  Visualizer
+                </Link>
+                <Link
+                  to="/practice/$slug"
+                  params={{ slug: practiceSlug ?? slug }}
+                  disabled={!practiceSlug}
+                  className={cn(
+                    "flex items-center gap-2 transition-colors",
+                    practiceSlug
+                      ? "text-slate hover:text-ink"
+                      : "pointer-events-none cursor-default text-slate/40",
+                  )}
+                >
+                  <svg
+                    aria-hidden="true"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                  Practice
+                </Link>
+                <Link
+                  to="/explore"
+                  className="flex items-center gap-2 text-slate hover:text-ink transition-colors"
+                >
+                  <svg
+                    aria-hidden="true"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                  </svg>
+                  Playground
+                </Link>
+              </nav>
+            </div>
+            <div className="flex shrink-0 items-center gap-4">
+              <span className="inline-flex h-9 items-center gap-2 rounded-full bg-tint px-3 font-mono text-[13px] text-primary">
+                <Flame className="h-4 w-4 text-primary" strokeWidth={1.8} /> {streak}
+              </span>
+              <span className="inline-flex h-9 items-center rounded-full border border-hairline px-3 font-mono text-[13px] text-ink">
+                {formatXp(xp)} XP
+              </span>
+              <button className="text-slate hover:text-ink transition-colors">
+                <Bell className="h-5 w-5" strokeWidth={1.5} />
+              </button>
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-tint font-mono text-[12px] text-primary">
+                AL
+              </span>
+            </div>
+          </header>
+
+          {/* Main Workspace */}
+          <main className="flex min-h-0 flex-1 flex-col px-4 py-4 lg:px-8 xl:px-12 2xl:px-20">
+            {/* Header Row */}
+            <div className="mb-4 flex shrink-0 flex-col gap-2">
+              <nav
+                aria-label="Breadcrumb"
+                className="flex items-center gap-2 font-mono text-[12px] text-slate"
+              >
+                <Link to="/explore" className="hover:text-ink">
+                  Explore
                 </Link>
                 <span>&gt;</span>
-                <span className="font-medium text-ink">{problemForTitle.title}</span>
-              </>
-            ) : (
-              <span className="font-medium text-ink">{algo.name}</span>
-            )}
-          </nav>
-
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
-            <div className="min-w-0">
-              <div className="flex min-w-0 items-center gap-3">
-                <h1 className="truncate font-display text-[26px] font-semibold tracking-tight text-ink">
-                  {heading}
-                </h1>
-                {headingDifficulty && <DifficultyBadge difficulty={headingDifficulty} />}
-              </div>
-              <p className="mt-1 truncate font-sans text-[14px] text-slate">{algo.oneLiner}</p>
-            </div>
-            <div className="flex shrink-0 items-center gap-3">
-              <button
-                type="button"
-                onClick={onCompleteLesson}
-                disabled={lessonDone || !lesson}
-                aria-pressed={lessonDone}
-                className={cn(
-                  "inline-flex h-10 items-center justify-center gap-2 rounded-full border px-5 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-                  lessonDone
-                    ? "cursor-default border-primary/30 bg-tint text-primary"
-                    : "cursor-pointer border-hairline text-ink hover:bg-tint",
-                )}
-              >
-                {lessonDone ? (
-                  <Check size={16} strokeWidth={2} />
+                <span>{CATEGORY_META[algo.category].label}</span>
+                <span>&gt;</span>
+                {problemForTitle ? (
+                  <>
+                    <Link
+                      to="/algorithms/$slug"
+                      params={{ slug }}
+                      search={{}}
+                      className="font-medium hover:text-ink"
+                    >
+                      {algo.name}
+                    </Link>
+                    <span>&gt;</span>
+                    <span className="font-medium text-ink">{problemForTitle.title}</span>
+                  </>
                 ) : (
-                  <Bookmark size={16} strokeWidth={1.5} />
+                  <span className="font-medium text-ink">{algo.name}</span>
                 )}
-                {lessonDone ? "Saved" : "Bookmark"}
-              </button>
-              <Link
-                to="/practice/$slug"
-                params={{ slug: practiceSlug ?? slug }}
-                disabled={!practiceSlug}
-                className={cn(
-                  "inline-flex h-10 items-center justify-center gap-2 rounded-full px-5 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-                  practiceSlug
-                    ? "bg-primary text-primary-foreground hover:opacity-90"
-                    : "pointer-events-none cursor-default bg-primary/40 text-primary-foreground",
-                )}
-              >
-                Practice <ArrowRight size={16} />
-              </Link>
+              </nav>
+
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
+                <div className="min-w-0">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <h1 className="truncate font-display text-[26px] font-semibold tracking-tight text-ink">
+                      {heading}
+                    </h1>
+                    {headingDifficulty && <DifficultyBadge difficulty={headingDifficulty} />}
+                  </div>
+                  <p className="mt-1 truncate font-sans text-[14px] text-slate">{algo.oneLiner}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={onCompleteLesson}
+                    disabled={lessonDone || !lesson}
+                    aria-pressed={lessonDone}
+                    className={cn(
+                      "inline-flex h-10 items-center justify-center gap-2 rounded-full border px-5 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+                      lessonDone
+                        ? "cursor-default border-primary/30 bg-tint text-primary"
+                        : "cursor-pointer border-hairline text-ink hover:bg-tint",
+                    )}
+                  >
+                    {lessonDone ? (
+                      <Check size={16} strokeWidth={2} />
+                    ) : (
+                      <Bookmark size={16} strokeWidth={1.5} />
+                    )}
+                    {lessonDone ? "Saved" : "Bookmark"}
+                  </button>
+                  <Link
+                    to="/practice/$slug"
+                    params={{ slug: practiceSlug ?? slug }}
+                    disabled={!practiceSlug}
+                    className={cn(
+                      "inline-flex h-10 items-center justify-center gap-2 rounded-full px-5 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+                      practiceSlug
+                        ? "bg-primary text-primary-foreground hover:opacity-90"
+                        : "pointer-events-none cursor-default bg-primary/40 text-primary-foreground",
+                    )}
+                  >
+                    Practice <ArrowRight size={16} />
+                  </Link>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Two-column workspace: canvas card left, code + reasoning right */}
-        <div className="grid min-h-0 flex-1 gap-6 grid-cols-[58fr_42fr] xl:grid-cols-[64fr_36fr] 2xl:grid-cols-[68fr_32fr]">
-          <VisualStage
-            module={mod}
-            algoName={algo.name}
-            className="flex min-w-0 flex-col min-h-0 rounded-2xl border border-hairline bg-card shadow-sm"
-          />
-          <RightColumnPanels algo={algo} module={mod} slug={modSlug} />
-        </div>
-
-      </main>
+            {/* Two-column workspace: canvas card left, code + reasoning right */}
+            <div className="grid min-h-0 flex-1 gap-6 grid-cols-[58fr_42fr] xl:grid-cols-[64fr_36fr] 2xl:grid-cols-[68fr_32fr]">
+              <VisualStage
+                module={mod}
+                algoName={algo.name}
+                className="flex min-w-0 flex-col min-h-0 rounded-2xl border border-hairline bg-card shadow-sm"
+              />
+              <RightColumnPanels algo={algo} module={mod} slug={modSlug} />
+            </div>
+          </main>
         </div>
       </DesktopScaleFrame>
 
@@ -553,7 +551,6 @@ function AlgorithmWorkspace(): React.ReactElement {
         <CustomInputModal
           isOpen={customInputOpen}
           onClose={() => setCustomInputOpen(false)}
-
           module={mod}
           slug={modSlug}
         />
