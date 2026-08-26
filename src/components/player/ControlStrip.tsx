@@ -85,9 +85,15 @@ export function ControlStrip({ children, className }: ControlStripProps): React.
       )}
 
       <div className="flex shrink-0 items-center gap-4">
-        <span className="font-mono text-[12px] tabular-nums text-slate">
-          {total === 0 ? "0 / 0" : `${index + 1} / ${total}`}
-        </span>
+        {/* The phase is what the learner should remember; the number is context. */}
+        <div className="flex flex-col items-end leading-tight">
+          <span className="font-sans text-[13px] font-semibold text-ink">
+            {phaseLabel ?? "—"}
+          </span>
+          <span className="font-mono text-[11px] tabular-nums text-slate-soft">
+            {total === 0 ? "Step 0 of 0" : `Step ${index + 1} of ${total}`}
+          </span>
+        </div>
         <div className="hidden items-center gap-2 sm:flex">
           <span className="font-sans text-[13px] font-medium text-slate">Speed</span>
           <SpeedControl />
