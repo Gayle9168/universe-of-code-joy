@@ -212,7 +212,6 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
      board and the code pane read, so the panel can never disagree with them. */
   const reasoning = deriveReasoning(step, prevStep, index + 1);
 
-
   /* A new step starts at the beginning of its explanation instead of inheriting
      the previous step's scroll position. Never moves focus. */
   React.useEffect(() => {
@@ -317,7 +316,6 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
           </>
         )}
       </div>
-
     </div>
   );
 }

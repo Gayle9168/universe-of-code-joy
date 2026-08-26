@@ -5,7 +5,6 @@ import { activeNodeIndex, buildTimelineNodes } from "@/lib/timeline";
 import { usePlayerStore } from "@/stores/playerStore";
 import { usePredictionGate } from "@/hooks/usePredictionGate";
 
-
 export interface StepTimelineProps {
   className?: string;
 }
@@ -37,7 +36,6 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
     },
     [pause, seek, skipCrossedForward],
   );
-
 
   const nodes = React.useMemo(() => (run ? buildTimelineNodes(run.steps) : []), [run]);
 

@@ -37,7 +37,6 @@ export function ControlStrip({ children, className }: ControlStripProps): React.
   const { isBlocking } = usePredictionGate();
   const isEnded = total > 0 && index >= total - 1;
 
-
   const side =
     "inline-flex h-9 items-center gap-1.5 rounded-lg border border-hairline bg-card px-3 font-sans text-[13px] font-medium text-ink transition-colors hover:bg-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-40";
 
@@ -71,9 +70,7 @@ export function ControlStrip({ children, className }: ControlStripProps): React.
         </button>
         <button
           type="button"
-          aria-label={
-            isBlocking ? "Answer the prediction to continue" : "Next step (→)"
-          }
+          aria-label={isBlocking ? "Answer the prediction to continue" : "Next step (→)"}
           onClick={next}
           disabled={!canForward || isBlocking}
           className={cn(side, "w-9 justify-center px-0")}

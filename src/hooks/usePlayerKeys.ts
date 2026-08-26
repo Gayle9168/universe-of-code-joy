@@ -25,7 +25,6 @@ export function isShortcutFreeTarget(target: EventTarget | null): boolean {
   return target.closest('[data-player-keys="off"]') !== null;
 }
 
-
 /**
  * Pure keyboard event dispatcher for algorithm playback controls.
  * Separated from window listeners to enable rigorous automated unit testing without DOM hacks.
@@ -117,6 +116,5 @@ export function usePlayerKeys(enabled: boolean = true): void {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [enabled, isBlocking, storeApi]);
 }
-
 
 export default usePlayerKeys;

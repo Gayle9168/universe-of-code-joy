@@ -136,7 +136,6 @@ export function ArrayCanvas({
   revealDecision = true,
   className,
 }: ArrayCanvasProps): React.ReactElement {
-
   const n = Math.max(1, frame.values.length);
   const win = windowExtent(frame);
   const [rowRef, rowWidth] = useMeasuredWidth<HTMLDivElement>();
@@ -185,7 +184,6 @@ export function ArrayCanvas({
      range has NOT moved yet. Only shown when the frame proves it, and never
      while a prediction checkpoint is still open. */
   const preview = revealDecision ? decisionPreview(frame) : null;
-
 
   return (
     <div className={cn("flex w-full flex-col", className)}>

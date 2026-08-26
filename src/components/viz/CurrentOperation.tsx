@@ -54,5 +54,4 @@ export function CurrentOperation({
   );
 }
 
-
 export default CurrentOperation;

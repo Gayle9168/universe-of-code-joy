@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 import { usePredictionGate } from "@/hooks/usePredictionGate";
 import { usePlayerStore, useCurrentStep } from "@/stores/playerStore";
 
-
 export interface AlgorithmWorldPanelProps {
   /** Undefined means this slug has no engine module yet. */
   module: AlgorithmModule | undefined;
@@ -38,8 +37,6 @@ export function AlgorithmWorldPanel({
   const prevFrame = prevStep?.frame ?? null;
   /* While a prediction checkpoint is open, nothing here may reveal the branch. */
   const { revealAllowed, prediction } = usePredictionGate();
-
-
 
   if (!mod) {
     return (
@@ -83,9 +80,10 @@ export function AlgorithmWorldPanel({
           each announcing themselves. At an open prediction checkpoint the
           summary would name the branch, so the prompt is announced instead. */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {revealAllowed ? (reasoning?.accessibleSummary ?? "") : (prediction?.accessiblePrompt ?? "")}
+        {revealAllowed
+          ? (reasoning?.accessibleSummary ?? "")
+          : (prediction?.accessiblePrompt ?? "")}
       </div>
-
 
       <h2 className="shrink-0 font-display text-[19px] font-semibold tracking-tight text-ink">
         Algorithm World
@@ -121,7 +119,6 @@ export function AlgorithmWorldPanel({
           </div>
         ) : null}
       </div>
-
     </section>
   );
 }

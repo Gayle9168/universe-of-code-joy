@@ -5,7 +5,6 @@ import { useIsReducedMotion } from "@/hooks/useReducedMotionSync";
 import { usePredictionGate } from "@/hooks/usePredictionGate";
 import { BASE_STEP_MS, stepDurationMs } from "@/lib/pacing";
 
-
 /**
  * Autoplay: one pending advance at a time, scheduled for exactly as long as the
  * *current* step deserves (see `src/lib/pacing.ts`), so a comparison and the
@@ -31,7 +30,6 @@ export function useAutoplay(): void {
   /* An open prediction checkpoint stops time from advancing. It is the existing
      player that pauses — no second timer and no second index. */
   const { isBlocking } = usePredictionGate();
-
 
   useEffect(() => {
     if (typeof window === "undefined") return;
