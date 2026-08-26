@@ -19,6 +19,8 @@ export interface SubmissionResult {
   from?: "lesson";
   /** Algorithm slug of that lesson, so the results page can offer a way back. */
   algorithmSlug?: string;
+  /** Which lesson stage sent them here, so results can offer the right next step. */
+  stage?: "code" | "solve";
 }
 
 interface ResultState {

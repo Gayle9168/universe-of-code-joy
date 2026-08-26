@@ -42,6 +42,7 @@ export function resolveTransferSlug(
   preferredProblemSlug?: string,
   problems: Problem[] = getProblemsByAlgorithm(algorithmSlug),
   implementationSlug: string | null = resolveImplementationSlug(algorithmSlug),
+  algorithm: Algorithm | undefined = getAlgorithm(algorithmSlug),
 ): string | null {
   const eligible =
     implementationSlug === null ? problems : problems.filter((p) => p.slug !== implementationSlug);
@@ -49,17 +50,31 @@ export function resolveTransferSlug(
     preferredProblemSlug && preferredProblemSlug !== implementationSlug
       ? preferredProblemSlug
       : undefined;
-  return resolvePracticeSlug(algorithmSlug, preferred, eligible);
+  if (preferred && eligible.some((p) => p.slug === preferred)) return preferred;
+  /* The curated transfer mapping, when the catalog actually has it and it is not
+     the implementation challenge, beats the generic easiest-first fallback. */
+  const curated = algorithm?.transferProblemSlug;
+  if (curated && curated !== implementationSlug && eligible.some((p) => p.slug === curated)) {
+    return curated;
+  }
+  return resolvePracticeSlug(algorithmSlug, undefined, eligible);
 }
 
 /**
- * Whether the CODE stage is complete: derived only from the mapped problem's
- * solved state, never from having visited Practice.
+ * Whether a mapped stage problem is complete: derived only from that problem's
+ * persisted `solvedAt`, never from having visited or run tests in Practice.
+ * Used for both CODE (implementation) and SOLVE (transfer).
  */
-export function isImplementationSolved(
-  implementationSlug: string | null,
+export function isStageProblemSolved(
+  problemSlug: string | null,
   progress: Pick<ProgressData, "problems">,
 ): boolean {
-  if (!implementationSlug) return false;
-  return Boolean(progress.problems[implementationSlug]?.solvedAt);
+  if (!problemSlug) return false;
+  return Boolean(progress.problems[problemSlug]?.solvedAt);
 }
+
+/** CODE stage completion. Thin alias over {@link isStageProblemSolved}. */
+export const isImplementationSolved = isStageProblemSolved;
+
+/** SOLVE stage completion. Thin alias over {@link isStageProblemSolved}. */
+export const isTransferSolved = isStageProblemSolved;

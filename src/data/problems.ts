@@ -1526,9 +1526,10 @@ export const problems: Problem[] = [
       { id: "t6", input: [[2, 4, 6, 8, 10], 9], expected: 4, hidden: true },
     ],
     hints: [
-      "This is binary search with a different return value for the not-found case.",
-      "Keep low = 0 and high = nums.length - 1 and narrow the window as usual.",
-      "When the loop ends without a match, low is exactly the insertion point.",
+      "The array is sorted. You do not need to inspect every position.",
+      "Maintain low and high as the remaining candidate range.",
+      "Think carefully about what low means after the range becomes empty.",
+      "The insertion position is the first index where the target could appear while preserving order.",
     ],
     xp: 60,
   },

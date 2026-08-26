@@ -6,6 +6,7 @@ import { getAlgorithm } from "@/content/algorithms";
 import { getProblem, getProblems } from "@/content/problems";
 import useHydrated from "@/hooks/useHydrated";
 import { useDueCardCount } from "@/hooks/useProgress";
+import { resolveTransferSlug } from "@/lib/lesson-stages";
 import { xpAtLevelStart, xpForLevel } from "@/lib/xp";
 import { baselineProgress, dayKey, useProgressStore } from "@/stores/progressStore";
 import { useResultStore } from "@/stores/resultStore";
@@ -126,6 +127,18 @@ function ChallengeResults() {
      an unrelated challenge. Generic submissions keep the existing behaviour. */
   const lessonAlgorithm =
     last?.from === "lesson" && last.algorithmSlug ? getAlgorithm(last.algorithmSlug) : undefined;
+  const lessonStage = last?.from === "lesson" ? last.stage : undefined;
+
+  /* Code accepted: the next skill is recognising the pattern elsewhere, so the
+     primary action becomes the transfer challenge rather than the lesson. */
+  const transferSlug = useMemo(
+    () => (lessonAlgorithm ? resolveTransferSlug(lessonAlgorithm.slug) : null),
+    [lessonAlgorithm],
+  );
+  const codeHandoff = Boolean(
+    lessonAlgorithm && lessonStage === "code" && transferSlug && transferSlug !== problem?.slug,
+  );
+  const solveDone = Boolean(lessonAlgorithm && lessonStage === "solve");
 
   const level = state.level;
   const levelStart = xpAtLevelStart(level);
@@ -340,6 +353,31 @@ function ChallengeResults() {
               </div>
             </div>
 
+            {/* Lesson-stage handoff: one clear next skill, no redirect */}
+            {codeHandoff && (
+              <div className="mt-4 rounded-2xl border border-primary/40 bg-primary-tint/40 px-5 py-3.5">
+                <h2 className="text-[14px] font-semibold text-foreground">
+                  Next: apply the pattern
+                </h2>
+                <p className="mt-1 font-mono text-[12.5px] leading-[1.6] text-muted-foreground">
+                  You implemented {lessonAlgorithm?.name}. Now apply the same shrinking-search-space
+                  reasoning to a different problem.
+                </p>
+              </div>
+            )}
+            {solveDone && (
+              <div className="mt-4 rounded-2xl border border-hairline bg-card px-5 py-3.5">
+                <h2 className="text-[14px] font-semibold text-foreground">
+                  Why the pattern worked
+                </h2>
+                <ul className="mt-1.5 space-y-1 font-mono text-[12.5px] leading-[1.6] text-muted-foreground">
+                  <li>the candidate indices were ordered,</li>
+                  <li>each comparison removed one side,</li>
+                  <li>low identified the first valid insertion position when the search ended.</li>
+                </ul>
+              </div>
+            )}
+
             {/* Footer buttons */}
             <div className="mt-5 flex items-center">
               <Link
@@ -356,7 +394,28 @@ function ChallengeResults() {
               >
                 View walkthrough
               </Link>
-              {lessonAlgorithm ? (
+              {codeHandoff && transferSlug ? (
+                <Link
+                  to="/practice/$slug"
+                  params={{ slug: transferSlug }}
+                  search={{
+                    from: "lesson" as const,
+                    algorithm: lessonAlgorithm!.slug,
+                    stage: "solve" as const,
+                  }}
+                  className="inline-flex h-11 items-center gap-2.5 rounded-xl bg-primary px-7 font-sans text-[14px] font-medium text-primary-foreground hover:bg-primary-glow"
+                >
+                  Apply {lessonAlgorithm?.name} to a new problem{" "}
+                  <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                </Link>
+              ) : solveDone ? (
+                <Link
+                  to="/review"
+                  className="inline-flex h-11 items-center gap-2.5 rounded-xl bg-primary px-7 font-sans text-[14px] font-medium text-primary-foreground hover:bg-primary-glow"
+                >
+                  Continue to Review <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                </Link>
+              ) : lessonAlgorithm ? (
                 <Link
                   to="/algorithms/$slug"
                   params={{ slug: lessonAlgorithm.slug }}
