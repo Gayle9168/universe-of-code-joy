@@ -33,9 +33,9 @@ function firstPrediction(values: number[], target: number) {
 
 describe("buildPredictionCheckpoints", () => {
   it("surfaces exactly one checkpoint for the Golden lesson run", () => {
-    expect(buildPredictionCheckpoints(steps([2, 5, 8, 12, 16, 23, 38, 56, 72, 91], 23))).toHaveLength(
-      1,
-    );
+    expect(
+      buildPredictionCheckpoints(steps([2, 5, 8, 12, 16, 23, 38, 56, 72, 91], 23)),
+    ).toHaveLength(1);
   });
 
   it("attaches the checkpoint to a branch comparison followed by a boundary move", () => {
@@ -246,10 +246,14 @@ describe("prediction store", () => {
 
   it("drops entries when custom input creates a new run", () => {
     const store = createPredictionStore();
-    store.getState().syncRun(predictionRunKey("binary-search", { values: "1, 2, 3", target: "23" }));
+    store
+      .getState()
+      .syncRun(predictionRunKey("binary-search", { values: "1, 2, 3", target: "23" }));
     store.getState().select(id, "move-low");
     store.getState().check(id, "move-low");
-    store.getState().syncRun(predictionRunKey("binary-search", { values: "1, 2, 3", target: "72" }));
+    store
+      .getState()
+      .syncRun(predictionRunKey("binary-search", { values: "1, 2, 3", target: "72" }));
     expect(store.getState().entries).toEqual({});
   });
 

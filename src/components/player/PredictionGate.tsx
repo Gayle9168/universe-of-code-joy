@@ -109,7 +109,6 @@ export function PredictionGate({
                   active ? "border-primary bg-tint" : "border-hairline bg-card hover:bg-tint/60",
                 )}
               >
-
                 <input
                   type="radio"
                   name={`prediction-${id}`}

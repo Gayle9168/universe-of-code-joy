@@ -302,7 +302,6 @@ export function ArrayCanvas({
             </span>
           ) : null}
         </div>
-
       </div>
     </div>
   );
