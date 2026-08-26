@@ -69,7 +69,7 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "h-px w-5 shrink-0 transition-colors duration-300 ease-out",
+                    "h-px w-4 shrink-0 transition-colors duration-300 ease-out",
                     isPast || isActive ? "bg-primary/40" : "bg-hairline",
                   )}
                 />
@@ -80,34 +80,47 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                 onClick={() => seek(node.from)}
                 aria-current={isActive ? "step" : undefined}
                 aria-label={`Phase ${i + 1}: ${node.label}`}
-                className="group flex shrink-0 items-center gap-2 rounded-full px-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                className={cn(
+                  "group flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 transition-colors duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+                  isActive
+                    ? "border-primary bg-tint"
+                    : isPast
+                      ? "border-primary/25 bg-card hover:bg-tint"
+                      : "border-hairline bg-card hover:border-primary/30",
+                )}
               >
+                {/* The marker is a small dot: the concept name carries the meaning. */}
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "shrink-0 rounded-full transition-colors duration-300 ease-out",
+                    node.milestone ? "size-2.5" : "size-1.5",
+                    isActive || isPast
+                      ? "bg-primary"
+                      : node.milestone
+                        ? "bg-primary/30"
+                        : "bg-hairline",
+                  )}
+                />
                 <span
                   className={cn(
-                    "flex size-6 shrink-0 items-center justify-center rounded-full border font-mono text-[11px] tabular-nums",
-                    "transition-[background-color,border-color,color] duration-300 ease-out",
+                    "max-w-[140px] truncate font-mono text-[11px] uppercase tracking-[0.08em] transition-colors duration-300 ease-out",
                     isActive
-                      ? "border-primary bg-primary text-primary-foreground"
+                      ? "font-semibold text-ink"
                       : isPast
-                        ? "border-primary/40 bg-tint text-primary"
-                        : "border-hairline bg-card text-slate group-hover:border-primary/40",
+                        ? "text-slate"
+                        : "text-slate-soft group-hover:text-slate",
                   )}
+                  title={node.label}
                 >
-                  {i + 1}
+                  {node.label}
                 </span>
-                {isActive ? (
-                  <span
-                    className="max-w-[140px] truncate font-mono text-[11px] uppercase tracking-[0.08em] text-ink"
-                    title={node.label}
-                  >
-                    {node.label}
-                  </span>
-                ) : null}
               </button>
             </li>
           );
         })}
       </ol>
+
     </div>
   );
 }
