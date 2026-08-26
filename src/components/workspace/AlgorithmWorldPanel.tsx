@@ -6,6 +6,7 @@ import { CurrentOperation } from "@/components/viz/CurrentOperation";
 import { FrameView } from "@/components/viz/FrameView";
 import { VariableBoard } from "@/components/viz/VariableBoard";
 import type { AlgorithmModule } from "@/engine/types";
+import { deriveReasoning } from "@/lib/reasoning";
 import { deriveOperation, deriveVariables } from "@/lib/variables";
 import { changedPointers } from "@/lib/vizState";
 import { cn } from "@/lib/utils";
@@ -52,7 +53,9 @@ export function AlgorithmWorldPanel({
      stale value or formula. */
   const variables = deriveVariables(step, prevStep);
   const operation = deriveOperation(step, prevStep);
+  const reasoning = deriveReasoning(step, prevStep, index + 1);
   const showTeachingRow = variables.length > 0 || operation !== null;
+
 
   /* Only the boundary that actually moved on this step gets emphasis. */
   const moved =
