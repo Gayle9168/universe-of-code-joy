@@ -31,7 +31,8 @@ export function AlgorithmWorldPanel({
   const step = useCurrentStep();
   const index = usePlayerStore((s) => s.index);
   const run = usePlayerStore((s) => s.run);
-  const prevFrame = run && index > 0 ? (run.steps[index - 1]?.frame ?? null) : null;
+  const prevStep = run && index > 0 ? (run.steps[index - 1] ?? null) : null;
+  const prevFrame = prevStep?.frame ?? null;
 
   if (!mod) {
     return (
