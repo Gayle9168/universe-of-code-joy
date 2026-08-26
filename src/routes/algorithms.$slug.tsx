@@ -17,6 +17,9 @@ import { useHeaderStats } from "@/components/app-shell";
 import { AlgoraGlyph } from "@/components/site-chrome";
 import { CustomInputModal } from "@/components/player/CustomInputModal";
 import { GoldenWorkspace } from "@/components/workspace/GoldenWorkspace";
+import { TraceWorkspace } from "@/components/trace/TraceWorkspace";
+import { getTraceExercise } from "@/content/trace-exercises";
+import { createTraceStore, TraceStoreProvider } from "@/stores/traceStore";
 import { LessonContextRow } from "@/components/workspace/LessonContextRow";
 import { LessonStageStrip } from "@/components/workspace/LessonStageStrip";
 
@@ -61,10 +64,13 @@ export const Route = createFileRoute("/algorithms/$slug")({
     // algorithm's own default rather than routing to a 404 on /practice.
     const problem =
       typeof search.problem === "string" && getProblem(search.problem) ? search.problem : undefined;
+    // The only non-guided stage with a screen of its own so far.
+    const stage = search.stage === "trace" ? ("trace" as const) : undefined;
     return {
       ...(input ? { input } : {}),
       ...(step !== undefined ? { step } : {}),
       ...(problem ? { problem } : {}),
+      ...(stage ? { stage } : {}),
     };
   },
   component: AlgorithmWorkspace,
@@ -133,8 +139,16 @@ function AlgorithmWorkspace(): React.ReactElement {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
-  usePlayerKeys();
+  /* Trace Mode has no playback, so the global shortcuts stand down: Space and
+     the arrows belong to the learner's answer controls there. */
+  const isTrace = search.stage === "trace";
+  usePlayerKeys(!isTrace);
   useAutoplay();
+
+  /* One trace store per workspace mount, mirroring how the player and prediction
+     stores are scoped: a learner's guesses never reach the guided player. */
+  const [traceStore] = React.useState(createTraceStore);
+  const traceExercise = React.useMemo(() => getTraceExercise(slug), [slug]);
 
   const algo = getAlgorithm(slug);
 
@@ -398,7 +412,12 @@ function AlgorithmWorkspace(): React.ReactElement {
                 practiceSlug={practiceSlug}
               />
               <div className="flex items-center justify-between gap-4">
-                <LessonStageStrip active="visualize" practiceSlug={practiceSlug} />
+                <LessonStageStrip
+                  active={isTrace ? "trace" : "visualize"}
+                  practiceSlug={practiceSlug}
+                  algorithmSlug={slug}
+                  traceAvailable={traceExercise !== undefined}
+                />
                 <button
                   type="button"
                   onClick={onCompleteLesson}
@@ -421,8 +440,15 @@ function AlgorithmWorkspace(): React.ReactElement {
               </div>
             </div>
 
-            {/* Golden workspace: algorithm world | code + reasoning, playback band below */}
-            <GoldenWorkspace algo={algo} module={mod} slug={modSlug} />
+            {/* Guided: algorithm world | code + reasoning, playback band below.
+                Trace: the learner's own world | the one active question. */}
+            {isTrace ? (
+              <TraceStoreProvider store={traceStore}>
+                <TraceWorkspace exercise={traceExercise} algoName={algo.name} />
+              </TraceStoreProvider>
+            ) : (
+              <GoldenWorkspace algo={algo} module={mod} slug={modSlug} />
+            )}
           </main>
         </div>
       </DesktopScaleFrame>
