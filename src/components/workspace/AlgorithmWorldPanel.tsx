@@ -2,13 +2,11 @@ import * as React from "react";
 import { MonitorPlay } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { ArrayCanvas } from "@/components/viz/ArrayCanvas";
-import { ComparisonCard } from "@/components/viz/ComparisonCard";
-import { DecisionNote } from "@/components/viz/DecisionNote";
-import { ExpressionBlock } from "@/components/viz/ExpressionBlock";
+import { CurrentOperation } from "@/components/viz/CurrentOperation";
 import { FrameView } from "@/components/viz/FrameView";
 import { VariableBoard } from "@/components/viz/VariableBoard";
 import type { AlgorithmModule } from "@/engine/types";
-import { midExpression, variableRows } from "@/lib/variableBoard";
+import { deriveOperation, deriveVariables } from "@/lib/variables";
 import { changedPointers } from "@/lib/vizState";
 import { cn } from "@/lib/utils";
 import { usePlayerStore, useCurrentStep } from "@/stores/playerStore";
@@ -33,7 +31,8 @@ export function AlgorithmWorldPanel({
   const step = useCurrentStep();
   const index = usePlayerStore((s) => s.index);
   const run = usePlayerStore((s) => s.run);
-  const prevFrame = run && index > 0 ? (run.steps[index - 1]?.frame ?? null) : null;
+  const prevStep = run && index > 0 ? (run.steps[index - 1] ?? null) : null;
+  const prevFrame = prevStep?.frame ?? null;
 
   if (!mod) {
     return (
@@ -48,14 +47,12 @@ export function AlgorithmWorldPanel({
   }
 
   const frame = step?.frame;
-  const rows = frame ? variableRows(frame, prevFrame) : [];
-  const expression = frame ? midExpression(frame) : null;
-
-  const hasExpression = Boolean(expression);
-  const hasComparison = Boolean(frame?.kind === "array" && frame.comparison);
-  const decision = frame?.kind === "array" ? (frame.decision ?? null) : null;
-  const showTeachingRow =
-    frame?.kind === "array" && (rows.length > 0 || hasExpression || hasComparison);
+  /* Everything below is a pure function of the current step (plus the previous
+     step for diffing), so seek, autoplay and rapid stepping cannot strand a
+     stale value or formula. */
+  const variables = deriveVariables(step, prevStep);
+  const operation = deriveOperation(step, prevStep);
+  const showTeachingRow = variables.length > 0 || operation !== null;
 
   /* Only the boundary that actually moved on this step gets emphasis. */
   const moved =
@@ -95,19 +92,10 @@ export function AlgorithmWorldPanel({
           )}
         </div>
 
-        {showTeachingRow || decision ? (
-          <div className="flex shrink-0 flex-col gap-3">
-            {showTeachingRow ? (
-              <div className="flex items-stretch gap-4">
-                <VariableBoard rows={rows} className="flex-[1.35]" />
-                <ExpressionBlock expression={expression} className="flex-[1.4]" />
-                <ComparisonCard
-                  comparison={hasComparison ? (frame.comparison ?? null) : null}
-                  className="flex-[0.85]"
-                />
-              </div>
-            ) : null}
-            <DecisionNote decision={decision} />
+        {showTeachingRow ? (
+          <div className="flex shrink-0 flex-col items-stretch gap-4 lg:flex-row">
+            <VariableBoard variables={variables} className="lg:flex-[0.9]" />
+            <CurrentOperation operation={operation} className="lg:flex-[1.1]" />
           </div>
         ) : null}
       </div>
