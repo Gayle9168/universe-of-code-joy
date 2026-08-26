@@ -68,7 +68,7 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "h-px w-4 shrink-0 transition-colors duration-300 ease-out",
+                    "h-px w-3 shrink-0 transition-colors duration-300 ease-out",
                     isPast || isActive ? "bg-primary/40" : "bg-hairline",
                   )}
                 />
@@ -80,7 +80,7 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                 aria-current={isActive ? "step" : undefined}
                 aria-label={`Phase ${i + 1}: ${node.label}`}
                 className={cn(
-                  "group flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 transition-colors duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+                  "group flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 transition-colors duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
                   isActive
                     ? "border-primary bg-tint"
                     : isPast
@@ -103,7 +103,7 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                 />
                 <span
                   className={cn(
-                    "max-w-[140px] truncate font-mono text-[11px] uppercase tracking-[0.08em] transition-colors duration-300 ease-out",
+                    "max-w-[96px] truncate font-mono text-[10px] uppercase tracking-[0.06em] transition-colors duration-300 ease-out",
                     isActive
                       ? "font-semibold text-ink"
                       : isPast
