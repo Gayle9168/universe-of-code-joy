@@ -88,9 +88,12 @@ describe("deriveReasoning — comparisons", () => {
   });
 
   it("explains right elimination when mid is larger", () => {
-    const i = indexOf(MISSING, "compare", (s) => frameOf(s).comparison?.op === ">");
-    const mid = pointer(MISSING.steps[i]!, "mid")!;
-    const r = reasoningAt(MISSING, i);
+    const run = runSearch("1, 2, 3, 4, 5, 6, 7, 8", "9");
+    const low = runSearch("10, 20, 30, 40, 50, 60", "9");
+    expect(run.steps.length).toBeGreaterThan(0);
+    const i = indexOf(low, "compare", (s) => frameOf(s).comparison?.op === ">");
+    const mid = pointer(low.steps[i]!, "mid")!;
+    const r = reasoningAt(low, i);
     expect(r.happened).toMatch(/is larger than the target 9/);
     expect(r.why).toContain(`at or right of index ${mid}`);
     expect(r.why).toContain("too large");
