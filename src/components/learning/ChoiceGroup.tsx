@@ -34,7 +34,11 @@ export function ChoiceGroup({
   className,
 }: ChoiceGroupProps): React.ReactElement {
   return (
-    <div role="radiogroup" aria-labelledby={labelledBy} className={cn("flex flex-col gap-1.5", className)}>
+    <div
+      role="radiogroup"
+      aria-labelledby={labelledBy}
+      className={cn("flex flex-col gap-1.5", className)}
+    >
       {choices.map((choice) => {
         const active = selectedId === choice.id;
         return (
@@ -64,7 +68,12 @@ export function ChoiceGroup({
               {choice.label}
             </span>
             {active ? (
-              <Check aria-hidden="true" size={13} strokeWidth={2} className="shrink-0 text-accent-strong" />
+              <Check
+                aria-hidden="true"
+                size={13}
+                strokeWidth={2}
+                className="shrink-0 text-accent-strong"
+              />
             ) : null}
           </label>
         );

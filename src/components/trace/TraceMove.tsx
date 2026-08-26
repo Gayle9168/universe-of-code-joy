@@ -83,7 +83,12 @@ export function TraceMove({
         <div className="flex items-center gap-1.5">
           {resolved ? (
             isCorrect ? (
-              <Check aria-hidden="true" size={14} strokeWidth={1.8} className="text-accent-strong" />
+              <Check
+                aria-hidden="true"
+                size={14}
+                strokeWidth={1.8}
+                className="text-accent-strong"
+              />
             ) : (
               <Info aria-hidden="true" size={14} strokeWidth={1.5} className="text-slate" />
             )

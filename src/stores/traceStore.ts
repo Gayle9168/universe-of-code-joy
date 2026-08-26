@@ -163,10 +163,7 @@ export function useTraceStore<T>(selector: (state: TraceState) => T): T {
 }
 
 /** Number of checkpoints resolved from the front — the active checkpoint index. */
-export function resolvedCount(
-  ids: readonly string[],
-  entries: Record<string, TraceEntry>,
-): number {
+export function resolvedCount(ids: readonly string[], entries: Record<string, TraceEntry>): number {
   let count = 0;
   for (const id of ids) {
     if (!isTraceResolved(entries[id])) break;

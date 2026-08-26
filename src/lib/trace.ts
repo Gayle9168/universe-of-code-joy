@@ -154,7 +154,8 @@ function chooseMidQuestion(
   correctIndex: number,
 ): TraceQuestion {
   const options: TraceOption[] = [];
-  for (let i = low; i <= high; i += 1) options.push({ id: `index-${i}`, label: `index ${i}`, index: i });
+  for (let i = low; i <= high; i += 1)
+    options.push({ id: `index-${i}`, label: `index ${i}`, index: i });
 
   const feedback: Record<string, string> = {};
   for (const option of options) {
@@ -271,7 +272,10 @@ function actionQuestion(
     id,
     kind: "action",
     prompt: "What changes next?",
-    context: [`arr[${mid}] = ${midValue}`, `${midValue} ${relation === "eq" ? "=" : relation === "lt" ? "<" : ">"} ${target}`],
+    context: [
+      `arr[${mid}] = ${midValue}`,
+      `${midValue} ${relation === "eq" ? "=" : relation === "lt" ? "<" : ">"} ${target}`,
+    ],
     options,
     correctOptionId: correctAction,
     explanation,

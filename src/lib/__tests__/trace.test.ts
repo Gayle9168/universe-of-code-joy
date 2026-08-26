@@ -2,12 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getModule } from "@/engine/registry";
 import { getTraceExercise, traceExercises } from "@/content/trace-exercises";
 import { buildTraceSession, traceFrame, viewAt, type TraceSession } from "@/lib/trace";
-import {
-  createTraceStore,
-  isTraceResolved,
-  resolvedCount,
-  traceRunKey,
-} from "@/stores/traceStore";
+import { createTraceStore, isTraceResolved, resolvedCount, traceRunKey } from "@/stores/traceStore";
 
 function sessionFor(inputs: Record<string, string>): TraceSession {
   const mod = getModule("binary-search");
