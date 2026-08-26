@@ -52,7 +52,13 @@ export function AlgorithmWorldPanel({
      step for diffing), so seek, autoplay and rapid stepping cannot strand a
      stale value or formula. */
   const variables = deriveVariables(step, prevStep);
-  const operation = deriveOperation(step, prevStep);
+  /* The canonical run slice lets the operation panel teach the complexity
+     insight once, derived from history rather than from a mutable UI flag. */
+  const operation = deriveOperation(
+    step,
+    prevStep,
+    run ? { steps: run.steps, index } : undefined,
+  );
   const reasoning = deriveReasoning(step, prevStep, index + 1);
   const showTeachingRow = variables.length > 0 || operation !== null;
 

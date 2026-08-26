@@ -88,7 +88,7 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
               <button
                 ref={isActive ? activeRef : undefined}
                 type="button"
-                onClick={() => seek(node.from)}
+                onClick={() => seekTo(node.from)}
                 aria-current={isActive ? "step" : undefined}
                 aria-label={`Phase ${i + 1}: ${node.label}`}
                 className={cn(
