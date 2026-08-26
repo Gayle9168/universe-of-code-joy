@@ -13,6 +13,8 @@ import { getAlgorithm } from "@/content/algorithms";
 import type { Algorithm } from "@/content/types";
 import type { AlgorithmModule, InputField, AuxPanel } from "@/engine/types";
 import { cn } from "@/lib/utils";
+import { invariantFor } from "@/lib/variableBoard";
+
 import { useIsReducedMotion } from "@/hooks/useReducedMotionSync";
 import { usePlayerStore, useCurrentStep } from "@/stores/playerStore";
 import { usePrefsStore, type CodeLanguage } from "@/stores/prefsStore";
