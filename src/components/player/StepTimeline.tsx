@@ -56,12 +56,12 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
           const isActive = i === activeNode;
           const isPast = i < activeNode;
           return (
-            <li key={`${node.label}-${node.from}`} className="flex min-w-0 shrink-0 items-start">
+            <li key={`${node.label}-${node.from}`} className="flex min-w-0 shrink-0 items-center">
               {i > 0 && (
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "mt-[13px] h-px w-8 shrink-0 transition-colors duration-300 ease-out",
+                    "h-px w-5 shrink-0 transition-colors duration-300 ease-out",
                     isPast || isActive ? "bg-primary/40" : "bg-hairline",
                   )}
                 />
