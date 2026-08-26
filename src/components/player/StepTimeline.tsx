@@ -1,7 +1,9 @@
 import * as React from "react";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { activeNodeIndex, buildTimelineNodes } from "@/lib/timeline";
 import { usePlayerStore } from "@/stores/playerStore";
+
 
 export interface StepTimelineProps {
   className?: string;
