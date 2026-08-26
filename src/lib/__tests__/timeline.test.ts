@@ -27,13 +27,7 @@ describe("buildTimelineNodes", () => {
       { phase: "compare" },
     ] as unknown as Step[];
     const nodes = buildTimelineNodes(fake);
-    expect(nodes.map((n) => n.label)).toEqual([
-      "setup",
-      "probe",
-      "compare",
-      "probe",
-      "compare",
-    ]);
+    expect(nodes.map((n) => n.label)).toEqual(["setup", "probe", "compare", "probe", "compare"]);
     expect(nodes[3]).toMatchObject({ from: 3, to: 4 });
   });
 

@@ -163,9 +163,9 @@ export function ArrayCanvas({
      stacking on top of each other (low = mid = high on the final frame). The
      lane maths is a pure, tested helper so the layout is deterministic. */
   const laneOf = new Map(
-    assignPointerLanes(baseMarkers.filter((m) => m.active).map((m) => ({ name: m.name, slot: m.slot }))).map(
-      (r) => [r.name, r.lane],
-    ),
+    assignPointerLanes(
+      baseMarkers.filter((m) => m.active).map((m) => ({ name: m.name, slot: m.slot })),
+    ).map((r) => [r.name, r.lane]),
   );
   const markers = baseMarkers.map((m) => ({ ...m, lane: laneOf.get(m.name) ?? 0 }));
 
