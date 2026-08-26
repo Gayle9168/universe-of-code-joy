@@ -63,7 +63,6 @@ export function AlgorithmWorldPanel({
       {/* items-start: when the reserved comparison/decision slots make the world
           taller than the card, centering would clip the target label at the top. */}
       <div className="relative flex min-h-0 flex-1 items-start justify-center overflow-y-auto overflow-x-hidden px-6 pb-1 pt-3">
-
         {frame ? (
           frame.kind === "array" ? (
             <ArrayCanvas frame={frame} />
