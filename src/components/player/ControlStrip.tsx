@@ -18,6 +18,7 @@ export function ControlStrip({ className }: ControlStripProps): React.ReactEleme
   const toggle = usePlayerStore((s) => s.toggle);
   const next = usePlayerStore((s) => s.next);
   const prev = usePlayerStore((s) => s.prev);
+  const reset = usePlayerStore((s) => s.reset);
   const index = usePlayerStore((s) => s.index);
   const total = usePlayerStore((s) => s.run?.steps.length ?? 0);
   const canBack = useCanStepBack();
@@ -56,6 +57,16 @@ export function ControlStrip({ className }: ControlStripProps): React.ReactEleme
             <Play size={16} strokeWidth={2} />
           )}
           {isPlaying ? "Pause" : isEnded ? "Replay" : "Play"}
+        </button>
+        <button
+          type="button"
+          aria-label="Restart from the first step (R)"
+          onClick={reset}
+          disabled={total === 0}
+          className={side}
+        >
+          <RotateCcw size={16} strokeWidth={1.5} />
+          Restart
         </button>
         <span className="font-mono text-[12px] tabular-nums text-slate">
           {total === 0 ? "0 / 0" : `${index + 1} / ${total}`}

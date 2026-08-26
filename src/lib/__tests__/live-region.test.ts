@@ -13,7 +13,7 @@ describe("Live region announcements with aria-atomic (Criterion S7.5)", () => {
     });
 
     it("verifies ExplainPane defines aria-live='polite' and aria-atomic='true' on active explanation container", () => {
-      expect(panelsContent).toContain('className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5"');
+      expect(panelsContent).toContain('className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5"');
     });
 
     it("verifies VisualStage provides an accessible polite live region for cross-tab announcements", () => {

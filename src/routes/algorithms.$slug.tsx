@@ -15,90 +15,11 @@ import {
 import { toast } from "sonner";
 import { useHeaderStats } from "@/components/app-shell";
 import { AlgoraGlyph } from "@/components/site-chrome";
-import {
-  VisualStage,
-  CodePane,
-  ExplainPane,
-  InputPane,
-  AboutPane,
-} from "@/components/player/WorkspacePanels";
 import { CustomInputModal } from "@/components/player/CustomInputModal";
-import type { AlgorithmModule } from "@/engine/types";
+import { GoldenWorkspace } from "@/components/workspace/GoldenWorkspace";
+import { LessonContextRow } from "@/components/workspace/LessonContextRow";
+import { LessonStageStrip } from "@/components/workspace/LessonStageStrip";
 
-function RightColumnPanels({
-  algo,
-  module: mod,
-  slug,
-}: {
-  algo: Algorithm;
-  module: AlgorithmModule | undefined;
-  slug: string;
-}): React.ReactElement {
-  const [tab, setTab] = React.useState<"code" | "input" | "about">("code");
-
-  return (
-    <div className="flex min-h-0 w-full min-w-0 flex-col gap-6">
-      {/* Upper Panel with Tabs: Code, Input, About */}
-      <div className="flex min-h-0 flex-[7] flex-col overflow-hidden rounded-2xl border border-hairline bg-card shadow-sm">
-        <div
-          role="tablist"
-          aria-label="Code and settings"
-          className="flex gap-1 border-b border-hairline px-3 py-2"
-        >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "code"}
-            onClick={() => setTab("code")}
-            className={cn(
-              "rounded-lg px-3 py-1.5 font-mono text-xs uppercase tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-              tab === "code" ? "bg-tint text-primary font-semibold" : "text-slate hover:text-ink",
-            )}
-          >
-            Code
-          </button>
-          {mod && (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={tab === "input"}
-              onClick={() => setTab("input")}
-              className={cn(
-                "rounded-lg px-3 py-1.5 font-mono text-xs uppercase tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-                tab === "input"
-                  ? "bg-tint text-primary font-semibold"
-                  : "text-slate hover:text-ink",
-              )}
-            >
-              Input
-            </button>
-          )}
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "about"}
-            onClick={() => setTab("about")}
-            className={cn(
-              "rounded-lg px-3 py-1.5 font-mono text-xs uppercase tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-              tab === "about" ? "bg-tint text-primary font-semibold" : "text-slate hover:text-ink",
-            )}
-          >
-            About
-          </button>
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          {tab === "code" && <CodePane className="border-0 shadow-none rounded-none h-full" />}
-          {tab === "input" && mod && <InputPane module={mod} slug={slug} />}
-          {tab === "about" && <AboutPane algo={algo} />}
-        </div>
-      </div>
-
-      {/* Lower Panel: Explanation (Always visible at the bottom) */}
-      <ExplainPane className="flex min-h-0 flex-[3] flex-col rounded-2xl border border-hairline bg-card shadow-sm" />
-    </div>
-  );
-}
 import { Button } from "@/components/common/Button";
 import { Chip } from "@/components/common/Chip";
 import { ComplexityTag } from "@/components/common/ComplexityTag";
@@ -277,6 +198,15 @@ function AlgorithmWorkspace(): React.ReactElement {
     lesson ? Boolean(s.lessons[lesson.slug]?.completedAt) : false,
   );
   const lessonDone = hydrated && lessonCompleted;
+  const lessonMastery = useProgressStore((s) => {
+    if (!lesson) return 0;
+    const p = s.lessons[lesson.slug];
+    if (!p) return 0;
+    return p.quizScore ?? (p.completedAt ? 100 : 0);
+  });
+  /* Mastery only reads after hydration so SSR and the first client paint agree. */
+  const masteryPct = hydrated ? lessonMastery : 0;
+
   const completeLesson = useProgressStore((s) => s.completeLesson);
   const awardXp = useProgressStore((s) => s.awardXp);
   const touchStreak = useProgressStore((s) => s.touchStreak);
@@ -456,93 +386,43 @@ function AlgorithmWorkspace(): React.ReactElement {
           </header>
 
           {/* Main Workspace */}
-          <main className="flex min-h-0 flex-1 flex-col px-4 py-4 lg:px-8 xl:px-12 2xl:px-20">
-            {/* Header Row */}
-            <div className="mb-4 flex shrink-0 flex-col gap-2">
-              <nav
-                aria-label="Breadcrumb"
-                className="flex items-center gap-2 font-mono text-[12px] text-slate"
-              >
-                <Link to="/explore" className="hover:text-ink">
-                  Explore
-                </Link>
-                <span>&gt;</span>
-                <span>{CATEGORY_META[algo.category].label}</span>
-                <span>&gt;</span>
-                {problemForTitle ? (
-                  <>
-                    <Link
-                      to="/algorithms/$slug"
-                      params={{ slug }}
-                      search={{}}
-                      className="font-medium hover:text-ink"
-                    >
-                      {algo.name}
-                    </Link>
-                    <span>&gt;</span>
-                    <span className="font-medium text-ink">{problemForTitle.title}</span>
-                  </>
-                ) : (
-                  <span className="font-medium text-ink">{algo.name}</span>
-                )}
-              </nav>
-
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
-                <div className="min-w-0">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <h1 className="truncate font-display text-[26px] font-semibold tracking-tight text-ink">
-                      {heading}
-                    </h1>
-                    {headingDifficulty && <DifficultyBadge difficulty={headingDifficulty} />}
-                  </div>
-                  <p className="mt-1 truncate font-sans text-[14px] text-slate">{algo.oneLiner}</p>
-                </div>
-                <div className="flex shrink-0 items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={onCompleteLesson}
-                    disabled={lessonDone || !lesson}
-                    aria-pressed={lessonDone}
-                    className={cn(
-                      "inline-flex h-10 items-center justify-center gap-2 rounded-full border px-5 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-                      lessonDone
-                        ? "cursor-default border-primary/30 bg-tint text-primary"
-                        : "cursor-pointer border-hairline text-ink hover:bg-tint",
-                    )}
-                  >
-                    {lessonDone ? (
-                      <Check size={16} strokeWidth={2} />
-                    ) : (
-                      <Bookmark size={16} strokeWidth={1.5} />
-                    )}
-                    {lessonDone ? "Saved" : "Bookmark"}
-                  </button>
-                  <Link
-                    to="/practice/$slug"
-                    params={{ slug: practiceSlug ?? slug }}
-                    disabled={!practiceSlug}
-                    className={cn(
-                      "inline-flex h-10 items-center justify-center gap-2 rounded-full px-5 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-                      practiceSlug
-                        ? "bg-primary text-primary-foreground hover:opacity-90"
-                        : "pointer-events-none cursor-default bg-primary/40 text-primary-foreground",
-                    )}
-                  >
-                    Practice <ArrowRight size={16} />
-                  </Link>
-                </div>
+          <main className="flex min-h-0 flex-1 flex-col px-4 py-2 lg:px-8 xl:px-12 2xl:px-20">
+            {/* One compact lesson context row, then the learning-stage strip */}
+            <div className="mb-3 flex shrink-0 flex-col gap-2">
+              <LessonContextRow
+                heading={heading}
+                difficulty={headingDifficulty}
+                estMinutes={lesson?.estMinutes ?? algo.estMinutes}
+                complexity={algo.timeAvg}
+                masteryPct={masteryPct}
+                practiceSlug={practiceSlug}
+              />
+              <div className="flex items-center justify-between gap-4">
+                <LessonStageStrip active="visualize" practiceSlug={practiceSlug} />
+                <button
+                  type="button"
+                  onClick={onCompleteLesson}
+                  disabled={lessonDone || !lesson}
+                  aria-pressed={lessonDone}
+                  className={cn(
+                    "inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-full border px-3 font-sans text-[12px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+                    lessonDone
+                      ? "cursor-default border-primary/30 bg-tint text-primary"
+                      : "cursor-pointer border-hairline text-ink hover:bg-tint",
+                  )}
+                >
+                  {lessonDone ? (
+                    <Check size={14} strokeWidth={2} />
+                  ) : (
+                    <Bookmark size={14} strokeWidth={1.5} />
+                  )}
+                  {lessonDone ? "Saved" : "Bookmark"}
+                </button>
               </div>
             </div>
 
-            {/* Two-column workspace: canvas card left, code + reasoning right */}
-            <div className="grid min-h-0 flex-1 gap-6 grid-cols-[58fr_42fr] xl:grid-cols-[64fr_36fr] 2xl:grid-cols-[68fr_32fr]">
-              <VisualStage
-                module={mod}
-                algoName={algo.name}
-                className="flex min-w-0 flex-col min-h-0 rounded-2xl border border-hairline bg-card shadow-sm"
-              />
-              <RightColumnPanels algo={algo} module={mod} slug={modSlug} />
-            </div>
+            {/* Golden workspace: algorithm world | code + reasoning, playback band below */}
+            <GoldenWorkspace algo={algo} module={mod} slug={modSlug} />
           </main>
         </div>
       </DesktopScaleFrame>

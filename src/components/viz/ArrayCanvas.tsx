@@ -263,11 +263,11 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
 
       {/* comparison strip — height reserved so frames never shift the layout */}
       <div
-        className="mt-5 flex w-full max-w-[520px] items-stretch rounded-xl border border-hairline bg-card transition-opacity duration-300 ease-out"
+        className="mt-3 flex w-full max-w-[520px] items-stretch rounded-xl border border-hairline bg-card transition-opacity duration-300 ease-out"
         style={{ opacity: frame.comparison ? 1 : 0 }}
         aria-hidden={frame.comparison ? undefined : true}
       >
-        <div className="flex flex-1 flex-col items-center gap-0.5 px-4 py-3">
+        <div className="flex flex-1 flex-col items-center gap-0.5 px-4 py-2">
           <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
             mid value
           </span>
@@ -279,7 +279,7 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
           </span>
         </div>
         <div className="w-px self-stretch bg-hairline" />
-        <div className="flex flex-1 items-center justify-center px-4 py-3">
+        <div className="flex flex-1 items-center justify-center px-4 py-2">
           <span
             key={`op-${String(frame.comparison?.left ?? "")}${frame.comparison?.op ?? ""}${String(frame.comparison?.right ?? "")}`}
             className={cn(
@@ -293,7 +293,7 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
           </span>
         </div>
         <div className="w-px self-stretch bg-hairline" />
-        <div className="flex flex-1 flex-col items-center gap-0.5 px-4 py-3">
+        <div className="flex flex-1 flex-col items-center gap-0.5 px-4 py-2">
           <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
             target
           </span>
@@ -309,7 +309,7 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
       {/* decision callout — stays in place, content cross-fades */}
       <div
         className={cn(
-          "mt-3 flex w-full max-w-[580px] items-center gap-3 rounded-xl px-4 py-3 transition-[background-color,opacity] duration-300 ease-out",
+          "mt-3 flex w-full max-w-[580px] items-center gap-3 rounded-xl px-4 py-2.5 transition-[background-color,opacity] duration-300 ease-out",
           frame.decision?.tone === "error"
             ? "bg-error-tint"
             : frame.decision?.tone === "accent"
