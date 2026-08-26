@@ -1,14 +1,36 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Bookmark, Check, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 import { AppSidebar, AppWorkspaceBar } from "@/components/app-shell";
+import { ReviewSession } from "@/components/learning/ReviewSession";
+import { getAlgorithm } from "@/content/algorithms";
 import useHydrated from "@/hooks/useHydrated";
+import {
+  gradedToday,
+  hasReviewSet,
+  nextReviewLabel,
+  reviewSetFor,
+  sessionGrade,
+  type ReviewOutcome,
+} from "@/lib/algorithm-review";
 import { buildQueue, cardFor, gradeXp, intervalLabel, nextInterval } from "@/lib/review";
 import { baselineProgress, useProgressStore } from "@/stores/progressStore";
 
+/** `?algorithm=` opens that algorithm's curated recall set; bare /review keeps the queue. */
+interface ReviewSearch {
+  algorithm?: string;
+}
+
 export const Route = createFileRoute("/review")({
-  component: ReviewQueue,
+  validateSearch: (search: Record<string, unknown>): ReviewSearch => {
+    const algorithm =
+      typeof search.algorithm === "string" && hasReviewSet(search.algorithm)
+        ? search.algorithm
+        : undefined;
+    return algorithm ? { algorithm } : {};
+  },
+  component: ReviewRoute,
   head: () => ({
     meta: [
       { title: "Review queue — spaced repetition — Algora" },
@@ -27,6 +49,84 @@ export const Route = createFileRoute("/review")({
     ],
   }),
 });
+
+/** Curated recall set when one is requested, the general queue otherwise. */
+function ReviewRoute() {
+  const { algorithm } = Route.useSearch();
+  return algorithm ? <AlgorithmReview slug={algorithm} /> : <ReviewQueue />;
+}
+
+/**
+ * One algorithm's active-recall session. Scheduling, XP and streak all go
+ * through the existing progress store, once per completed session — and not at
+ * all when the card was already graded today, so refreshing cannot farm either.
+ */
+function AlgorithmReview({ slug }: { slug: string }) {
+  const hydrated = useHydrated();
+  const items = useMemo(() => reviewSetFor(slug), [slug]);
+  const algo = getAlgorithm(slug);
+  const gradeCard = useProgressStore((s) => s.gradeCard);
+  const awardXp = useProgressStore((s) => s.awardXp);
+  const touchStreak = useProgressStore((s) => s.touchStreak);
+  const card = useProgressStore((s) => s.reviewCards[slug]);
+
+  /* Snapshot once: whether this session schedules must not flip mid-session. */
+  const [practiceOnly] = useState(() => gradedToday(card));
+  const [label, setLabel] = useState<string | null>(null);
+
+  const onComplete = useCallback(
+    (outcomes: ReviewOutcome[]) => {
+      if (practiceOnly) return;
+      const grade = sessionGrade(outcomes);
+      gradeCard(slug, grade);
+      const gained = gradeXp(grade);
+      awardXp(gained, `review:${slug}`);
+      touchStreak();
+      setLabel(nextReviewLabel(useProgressStore.getState().reviewCards[slug]));
+      toast.success(`Review complete — +${gained} XP`, {
+        description: `${items.length} ${algo?.name ?? slug} prompts recalled.`,
+      });
+    },
+    [algo?.name, awardXp, gradeCard, items.length, practiceOnly, slug, touchStreak],
+  );
+
+  return (
+    <div className="flex h-screen w-full overflow-hidden bg-background">
+      <AppSidebar active="Review" collapsible />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <AppWorkspaceBar crumbs={["Review", algo?.name ?? slug]} />
+        <main className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto px-8 py-6">
+          {hydrated ? (
+            <ReviewSession
+              algorithmName={algo?.name ?? slug}
+              items={items}
+              practiceOnly={practiceOnly}
+              onComplete={onComplete}
+              nextReviewLabel={label}
+              footer={
+                <>
+                  <Link
+                    to="/algorithms/$slug"
+                    params={{ slug }}
+                    className="inline-flex h-11 items-center rounded-xl border border-primary bg-card px-6 font-sans text-[14px] font-medium text-primary hover:bg-tint"
+                  >
+                    Back to lesson
+                  </Link>
+                  <Link
+                    to="/review"
+                    className="inline-flex h-11 items-center rounded-xl bg-primary px-6 font-sans text-[14px] font-medium text-primary-foreground hover:bg-primary-glow"
+                  >
+                    Review queue
+                  </Link>
+                </>
+              }
+            />
+          ) : null}
+        </main>
+      </div>
+    </div>
+  );
+}
 
 const TEAL = "var(--primary)";
 const EDGE = "var(--viz-edge)";
