@@ -11,9 +11,10 @@ At the first branch comparison (e.g. `16 < 23` TRUE):
 - Visible: array with indices/values, official range `[0..9]`, target, low/mid/high on the Variable Board, the comparison expression with TRUE/FALSE, the active comparison code line.
 - Hidden: decision preview tint and `Preview: [5..9] would survive`, the `Discard the left half` decision line in Current Operation, Why, Invariant, and `Next:` in Reasoning.
 - The Reasoning card becomes `Your turn`: a radio group (`low = mid + 1`, `high = mid - 1`, `return mid`, `target not found`) plus **Check answer**.
-- Correct → calm check mark, one-sentence causal explanation, **Continue**. Continue resolves the gate in place (does not auto-advance), so the now-revealed preview / Why / Invariant / Next become visible on the same step; the learner then steps to Eliminate.
-- Incorrect → calm, non-red "Not quite" with a misconception sentence for the chosen option, **Try again**, plus a quiet **Show answer**. The step never advances.
-- Show answer → correct option marked, explanation shown, outcome recorded as `revealed`.
+- Correct → calm check mark, one-sentence causal explanation, **Continue**. Continue resolves the gate **on the same Compare step**: it never touches `currentStepIndex`. The revealed preview / decision / Why / Invariant / Next appear on that same step, and the learner uses the existing Next/Play to enter Eliminate. Sequence: `Compare → Prediction → Correct → Continue → reveal on Compare → Next → Eliminate`.
+- Incorrect → calm, non-red "Not quite" with a misconception sentence for the chosen option, **Try again** (restores the answer interaction), plus a quiet **Show answer**. `selected` and `incorrect` both stay **blocking**: nothing advances, and no preview / decision / Why / Invariant / Next is exposed.
+- Show answer → correct option marked, explanation shown, outcome recorded as `revealed` (never `correct`).
+
 
 ## Checkpoint derivation (pure, deterministic)
 
@@ -24,28 +25,30 @@ New `src/lib/prediction.ts`:
 
 ## Prediction state architecture
 
-New `src/stores/predictionStore.ts` (zustand, in-memory, not persisted, separate from `progressStore` and from `playerStore`):
+New `src/stores/predictionStore.ts` — zustand **factory plus React context**, exactly like `createPlayerStore` / `PlayerStoreProvider`, so each visualizer/workspace instance owns its own interaction state and two instances can never interfere. In-memory only, not persisted, and it holds no step index: the canonical `currentStepIndex` in `playerStore` stays the one and only playback position (no `predictionStepIndex`, no second player).
 
-- `runKey: string | null` plus `entries: Record<checkpointId, { status: "unanswered" | "selected" | "incorrect" | "correct" | "revealed"; selectedOptionId?: string; attempts: number; outcome?: PredictionOutcome }>`.
+- `runKey: string | null` plus `entries: Record<checkpointId, { status: "unanswered" | "selected" | "incorrect" | "correct" | "revealed" | "skipped"; selectedOptionId?: PredictionOptionId; attempts: number; outcome?: PredictionOutcome; continued: boolean }>`.
+- Resolution rule: only `correct`, `revealed` and `skipped` resolve a checkpoint. `unanswered`, `selected` and `incorrect` keep it blocking.
 - `PredictionOutcome = "correct-first-try" | "correct-after-retry" | "revealed" | "skipped"` — learning metadata only; no XP/mastery wiring.
-- `runKey` is derived deterministically from the player's `slug` + serialized `rawInputs` (new pure `predictionRunKey()` helper). When the key changes (custom input, different algorithm) entries are dropped, so a solved checkpoint cannot leak into a new run.
-- `reset()` is called on Replay/Restart so the checkpoint becomes answerable again.
-- New hook `src/hooks/usePredictionGate.ts` combines the checkpoint list, the canonical `index`, and store state into `{ checkpoint, prediction, status, isBlocking, revealAllowed }`. `isBlocking` is true only while the player sits exactly on an unresolved checkpoint step.
+- `predictionRunKey(slug, rawInputs)` is a pure helper that sorts the raw-input keys before serializing, so equivalent input objects built in any property order always produce the identical key. Changing the key drops entries, so nothing leaks between runs or algorithms.
+- `resetEntries()` runs on Replay/Restart (return to step 0) so the checkpoint becomes answerable again and no stale "Correct!" survives.
+- New hook `src/hooks/usePredictionGate.ts` combines checkpoints, the canonical `index` and store state into `{ checkpoint, prediction, entry, isBlocking, revealAllowed, showGate, skipCrossedForward(target) }`. `isBlocking` is true only while the player sits exactly on an unresolved checkpoint step.
 
 ## Leak prevention
 
-`revealAllowed` (false while blocking) is threaded as an explicit prop — no component reads prediction state itself except the gate:
+`revealAllowed` (false until the checkpoint is resolved) is threaded as an explicit prop — no presentation component reads prediction state itself:
 
-- `AlgorithmWorldPanel` passes `revealDecision={revealAllowed}` to `ArrayCanvas` (suppresses `decisionPreview` caption and preview tint) and to `CurrentOperation` (drops `result`/decision lines and the verdict note, keeping the comparison + TRUE/FALSE).
-- `ExplainPane` renders `PredictionGate` instead of Why / Invariant / Next while blocking; `What happened` (the neutral comparison sentence) stays.
-- The code pane already follows `codeLine` of the current step, so no change is needed — the boundary line is never highlighted early.
+- `AlgorithmWorldPanel` passes `revealDecision={revealAllowed}` to `ArrayCanvas` (suppresses the `decisionPreview` caption and any surviving-range preview tint) and to `CurrentOperation` (drops the decision/result line, keeping only the comparison expression and its TRUE/FALSE verdict).
+- `ExplainPane` renders `PredictionGate` instead of Why / Invariant / Next while unresolved; only the neutral `What happened` comparison sentence stays.
+- The code pane follows `codeLine` of the current Compare step, so the boundary line is never highlighted early — no change needed.
 
 ## Player integration
 
-- `useAutoplay`: when the gate is blocking, pause and do not schedule a timer. No second timer, no second index.
-- `ControlStrip` / `ExplainPane` Next: disabled while blocking (`aria-disabled` + tooltip-free label "Answer the prediction to continue"); Previous, Restart, and speed remain available.
-- `usePlayerKeys`: while blocking, `ArrowRight`, `Shift+ArrowRight`, `End` and `Space` are ignored; `isTypingTarget` is extended so radio/button controls inside the gate swallow Space/Enter (gate markup uses native `input[type=radio]` in a `role="radiogroup"` plus real buttons).
-- `StepTimeline` seek past an unresolved checkpoint: marks it `skipped` (outcome `"skipped"`) and seeks normally. Past steps stay seekable.
+- `useAutoplay`: when the gate is blocking, pause and schedule no timer. No second timer, no second index.
+- `ControlStrip` / `ExplainPane` Next: disabled while blocking; Previous, Restart and speed remain available.
+- `usePlayerKeys`: while blocking, `ArrowRight`, `Shift+ArrowRight`, `End` and `Space` are ignored; the gate uses native `input[type=radio]` in a `role="radiogroup"` plus real buttons, and focus inside those controls suppresses global shortcuts so Space never starts playback.
+- `StepTimeline` seek: a checkpoint is marked `skipped` **only when the learner crosses forward past it** (target step index beyond an unresolved checkpoint the player has not passed). Backward seeks, seeking to the checkpoint step itself and Previous never mark it skipped.
+
 
 ## Accessibility
 
