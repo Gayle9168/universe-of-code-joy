@@ -10,6 +10,7 @@ import { deriveReasoning } from "@/lib/reasoning";
 import { deriveOperation, deriveVariables } from "@/lib/variables";
 import { changedPointers } from "@/lib/vizState";
 import { cn } from "@/lib/utils";
+import { usePredictionGate } from "@/hooks/usePredictionGate";
 import { usePlayerStore, useCurrentStep } from "@/stores/playerStore";
 
 export interface AlgorithmWorldPanelProps {
@@ -34,6 +35,8 @@ export function AlgorithmWorldPanel({
   const run = usePlayerStore((s) => s.run);
   const prevStep = run && index > 0 ? (run.steps[index - 1] ?? null) : null;
   const prevFrame = prevStep?.frame ?? null;
+  /* While a prediction checkpoint is open, nothing here may reveal the branch. */
+  const { revealAllowed, prediction } = usePredictionGate();
 
   if (!mod) {
     return (
@@ -74,9 +77,12 @@ export function AlgorithmWorldPanel({
     >
       {/* The one live region for the whole workspace: a single concise execution
           summary per step, instead of code, variables, operation and reasoning
-          each announcing themselves. */}
+          each announcing themselves. At an open prediction checkpoint the
+          summary would name the branch, so the prompt is announced instead. */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {reasoning?.accessibleSummary ?? ""}
+        {revealAllowed
+          ? (reasoning?.accessibleSummary ?? "")
+          : (prediction?.accessiblePrompt ?? "")}
       </div>
 
       <h2 className="shrink-0 font-display text-[19px] font-semibold tracking-tight text-ink">
@@ -93,7 +99,7 @@ export function AlgorithmWorldPanel({
         <div className="flex shrink-0 justify-center">
           {frame ? (
             frame.kind === "array" ? (
-              <ArrayCanvas frame={frame} movedPointers={moved} />
+              <ArrayCanvas frame={frame} movedPointers={moved} revealDecision={revealAllowed} />
             ) : (
               <FrameView frame={frame} />
             )
@@ -105,7 +111,11 @@ export function AlgorithmWorldPanel({
         {showTeachingRow ? (
           <div className="flex shrink-0 flex-col items-stretch gap-4 lg:flex-row">
             <VariableBoard variables={variables} className="lg:flex-[0.9]" />
-            <CurrentOperation operation={operation} className="lg:flex-[1.1]" />
+            <CurrentOperation
+              operation={operation}
+              revealDecision={revealAllowed}
+              className="lg:flex-[1.1]"
+            />
           </div>
         ) : null}
       </div>

@@ -6,6 +6,11 @@ import type { Operation } from "@/lib/variables";
 export interface CurrentOperationProps {
   /** Null on steps that compute nothing (setup) — the panel then disappears. */
   operation: Operation | null;
+  /**
+   * False while a prediction checkpoint is unresolved: the comparison and its
+   * verdict stay, the branch decision line is withheld.
+   */
+  revealDecision?: boolean;
   className?: string;
 }
 
@@ -16,9 +21,16 @@ export interface CurrentOperationProps {
  */
 export function CurrentOperation({
   operation,
+  revealDecision = true,
   className,
 }: CurrentOperationProps): React.ReactElement | null {
   if (!operation) return null;
+
+  /* A `result` line on a comparison step names the branch the algorithm is about
+     to take, so it is withheld until the learner has predicted. */
+  const lines = revealDecision
+    ? operation.lines
+    : operation.lines.filter((line) => line.kind !== "result" && line.kind !== "note");
 
   return (
     <section
@@ -31,10 +43,10 @@ export function CurrentOperation({
       <h3 className="font-sans text-[12px] font-medium uppercase tracking-[0.06em] text-slate-soft">
         {operation.title}
       </h3>
-      <span className="sr-only">{operation.announcement}</span>
+      {revealDecision ? <span className="sr-only">{operation.announcement}</span> : null}
       <ExpressionView
-        key={operation.lines.map((l) => l.text).join("|")}
-        lines={operation.lines}
+        key={lines.map((l) => l.text).join("|")}
+        lines={lines}
         tone={operation.tone}
         className="viz-swap"
       />

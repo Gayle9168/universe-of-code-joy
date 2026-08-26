@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { usePlayerStore, usePlayerStoreApi } from "@/stores/playerStore";
 import { usePrefsStore } from "@/stores/prefsStore";
 import { useIsReducedMotion } from "@/hooks/useReducedMotionSync";
+import { usePredictionGate } from "@/hooks/usePredictionGate";
 import { BASE_STEP_MS, stepDurationMs } from "@/lib/pacing";
 
 /**
@@ -26,6 +27,9 @@ export function useAutoplay(): void {
   const phase = usePlayerStore((s) => s.run?.steps[s.index]?.phase ?? null);
   const speed = usePrefsStore((s) => s.playbackSpeed);
   const reducedMotion = useIsReducedMotion();
+  /* An open prediction checkpoint stops time from advancing. It is the existing
+     player that pauses — no second timer and no second index. */
+  const { isBlocking } = usePredictionGate();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -48,7 +52,14 @@ export function useAutoplay(): void {
       return;
     }
 
+    // An unresolved prediction checkpoint: pause and schedule nothing.
+    if (isBlocking) {
+      if (isPlaying) storeApi.getState().pause();
+      return;
+    }
+
     if (!isPlaying) return;
+
     if (total === 0) {
       storeApi.getState().pause();
       return;
@@ -71,7 +82,7 @@ export function useAutoplay(): void {
     }, delay);
 
     return () => window.clearTimeout(timer);
-  }, [isPlaying, index, total, phase, speed, reducedMotion, storeApi]);
+  }, [isPlaying, index, total, phase, speed, reducedMotion, isBlocking, storeApi]);
 }
 
 export default useAutoplay;

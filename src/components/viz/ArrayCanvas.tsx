@@ -121,12 +121,19 @@ export interface ArrayCanvasProps {
   frame: ArrayFrame;
   /** Pointer names whose index moved on this step — only those get emphasis. */
   movedPointers?: readonly string[];
+  /**
+   * False while a prediction checkpoint is unresolved: the surviving-side
+   * preview is withheld so the canvas cannot answer the question for the
+   * learner. Everything else (values, range, pointers) stays.
+   */
+  revealDecision?: boolean;
   className?: string;
 }
 
 export function ArrayCanvas({
   frame,
   movedPointers,
+  revealDecision = true,
   className,
 }: ArrayCanvasProps): React.ReactElement {
   const n = Math.max(1, frame.values.length);
@@ -174,8 +181,9 @@ export function ArrayCanvas({
     : { offset: 0, width: rowWidth, center: rowWidth / 2 };
 
   /* A decision in progress: the surviving side is highlighted but the official
-     range has NOT moved yet. Only shown when the frame proves it. */
-  const preview = decisionPreview(frame);
+     range has NOT moved yet. Only shown when the frame proves it, and never
+     while a prediction checkpoint is still open. */
+  const preview = revealDecision ? decisionPreview(frame) : null;
 
   return (
     <div className={cn("flex w-full flex-col", className)}>
@@ -283,16 +291,16 @@ export function ArrayCanvas({
         </div>
 
         {/* Decision preview: the side that would survive this comparison. The
-            row is always reserved so the canvas keeps one height, and the
-            wording is explicit that the range above has not changed yet. */}
+            row keeps its height so the canvas never reflows, but the sentence
+            itself is absent unless a preview is allowed — at an open prediction
+            checkpoint it would otherwise still be readable to a screen reader.
+            The wording is explicit that the range above has not changed yet. */}
         <div className="mt-1.5 flex h-[16px] w-full items-start justify-center">
-          <span
-            className="whitespace-nowrap font-mono text-[12px] text-slate transition-opacity duration-300 ease-out"
-            style={{ opacity: preview ? 1 : 0 }}
-          >
-            Preview: {preview ? `[${preview.from}..${preview.to}]` : "—"} would survive — range not
-            changed yet
-          </span>
+          {preview ? (
+            <span className="viz-swap whitespace-nowrap font-mono text-[12px] text-slate">
+              Preview: [{preview.from}..{preview.to}] would survive — range not changed yet
+            </span>
+          ) : null}
         </div>
       </div>
     </div>

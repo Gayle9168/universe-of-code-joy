@@ -1,14 +1,28 @@
 import { useEffect } from "react";
 import { usePlayerStoreApi, type PlayerState } from "@/stores/playerStore";
 import { usePrefsStore } from "@/stores/prefsStore";
+import { usePredictionGate } from "@/hooks/usePredictionGate";
 
 export const PLAYER_SPEEDS: number[] = [0.25, 0.5, 1, 1.5, 2, 4];
+
+/** Keys that would advance execution past an open prediction checkpoint. */
+export const FORWARD_KEYS: readonly string[] = [" ", "Spacebar", "ArrowRight", "End"];
 
 export function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   const tag = target.tagName.toLowerCase();
   if (tag === "input" || tag === "textarea" || tag === "select") return true;
   return target.isContentEditable;
+}
+
+/**
+ * True when the event came from a region that opts out of global player
+ * shortcuts (the Prediction Gate), so Space selects an option instead of
+ * starting playback.
+ */
+export function isShortcutFreeTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return target.closest('[data-player-keys="off"]') !== null;
 }
 
 /**
@@ -66,11 +80,14 @@ export function handlePlayerKeyDown(
 
 /**
  * Global keyboard shortcuts for the algorithm player.
- * Ignores events originating from form fields / contenteditable regions and
- * never calls preventDefault on keys it does not handle.
+ * Ignores events originating from form fields / contenteditable regions and from
+ * the Prediction Gate, and never calls preventDefault on keys it does not handle.
+ * While a prediction checkpoint is unresolved, the keys that would advance
+ * execution (Space, →, Shift+→, End) do nothing; Previous and Home still work.
  */
 export function usePlayerKeys(enabled: boolean = true): void {
   const storeApi = usePlayerStoreApi();
+  const { isBlocking } = usePredictionGate();
 
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
@@ -78,6 +95,8 @@ export function usePlayerKeys(enabled: boolean = true): void {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       if (isTypingTarget(event.target)) return;
+      if (isShortcutFreeTarget(event.target)) return;
+      if (isBlocking && FORWARD_KEYS.includes(event.key)) return;
 
       const player = storeApi.getState();
       const prefs = usePrefsStore.getState();
@@ -95,7 +114,7 @@ export function usePlayerKeys(enabled: boolean = true): void {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [enabled, storeApi]);
+  }, [enabled, isBlocking, storeApi]);
 }
 
 export default usePlayerKeys;
