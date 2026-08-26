@@ -58,7 +58,9 @@ function RightColumn({
           aria-labelledby={`golden-tab-${tab}`}
           className="min-h-0 flex-1 overflow-y-auto"
         >
-          {tab === "code" && <CodePane className="h-full rounded-none border-0 shadow-none" />}
+          {tab === "code" && (
+            <CodePane hideTitle className="h-full rounded-none border-0 shadow-none" />
+          )}
           {tab === "input" && mod && <InputPane module={mod} slug={slug} />}
           {tab === "about" && <AboutPane algo={algo} />}
         </div>
