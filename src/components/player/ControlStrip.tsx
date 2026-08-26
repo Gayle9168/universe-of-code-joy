@@ -60,34 +60,34 @@ export function ControlStrip({ children, className }: ControlStripProps): React.
         </button>
         <button
           type="button"
+          aria-label="Next step (→)"
+          onClick={next}
+          disabled={!canForward}
+          className={cn(side, "w-9 justify-center px-0")}
+        >
+          <ChevronRight size={16} strokeWidth={1.5} />
+        </button>
+        <button
+          type="button"
           aria-label="Restart from the first step (R)"
           onClick={reset}
           disabled={total === 0}
-          className={side}
+          className={cn(side, "w-9 justify-center px-0")}
         >
           <RotateCcw size={16} strokeWidth={1.5} />
-          Restart
         </button>
+      </div>
+
+      {children ? <div className="flex min-w-0 flex-1 justify-center">{children}</div> : <div className="flex-1" />}
+
+      <div className="flex shrink-0 items-center gap-4">
         <span className="font-mono text-[12px] tabular-nums text-slate">
           {total === 0 ? "0 / 0" : `${index + 1} / ${total}`}
         </span>
-      </div>
-
-      <div className="flex items-center gap-4">
         <div className="hidden items-center gap-2 sm:flex">
           <span className="font-sans text-[13px] font-medium text-slate">Speed</span>
           <SpeedControl />
         </div>
-        <button
-          type="button"
-          aria-label="Next step (→)"
-          onClick={next}
-          disabled={!canForward}
-          className={side}
-        >
-          Next
-          <ChevronRight size={16} strokeWidth={1.5} />
-        </button>
       </div>
     </div>
   );
