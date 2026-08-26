@@ -75,3 +75,33 @@ export function changedPointers(
   const before = new Map(previous.map((p) => [p.name, p.index]));
   return current.filter((p) => before.has(p.name) && before.get(p.name) !== p.index).map((p) => p.name);
 }
+
+/**
+ * Truth of a rendered comparison (`16` `<` `23`) when both sides are numeric.
+ * Returns null for non-numeric or unknown operators, so the view can fall back
+ * to showing the engine's plain-English verdict alone.
+ */
+export function evaluateComparison(left: string, op: string, right: string): boolean | null {
+  const a = Number(left);
+  const b = Number(right);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  switch (op) {
+    case "<":
+      return a < b;
+    case ">":
+      return a > b;
+    case "<=":
+      return a <= b;
+    case ">=":
+      return a >= b;
+    case "===":
+    case "==":
+    case "=":
+      return a === b;
+    case "!==":
+    case "!=":
+      return a !== b;
+    default:
+      return null;
+  }
+}

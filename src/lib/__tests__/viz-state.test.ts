@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { cellTreatment, changedPointers, pickCellState, statePriority } from "@/lib/vizState";
+import {
+  cellTreatment,
+  changedPointers,
+  evaluateComparison,
+  pickCellState,
+  statePriority,
+} from "@/lib/vizState";
 
 describe("cell state priority", () => {
   it("ranks found above every other state", () => {
@@ -63,5 +69,19 @@ describe("changedPointers", () => {
   it("reports nothing on the first frame", () => {
     expect(changedPointers(null, [{ name: "lo", index: 0 }])).toEqual([]);
     expect(changedPointers([], [{ name: "lo", index: 0 }])).toEqual([]);
+  });
+});
+
+describe("evaluateComparison", () => {
+  it("evaluates the operators binary search emits", () => {
+    expect(evaluateComparison("16", "<", "23")).toBe(true);
+    expect(evaluateComparison("16", ">", "23")).toBe(false);
+    expect(evaluateComparison("23", "===", "23")).toBe(true);
+    expect(evaluateComparison("8", "<=", "8")).toBe(true);
+  });
+
+  it("returns null when it cannot decide", () => {
+    expect(evaluateComparison("arr[4]", "<", "23")).toBeNull();
+    expect(evaluateComparison("1", "~", "2")).toBeNull();
   });
 });
