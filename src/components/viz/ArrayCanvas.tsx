@@ -2,7 +2,9 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import type { ArrayFrame, CellState } from "@/engine/types";
 import { pointerLabel } from "@/lib/pointerLabels";
+import { StateIcon } from "@/components/viz/StateIcon";
 import { cellCenter, scaleXFor, windowExtentPx } from "@/lib/vizTransitions";
+import { cellTreatment } from "@/lib/vizState";
 
 /**
  * DOM (not SVG) canvas for searching-style array frames: a `target = n` chip,
@@ -20,11 +22,11 @@ const MAX_CELL = 88;
 
 const CELL_SURFACE: Record<CellState, string> = {
   idle: "border-hairline bg-card text-ink",
-  active: "border-primary/35 bg-tint/55 text-ink",
+  active: "border-[1.5px] border-accent-strong bg-tint text-accent-strong",
   visited: "border-hairline bg-card text-slate-soft",
-  frontier: "border-primary/35 bg-tint/55 text-ink",
+  frontier: "border-primary/45 bg-tint/70 text-ink",
   found: "border-[1.5px] border-accent-strong bg-tint text-accent-strong",
-  excluded: "border-hairline bg-card text-slate-soft",
+  excluded: "border-dashed border-hairline bg-paper text-slate-soft",
   compare: "border-[1.5px] border-accent-strong bg-tint text-accent-strong",
   sorted: "border-primary/35 bg-tint/55 text-ink",
 };
@@ -33,7 +35,9 @@ const CELL_SURFACE: Record<CellState, string> = {
 const EMPHASIS: Partial<Record<CellState, string>> = {
   found: "font-semibold shadow-sm",
   compare: "font-semibold shadow-sm",
+  active: "font-semibold shadow-sm",
 };
+
 
 function stateOf(frame: ArrayFrame, index: number): CellState {
   return frame.states[index] ?? "idle";
