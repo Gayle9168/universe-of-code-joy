@@ -175,17 +175,16 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
   }
 
   const nextStep = run.steps[index + 1];
-  const frame = step.frame;
-  /* Current State reads the frame's own pointers, so it can never disagree with
-     the markers drawn on the canvas. */
-  const pointers = frame.kind === "array" ? frame.pointers : [];
+  /* Every section reads the frame the canvas is drawing, so the reasoning can
+     never disagree with what is on screen. Empty sections are not rendered. */
+  const invariant = invariantFor(step.frame);
 
   return (
     <div
       className={cn("flex flex-col rounded-xl border border-hairline bg-card shadow-sm", className)}
     >
       <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
-        <h2 className="font-sans text-[14px] font-medium text-ink">Why this step?</h2>
+        <h2 className="font-sans text-[14px] font-medium text-ink">Reasoning</h2>
         <span className="font-mono text-[12px] text-slate">
           Step {index + 1} of {run.steps.length}
         </span>
@@ -194,64 +193,72 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
       <div
         aria-live="polite"
         aria-atomic="true"
-        className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5"
+        className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5"
       >
-        {/* Keyed on the step so only the text cross-fades — the panel stays put. */}
-        <p key={`why-${index}`} className="viz-swap font-sans text-[13px] leading-relaxed text-ink">
-          {step.narration}
-          {step.detail ? <span className="mt-1.5 block text-slate">{step.detail}</span> : null}
-        </p>
+        <div>
+          <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+            What happened
+          </h3>
+          {/* Keyed on the step so only the text cross-fades — the panel stays put. */}
+          <p
+            key={`happened-${index}`}
+            className="viz-swap font-sans text-[13px] leading-relaxed text-ink"
+          >
+            {step.narration}
+          </p>
+        </div>
 
-        {pointers.length > 0 ? (
+        {step.detail ? (
           <div>
-            <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
-              Current state
+            <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+              Why
             </h3>
-            <dl className="flex flex-wrap gap-2">
-              {pointers.map((p) => (
-                <div
-                  key={p.name}
-                  className="flex min-w-[74px] flex-col rounded-lg border border-hairline bg-paper px-3 py-2"
-                >
-                  <dt className="font-mono text-[11px] text-slate">{p.name}</dt>
-                  <dd className="font-mono text-[16px] font-semibold tabular-nums text-ink">
-                    <span key={`${p.name}-${p.index}`} className="viz-swap">
-                      {p.index}
-                    </span>
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <p
+              key={`why-${index}`}
+              className="viz-swap font-sans text-[13px] leading-relaxed text-slate"
+            >
+              {step.detail}
+            </p>
           </div>
         ) : null}
 
-        <div>
-          <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
-            What happens next?
-          </h3>
-          <div className="flex items-start gap-3 rounded-lg bg-tint px-3 py-3">
+        {invariant ? (
+          <div>
+            <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+              Invariant
+            </h3>
+            <p
+              key={`invariant-${index}`}
+              className="viz-swap rounded-lg border border-primary/20 bg-tint px-3 py-2 font-sans text-[13px] leading-relaxed text-ink"
+            >
+              {invariant}
+            </p>
+          </div>
+        ) : null}
+
+        {nextStep ? (
+          <div className="flex items-center justify-between gap-3 border-t border-hairline pt-3">
             <p
               key={`next-${index}`}
-              className="viz-swap min-w-0 flex-1 font-sans text-[13px] leading-relaxed text-ink"
+              className="min-w-0 flex-1 font-sans text-[12px] leading-relaxed text-slate"
             >
-              {nextStep ? nextStep.narration : "This is the final step of the run."}
+              Next: {nextStep.narration}
             </p>
-            {nextStep ? (
-              <button
-                type="button"
-                aria-label="Next step (→)"
-                onClick={goNext}
-                className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-card text-primary transition-colors hover:bg-card/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-              >
-                <ArrowRight size={16} strokeWidth={1.8} />
-              </button>
-            ) : null}
+            <button
+              type="button"
+              aria-label="Next step (→)"
+              onClick={goNext}
+              className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-card text-primary transition-colors hover:bg-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            >
+              <ArrowRight size={16} strokeWidth={1.8} />
+            </button>
           </div>
-        </div>
+        ) : null}
       </div>
     </div>
   );
 }
+
 
 /* ---------------- input tab ---------------- */
 
