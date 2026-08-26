@@ -40,7 +40,11 @@ import { useAutoplay } from "@/hooks/useAutoplay";
 import { useHydrated } from "@/hooks/useHydrated";
 import { usePlayerKeys } from "@/hooks/usePlayerKeys";
 import { useSession } from "@/hooks/useSession";
-import { resolvePracticeSlug } from "@/lib/explore-items";
+import {
+  isImplementationSolved,
+  resolveImplementationSlug,
+  resolveTransferSlug,
+} from "@/lib/lesson-stages";
 import { mergePlayerSearch, type AlgorithmSearch } from "@/lib/player-search";
 import { cn } from "@/lib/utils";
 import { progressPct } from "@/lib/xp";
@@ -186,10 +190,20 @@ function AlgorithmWorkspace(): React.ReactElement {
   const heading = problemForTitle?.title ?? algo?.name ?? slug;
   const headingDifficulty = problemForTitle?.difficulty ?? algo?.difficulty;
 
-  /** Null for algorithms with no linked question — the button renders disabled. */
+  /**
+   * The Code stage's implementation challenge, mapped in the algorithm catalog.
+   * Null hides the chip and the Trace CTA rather than routing to a 404.
+   */
+  const codeSlug = React.useMemo(() => resolveImplementationSlug(slug), [slug]);
+
+  /**
+   * Null for algorithms with no linked question — the button renders disabled.
+   * Resolved away from the implementation challenge so Solve (apply the
+   * technique elsewhere) never reopens Code (write the technique).
+   */
   const practiceSlug = React.useMemo(
-    () => resolvePracticeSlug(slug, search.problem),
-    [slug, search.problem],
+    () => resolveTransferSlug(slug, search.problem, undefined, codeSlug),
+    [slug, search.problem, codeSlug],
   );
 
   const load = usePlayerStore((s) => s.load);
@@ -220,6 +234,11 @@ function AlgorithmWorkspace(): React.ReactElement {
   });
   /* Mastery only reads after hydration so SSR and the first client paint agree. */
   const masteryPct = hydrated ? lessonMastery : 0;
+
+  /* CODE completion is derived from the mapped problem's solved state — the one
+     existing source of truth — never from a separate lesson-stage flag. */
+  const codeSolved = useProgressStore((s) => isImplementationSolved(codeSlug, s));
+  const codeComplete = hydrated && codeSolved;
 
   const completeLesson = useProgressStore((s) => s.completeLesson);
   const awardXp = useProgressStore((s) => s.awardXp);
@@ -417,6 +436,8 @@ function AlgorithmWorkspace(): React.ReactElement {
                   practiceSlug={practiceSlug}
                   algorithmSlug={slug}
                   traceAvailable={traceExercise !== undefined}
+                  codeSlug={codeSlug}
+                  codeComplete={codeComplete}
                 />
                 <button
                   type="button"
@@ -444,7 +465,12 @@ function AlgorithmWorkspace(): React.ReactElement {
                 Trace: the learner's own world | the one active question. */}
             {isTrace ? (
               <TraceStoreProvider store={traceStore}>
-                <TraceWorkspace exercise={traceExercise} algoName={algo.name} />
+                <TraceWorkspace
+                  exercise={traceExercise}
+                  algoName={algo.name}
+                  codeSlug={codeSlug}
+                  algorithmSlug={slug}
+                />
               </TraceStoreProvider>
             ) : (
               <GoldenWorkspace algo={algo} module={mod} slug={modSlug} />
