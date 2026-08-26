@@ -131,9 +131,7 @@ function hasFound(frame: ArrayFrame): boolean {
 function comparisonLines(frame: ArrayFrame): ExpressionLine[] {
   const c = frame.comparison;
   if (!c) return [];
-  const lines: ExpressionLine[] = [
-    { kind: "substitution", text: `${c.left} ${c.op} ${c.right}` },
-  ];
+  const lines: ExpressionLine[] = [{ kind: "substitution", text: `${c.left} ${c.op} ${c.right}` }];
   const truth = evaluateComparison(c.left, c.op, c.right);
   if (truth !== null) lines.push({ kind: "truth", text: truth ? "TRUE" : "FALSE" });
   if (c.verdict) lines.push({ kind: "note", text: c.verdict });

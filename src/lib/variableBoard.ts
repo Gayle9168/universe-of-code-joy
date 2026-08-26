@@ -9,8 +9,6 @@ import type { ArrayFrame, Frame } from "@/engine/types";
  * Step fields, no algorithm logic. No React, no DOM, no stores.
  */
 
-
-
 function asArrayFrame(frame: Frame | undefined | null): ArrayFrame | null {
   return frame && frame.kind === "array" ? frame : null;
 }
@@ -29,7 +27,6 @@ export function activeWindow(frame: ArrayFrame): { from: number; to: number } | 
   if (lo === null || hi === null || lo > hi) return null;
   return { from: lo, to: hi };
 }
-
 
 /** What remains true after this step — shown in the reasoning panel. */
 export function invariantFor(frame: Frame): string | null {

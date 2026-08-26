@@ -34,10 +34,7 @@ export function ExpressionView({
       {lines.map((line) => {
         if (line.kind === "note") {
           return (
-            <p
-              key={`note-${line.text}`}
-              className="font-sans text-[12px] leading-[1.4] text-slate"
-            >
+            <p key={`note-${line.text}`} className="font-sans text-[12px] leading-[1.4] text-slate">
               {line.text}
             </p>
           );
