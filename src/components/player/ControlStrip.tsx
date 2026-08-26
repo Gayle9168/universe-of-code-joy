@@ -5,11 +5,13 @@ import { usePlayerStore, useCanStepBack, useCanStepForward } from "@/stores/play
 import { SpeedControl } from "@/components/player/SpeedControl";
 
 /**
- * The single-row control strip under the timeline: Previous, Play/Pause, Next,
- * Speed. Deliberately smaller than `PlaybackBar` — the reference workspace gives
- * the canvas the height, so the controls stay one compact row.
+ * The single compact playback row: transport controls on the left, an optional
+ * centred slot (the phase timeline) and speed plus Next on the right. The canvas
+ * gets the height, so this stays one row.
  */
 export interface ControlStripProps {
+  /** Rendered centred between the two control clusters — the phase timeline. */
+  children?: React.ReactNode;
   className?: string;
 }
 
