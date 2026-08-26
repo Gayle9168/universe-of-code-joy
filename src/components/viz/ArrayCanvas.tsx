@@ -222,7 +222,7 @@ export function ArrayCanvas({
               className="absolute left-0 top-0 flex flex-col items-center gap-0.5 leading-none transition-[transform,opacity] duration-300 ease-out will-change-transform"
               style={{
                 opacity: m.active ? 1 : 0,
-                transform: `translateX(${clampToRow(cellCenter(m.index, rowWidth, n, CELL_GAP) + m.lane, rowWidth, 22)}px) translateX(-50%)`,
+                transform: `translateX(${clampToRow(cellCenter(m.index, rowWidth, n, CELL_GAP), rowWidth, 22 + Math.abs(m.lane)) + m.lane}px) translateX(-50%)`,
               }}
             >
               <svg
