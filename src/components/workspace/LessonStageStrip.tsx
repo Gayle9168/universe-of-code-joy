@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type LessonStage =
@@ -30,6 +31,10 @@ export interface LessonStageStripProps {
   algorithmSlug?: string;
   /** True when this algorithm has a hand-trace exercise; false keeps it inert. */
   traceAvailable?: boolean;
+  /** Implementation challenge for the Code stage; null keeps the chip inert. */
+  codeSlug?: string | null;
+  /** True when that implementation challenge is already solved. */
+  codeComplete?: boolean;
   className?: string;
 }
 
@@ -43,6 +48,8 @@ export function LessonStageStrip({
   practiceSlug,
   algorithmSlug,
   traceAvailable = false,
+  codeSlug = null,
+  codeComplete = false,
   className,
 }: LessonStageStripProps): React.ReactElement {
   return (
@@ -80,6 +87,32 @@ export function LessonStageStrip({
               className={cn(base, "text-slate hover:bg-tint hover:text-ink")}
             >
               {stage.label}
+            </Link>
+          );
+        }
+        /* Code opens the existing implementation challenge, and shows a check
+           once that challenge is actually solved — visiting is not completion. */
+        if (stage.id === "code" && codeSlug) {
+          return (
+            <Link
+              key={stage.id}
+              to="/practice/$slug"
+              params={{ slug: codeSlug }}
+              search={{
+                from: "lesson" as const,
+                ...(algorithmSlug ? { algorithm: algorithmSlug } : {}),
+                stage: "code" as const,
+              }}
+              className={cn(
+                base,
+                "gap-1.5",
+                codeComplete
+                  ? "text-primary hover:bg-tint"
+                  : "text-slate hover:bg-tint hover:text-ink",
+              )}
+            >
+              {stage.label}
+              {codeComplete ? <Check aria-label="complete" size={12} strokeWidth={2.4} /> : null}
             </Link>
           );
         }

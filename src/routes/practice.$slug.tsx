@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import {
+  ArrowLeft,
   Bookmark,
   Check,
   ChevronDown,
@@ -20,6 +21,8 @@ import { AppSidebar, AppWorkspaceBar } from "@/components/app-shell";
 import { fetchProblem, getProblem } from "@/content/problems";
 import type { Problem } from "@/content/types";
 import { getAlgorithm } from "@/content/algorithms";
+import type { PracticeSearch } from "@/lib/practice-search";
+import { validatePracticeSearch } from "@/lib/practice-search";
 import { useHydrated } from "@/hooks/useHydrated";
 import { useTestRunner } from "@/hooks/useTestRunner";
 import { formatArgs, solveXp, type RunnerLang, type TestResult } from "@/lib/runner";
@@ -27,6 +30,10 @@ import { dayKey, useProgressStore } from "@/stores/progressStore";
 import { useResultStore } from "@/stores/resultStore";
 
 export const Route = createFileRoute("/practice/$slug")({
+  /* Lightweight origin context only. Solved state stays authoritative, so a
+     direct visit with no params renders exactly the same workspace. */
+  validateSearch: (search: Record<string, unknown>): PracticeSearch =>
+    validatePracticeSearch(search),
   loader: async ({ params }) => {
     const problem = await fetchProblem(params.slug);
     if (!problem) throw notFound();
@@ -324,11 +331,14 @@ function useElapsed(): string {
 
 function PracticeChallenge() {
   const { problem } = Route.useLoaderData() as { problem: Problem };
+  const search = Route.useSearch();
   const navigate = useNavigate();
   const hydrated = useHydrated();
   const timer = useElapsed();
 
-  const [lang, setLang] = useState<RunnerLang>("py");
+  /* JavaScript first because it is the only language pair the worker can
+     actually execute — see the Python note below the Run bar. */
+  const [lang, setLang] = useState<RunnerLang>("js");
   const [langOpen, setLangOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("Description");
   const [hintsShown, setHintsShown] = useState(0);
@@ -345,6 +355,12 @@ function PracticeChallenge() {
   const setLastResult = useResultStore((s) => s.setLast);
 
   const runner = useTestRunner(problem.tests, problem.io);
+  /** The worker executes JavaScript only; Python is editable but not runnable. */
+  const langRunnable = lang !== "py";
+  /* Only shown when the learner actually arrived from a lesson and the named
+     algorithm resolves in the catalog. */
+  const lessonAlgorithm =
+    search.from === "lesson" && search.algorithm ? getAlgorithm(search.algorithm) : undefined;
   const solved = hydrated && Boolean(stored?.solvedAt);
   const attempts = hydrated ? (stored?.attempts ?? 0) : 0;
   const xpOffer = useMemo(
@@ -384,6 +400,7 @@ function PracticeChallenge() {
   }, [lang, problem.starterCode, runner]);
 
   const handleRun = useCallback(async () => {
+    if (!langRunnable) return;
     const sample = problem.tests.filter((t) => !t.hidden);
     setShowHidden(false);
     const result = await runner.run(code, lang, sample);
@@ -391,9 +408,10 @@ function PracticeChallenge() {
     if (result.summary?.verdict === "accepted") {
       toast.success("Sample tests passed", { description: "Submit to run the hidden tests too." });
     }
-  }, [code, lang, problem.tests, runner]);
+  }, [code, lang, langRunnable, problem.tests, runner]);
 
   const handleSubmit = useCallback(async () => {
+    if (!langRunnable) return;
     setShowHidden(true);
     recordAttempt(problem.slug, code, lang);
     const result = await runner.run(code, lang, problem.tests);
@@ -432,6 +450,8 @@ function PracticeChallenge() {
       xpAwarded: gained,
       lang,
       solvedToday: useProgressStore.getState().activity[dayKey()]?.solved ?? 0,
+      ...(search.from === "lesson" ? { from: "lesson" as const } : {}),
+      ...(lessonAlgorithm ? { algorithmSlug: lessonAlgorithm.slug } : {}),
     });
     void navigate({ to: "/practice/results" });
   }, [
@@ -440,12 +460,15 @@ function PracticeChallenge() {
     code,
     hintsShown,
     lang,
+    langRunnable,
+    lessonAlgorithm,
     markSolved,
     navigate,
     problem,
     recordAttempt,
     runner,
     setLastResult,
+    search.from,
     stored,
     touchStreak,
   ]);
@@ -487,6 +510,22 @@ function PracticeChallenge() {
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-4">
+              {lessonAlgorithm && (
+                <div className="mb-3 flex flex-wrap items-center gap-x-2 font-mono text-[11.5px] text-muted-foreground">
+                  <Link
+                    to="/algorithms/$slug"
+                    params={{ slug: lessonAlgorithm.slug }}
+                    className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-primary hover:underline"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.8} />
+                    {lessonAlgorithm.name}
+                  </Link>
+                  <span aria-hidden="true">·</span>
+                  <span className="whitespace-nowrap">
+                    {search.stage === "code" ? "Code stage" : "Lesson"} — now implement it
+                  </span>
+                </div>
+              )}
               <div className="flex items-center gap-2.5">
                 <span
                   className={`rounded-lg border px-2.5 py-1 font-mono text-[12px] capitalize ${DIFFICULTY_CLASS[problem.difficulty]}`}
@@ -680,29 +719,40 @@ function PracticeChallenge() {
               onToggleHidden={() => setShowHidden((v) => !v)}
             />
 
-            <div className="mt-auto flex shrink-0 items-center rounded-2xl border border-hairline bg-card px-5 py-3.5">
-              <button
-                type="button"
-                onClick={handleRun}
-                disabled={runner.status === "running"}
-                className="inline-flex h-11 items-center gap-2.5 rounded-xl border border-primary bg-card px-6 font-sans text-[14px] font-medium text-primary hover:bg-primary-tint disabled:opacity-60"
-              >
-                <Play className="h-4 w-4 fill-current" strokeWidth={0} />{" "}
-                {runner.status === "running" ? "Running…" : "Run"}
-              </button>
-              <div className="ml-auto flex items-center gap-4">
-                <span className="inline-flex h-10 items-center gap-2 rounded-xl border border-primary/40 bg-card px-4 font-mono text-[12.5px] text-primary">
-                  <Star className="h-3.5 w-3.5" strokeWidth={1.8} />{" "}
-                  {solved ? "Solved" : `+${xpOffer} XP`}
-                </span>
+            <div className="mt-auto flex shrink-0 flex-col gap-2.5 rounded-2xl border border-hairline bg-card px-5 py-3.5">
+              {!langRunnable && (
+                <p
+                  role="status"
+                  className="font-mono text-[12px] leading-[18px] text-muted-foreground"
+                >
+                  Python execution is not available yet — switch to JavaScript or TypeScript to run
+                  the tests. You can still write and save Python here.
+                </p>
+              )}
+              <div className="flex items-center">
                 <button
                   type="button"
-                  onClick={handleSubmit}
-                  disabled={runner.status === "running"}
-                  className="inline-flex h-11 items-center gap-2.5 rounded-xl bg-primary px-7 font-sans text-[14px] font-medium text-primary-foreground hover:bg-primary-glow disabled:opacity-60"
+                  onClick={handleRun}
+                  disabled={runner.status === "running" || !langRunnable}
+                  className="inline-flex h-11 items-center gap-2.5 rounded-xl border border-primary bg-card px-6 font-sans text-[14px] font-medium text-primary hover:bg-primary-tint disabled:opacity-60"
                 >
-                  Submit <Send className="h-4 w-4" strokeWidth={1.9} />
+                  <Play className="h-4 w-4 fill-current" strokeWidth={0} />{" "}
+                  {runner.status === "running" ? "Running…" : "Run"}
                 </button>
+                <div className="ml-auto flex items-center gap-4">
+                  <span className="inline-flex h-10 items-center gap-2 rounded-xl border border-primary/40 bg-card px-4 font-mono text-[12.5px] text-primary">
+                    <Star className="h-3.5 w-3.5" strokeWidth={1.8} />{" "}
+                    {solved ? "Solved" : `+${xpOffer} XP`}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={runner.status === "running" || !langRunnable}
+                    className="inline-flex h-11 items-center gap-2.5 rounded-xl bg-primary px-7 font-sans text-[14px] font-medium text-primary-foreground hover:bg-primary-glow disabled:opacity-60"
+                  >
+                    Submit <Send className="h-4 w-4" strokeWidth={1.9} />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

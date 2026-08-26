@@ -107,6 +107,7 @@ export const algorithms: Algorithm[] = [
     ],
     estMinutes: 15,
     xp: 100,
+    implementationProblemSlug: "binary-search-classic",
   },
   {
     slug: "linear-search",

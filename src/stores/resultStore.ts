@@ -15,6 +15,10 @@ export interface SubmissionResult {
   xpAwarded: number;
   lang: RunnerLang;
   solvedToday: number;
+  /** Set when the learner entered from a Golden Lesson stage. */
+  from?: "lesson";
+  /** Algorithm slug of that lesson, so the results page can offer a way back. */
+  algorithmSlug?: string;
 }
 
 interface ResultState {

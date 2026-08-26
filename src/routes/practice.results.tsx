@@ -122,6 +122,11 @@ function ChallengeResults() {
     [problem?.slug, state.problems],
   );
 
+  /* Came from a Golden Lesson stage: the obvious next action is the lesson, not
+     an unrelated challenge. Generic submissions keep the existing behaviour. */
+  const lessonAlgorithm =
+    last?.from === "lesson" && last.algorithmSlug ? getAlgorithm(last.algorithmSlug) : undefined;
+
   const level = state.level;
   const levelStart = xpAtLevelStart(level);
   const levelEnd = xpForLevel(level + 1);
@@ -351,13 +356,24 @@ function ChallengeResults() {
               >
                 View walkthrough
               </Link>
-              <Link
-                to={nextProblem ? "/practice/$slug" : "/explore"}
-                params={(nextProblem ? { slug: nextProblem.slug } : undefined) as never}
-                className="inline-flex h-11 items-center gap-2.5 rounded-xl bg-primary px-7 font-sans text-[14px] font-medium text-primary-foreground hover:bg-primary-glow"
-              >
-                Next challenge <ArrowRight className="h-4 w-4" strokeWidth={2} />
-              </Link>
+              {lessonAlgorithm ? (
+                <Link
+                  to="/algorithms/$slug"
+                  params={{ slug: lessonAlgorithm.slug }}
+                  className="inline-flex h-11 items-center gap-2.5 rounded-xl bg-primary px-7 font-sans text-[14px] font-medium text-primary-foreground hover:bg-primary-glow"
+                >
+                  Continue {lessonAlgorithm.name} lesson{" "}
+                  <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                </Link>
+              ) : (
+                <Link
+                  to={nextProblem ? "/practice/$slug" : "/explore"}
+                  params={(nextProblem ? { slug: nextProblem.slug } : undefined) as never}
+                  className="inline-flex h-11 items-center gap-2.5 rounded-xl bg-primary px-7 font-sans text-[14px] font-medium text-primary-foreground hover:bg-primary-glow"
+                >
+                  Next challenge <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                </Link>
+              )}
             </div>
           </section>
         </main>
