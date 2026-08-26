@@ -173,7 +173,6 @@ export function ArrayCanvas({
     return { ...m, lane: (k - (bucket.length - 1) / 2) * 30 };
   });
 
-
   const extent = win
     ? windowExtentPx(win.from, win.to, rowWidth, n, CELL_GAP)
     : { offset: 0, width: rowWidth, center: rowWidth / 2 };
