@@ -51,7 +51,7 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
       role="group"
       aria-label={`Step timeline, step ${index + 1} of ${run.steps.length}`}
     >
-      <ol className="flex items-start gap-0 overflow-x-auto pb-1">
+      <ol className="flex items-center justify-center gap-0 overflow-x-auto">
         {nodes.map((node, i) => {
           const isActive = i === activeNode;
           const isPast = i < activeNode;
