@@ -176,9 +176,6 @@ export function ArrayCanvas({
   /* A decision in progress: the surviving side is highlighted but the official
      range has NOT moved yet. Only shown when the frame proves it. */
   const preview = decisionPreview(frame);
-  const previewExtent = preview
-    ? windowExtentPx(preview.from, preview.to, rowWidth, n, CELL_GAP)
-    : null;
 
   return (
     <div className={cn("flex w-full flex-col", className)}>
