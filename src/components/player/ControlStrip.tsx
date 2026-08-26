@@ -31,19 +31,17 @@ export function ControlStrip({ children, className }: ControlStripProps): React.
     "inline-flex h-9 items-center gap-1.5 rounded-lg border border-hairline bg-card px-3 font-sans text-[13px] font-medium text-ink transition-colors hover:bg-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-40";
 
   return (
-    <div className={cn("flex w-full items-center justify-between gap-4", className)}>
-      <button
-        type="button"
-        aria-label="Previous step (←)"
-        onClick={prev}
-        disabled={!canBack}
-        className={side}
-      >
-        <ChevronLeft size={16} strokeWidth={1.5} />
-        Previous
-      </button>
-
-      <div className="flex items-center gap-3">
+    <div className={cn("flex w-full items-center gap-5", className)}>
+      <div className="flex shrink-0 items-center gap-2">
+        <button
+          type="button"
+          aria-label="Previous step (←)"
+          onClick={prev}
+          disabled={!canBack}
+          className={cn(side, "w-9 justify-center px-0")}
+        >
+          <ChevronLeft size={16} strokeWidth={1.5} />
+        </button>
         <button
           type="button"
           aria-label={`${isPlaying ? "Pause" : isEnded ? "Replay" : "Play"} (Space)`}
