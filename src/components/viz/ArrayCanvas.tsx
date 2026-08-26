@@ -5,6 +5,8 @@ import { pointerLabel } from "@/lib/pointerLabels";
 import { StateIcon } from "@/components/viz/StateIcon";
 import { cellCenter, clampToRow, scaleXFor, windowExtentPx } from "@/lib/vizTransitions";
 import { cellTreatment } from "@/lib/vizState";
+import { assignPointerLanes } from "@/lib/pointerLanes";
+import { decisionPreview } from "@/lib/decisionPreview";
 
 /**
  * DOM (not SVG) canvas for searching-style array frames: a `target = n` chip,
@@ -158,24 +160,25 @@ export function ArrayCanvas({
   });
 
   /* Markers that land on the same cell share the slot side by side instead of
-     stacking on top of each other (low = high = mid on the final frame). */
-  const lanes = new Map<number, string[]>();
-  for (const m of baseMarkers) {
-    if (!m.active) continue;
-    const bucket = lanes.get(m.slot);
-    if (bucket) bucket.push(m.name);
-    else lanes.set(m.slot, [m.name]);
-  }
-  const markers = baseMarkers.map((m) => {
-    const bucket = lanes.get(m.slot);
-    if (!bucket || bucket.length < 2) return { ...m, lane: 0 };
-    const k = bucket.indexOf(m.name);
-    return { ...m, lane: (k - (bucket.length - 1) / 2) * 44 };
-  });
+     stacking on top of each other (low = mid = high on the final frame). The
+     lane maths is a pure, tested helper so the layout is deterministic. */
+  const laneOf = new Map(
+    assignPointerLanes(baseMarkers.filter((m) => m.active).map((m) => ({ name: m.name, slot: m.slot }))).map(
+      (r) => [r.name, r.lane],
+    ),
+  );
+  const markers = baseMarkers.map((m) => ({ ...m, lane: laneOf.get(m.name) ?? 0 }));
 
   const extent = win
     ? windowExtentPx(win.from, win.to, rowWidth, n, CELL_GAP)
     : { offset: 0, width: rowWidth, center: rowWidth / 2 };
+
+  /* A decision in progress: the surviving side is highlighted but the official
+     range has NOT moved yet. Only shown when the frame proves it. */
+  const preview = decisionPreview(frame);
+  const previewExtent = preview
+    ? windowExtentPx(preview.from, preview.to, rowWidth, n, CELL_GAP)
+    : null;
 
   return (
     <div className={cn("flex w-full flex-col", className)}>
