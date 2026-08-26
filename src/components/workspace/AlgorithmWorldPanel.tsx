@@ -49,6 +49,10 @@ export function AlgorithmWorldPanel({
   const rows = frame ? variableRows(frame, prevFrame) : [];
   const expression = frame ? midExpression(frame) : null;
 
+  const hasExpression = Boolean(expression);
+  const hasComparison = Boolean(frame?.kind === "array" && frame.comparison);
+  const showTeachingRow = frame?.kind === "array" && (rows.length > 0 || hasExpression || hasComparison);
+
   return (
     <section
       aria-label="Algorithm world"
@@ -66,8 +70,9 @@ export function AlgorithmWorldPanel({
       </h2>
 
       {/* One scroll column: the frame, then the panels that read it — the two
-          stay together instead of being pushed to opposite edges. */}
-      <div className="relative mt-4 flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
+          stay together instead of being pushed to opposite edges. The column
+          grows with its content and only scrolls when the viewport is short. */}
+      <div className="relative mt-4 flex min-h-0 flex-col gap-6 overflow-y-auto overflow-x-hidden">
         <div className="flex shrink-0 justify-center">
           {frame ? (
             frame.kind === "array" ? (
@@ -80,16 +85,20 @@ export function AlgorithmWorldPanel({
           )}
         </div>
 
-        {frame?.kind === "array" ? (
-          <div className="mt-7 flex shrink-0 items-stretch gap-4">
+        {showTeachingRow ? (
+          <div className="flex shrink-0 items-stretch gap-4">
             <VariableBoard rows={rows} className="flex-[1.35]" />
             <ExpressionBlock expression={expression} className="flex-[1.4]" />
-            <ComparisonCard comparison={frame.comparison ?? null} className="flex-[0.85]" />
+            <ComparisonCard
+              comparison={hasComparison ? (frame.comparison ?? null) : null}
+              className="flex-[0.85]"
+            />
           </div>
         ) : null}
       </div>
     </section>
   );
 }
+
 
 export default AlgorithmWorldPanel;
