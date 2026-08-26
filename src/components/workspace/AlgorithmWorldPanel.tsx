@@ -3,13 +3,16 @@ import { MonitorPlay } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { ArrayCanvas } from "@/components/viz/ArrayCanvas";
 import { ComparisonCard } from "@/components/viz/ComparisonCard";
+import { DecisionNote } from "@/components/viz/DecisionNote";
 import { ExpressionBlock } from "@/components/viz/ExpressionBlock";
 import { FrameView } from "@/components/viz/FrameView";
 import { VariableBoard } from "@/components/viz/VariableBoard";
 import type { AlgorithmModule } from "@/engine/types";
 import { midExpression, variableRows } from "@/lib/variableBoard";
+import { changedPointers } from "@/lib/vizState";
 import { cn } from "@/lib/utils";
 import { usePlayerStore, useCurrentStep } from "@/stores/playerStore";
+
 
 export interface AlgorithmWorldPanelProps {
   /** Undefined means this slug has no engine module yet. */
