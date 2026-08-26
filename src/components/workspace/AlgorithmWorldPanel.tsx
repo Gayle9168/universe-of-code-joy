@@ -56,7 +56,6 @@ export function AlgorithmWorldPanel({
   const reasoning = deriveReasoning(step, prevStep, index + 1);
   const showTeachingRow = variables.length > 0 || operation !== null;
 
-
   /* Only the boundary that actually moved on this step gets emphasis. */
   const moved =
     frame?.kind === "array"
@@ -77,7 +76,6 @@ export function AlgorithmWorldPanel({
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {reasoning?.accessibleSummary ?? ""}
       </div>
-
 
       <h2 className="shrink-0 font-display text-[19px] font-semibold tracking-tight text-ink">
         Algorithm World

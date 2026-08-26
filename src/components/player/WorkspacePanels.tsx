@@ -302,7 +302,6 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
       </div>
     </div>
   );
-
 }
 
 /* ---------------- input tab ---------------- */
