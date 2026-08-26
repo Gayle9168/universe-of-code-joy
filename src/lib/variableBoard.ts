@@ -53,12 +53,15 @@ export function variableRows(frame: Frame, prev?: Frame | null): VariableRow[] {
 
   const rows: VariableRow[] = f.pointers.map((ptr) => {
     const before = p ? pointerIndex(p, ptr.name) : null;
+    const changed = before !== null && before !== ptr.index;
     return {
       name: ptr.name,
       value: String(ptr.index),
-      changed: before !== null && before !== ptr.index,
+      changed,
+      ...(changed ? { previous: String(before) } : {}),
     };
   });
+
 
   if (f.target) {
     rows.push({
