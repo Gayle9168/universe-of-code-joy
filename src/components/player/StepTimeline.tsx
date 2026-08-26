@@ -88,19 +88,28 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                       : "border-hairline bg-card hover:border-primary/30",
                 )}
               >
-                {/* The marker is a small dot: the concept name carries the meaning. */}
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "shrink-0 rounded-full transition-colors duration-300 ease-out",
-                    node.milestone ? "size-2.5" : "size-1.5",
-                    isActive || isPast
-                      ? "bg-primary"
-                      : node.milestone
-                        ? "bg-primary/30"
-                        : "bg-hairline",
-                  )}
-                />
+                {/* Completed phases carry a check; the current phase carries a
+                    ringed marker. Milestones stay slightly stronger. No new colour. */}
+                {isPast ? (
+                  <Check
+                    aria-hidden="true"
+                    size={12}
+                    strokeWidth={2}
+                    className="shrink-0 text-primary/70"
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "shrink-0 rounded-full transition-colors duration-300 ease-out",
+                      isActive
+                        ? "size-2.5 bg-primary ring-2 ring-primary/25"
+                        : node.milestone
+                          ? "size-2.5 bg-primary/30"
+                          : "size-1.5 bg-hairline",
+                    )}
+                  />
+                )}
                 <span
                   className={cn(
                     "max-w-[96px] truncate font-mono text-[10px] uppercase tracking-[0.06em] transition-colors duration-300 ease-out",
