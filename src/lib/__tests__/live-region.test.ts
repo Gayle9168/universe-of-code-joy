@@ -12,10 +12,11 @@ describe("Live region announcements with aria-atomic (Criterion S7.5)", () => {
       expect(panelsContent).toContain("Run the algorithm to see the explanation.");
     });
 
-    it("verifies ExplainPane defines aria-live='polite' and aria-atomic='true' on active explanation container", () => {
-      expect(panelsContent).toContain(
-        'className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3.5"',
-      );
+    it("keeps the reasoning body a scrollable flex child (spacing may be tuned)", () => {
+      // Asserts structure, not exact spacing utilities, so layout polish does
+      // not require a test edit while the scroll container stays guaranteed.
+      expect(panelsContent).toMatch(/ref=\{bodyRef\}[\s\S]{0,160}min-h-0 flex-1/);
+      expect(panelsContent).toMatch(/ref=\{bodyRef\}[\s\S]{0,160}overflow-y-auto/);
     });
 
     it("verifies VisualStage provides an accessible polite live region for cross-tab announcements", () => {

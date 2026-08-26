@@ -139,6 +139,40 @@ function comparisonLines(frame: ArrayFrame): ExpressionLine[] {
 }
 
 /**
+ * The canonical run slice a step belongs to. Passing it lets the panel say
+ * something *about the run so far* (is this the first elimination?) without
+ * keeping mutable UI state that Previous, seek or Replay could invalidate.
+ */
+export interface OperationContext {
+  steps: readonly Step[];
+  index: number;
+}
+
+/**
+ * True when no earlier step in the canonical run carries the same semantic
+ * label. Generic: it compares `timelineLabel`, falling back to `phase`.
+ */
+export function isFirstOccurrence(
+  current: Step | null | undefined,
+  context?: OperationContext,
+): boolean {
+  if (!current) return true;
+  if (!context) return true;
+  const key = current.timelineLabel ?? current.phase;
+  for (let i = 0; i < context.index && i < context.steps.length; i += 1) {
+    const step = context.steps[i]!;
+    if ((step.timelineLabel ?? step.phase) === key) return false;
+  }
+  return true;
+}
+
+/** Keeps the leading sentence of a note and drops the rest. */
+function firstSentence(text: string): string {
+  const match = /^[^.!?]*[.!?]/.exec(text.trim());
+  return match ? match[0] : text.trim();
+}
+
+/**
  * The single calculation, comparison, boundary move or result this step is
  * about — one reusable operation instead of three permanently mounted cards.
  *
@@ -149,11 +183,15 @@ function comparisonLines(frame: ArrayFrame): ExpressionLine[] {
 export function deriveOperation(
   current: Step | null | undefined,
   previous?: Step | null,
+  context?: OperationContext,
 ): Operation | null {
   const frame = asArrayFrame(current);
   if (!frame) return null;
   const prev = asArrayFrame(previous);
   const tone: OperationTone = frame.comparison?.tone ?? frame.decision?.tone ?? "accent";
+  /* Derived from the canonical run, never from a component-local flag, so
+     Previous, seek and Replay all agree about what the learner has seen. */
+  const firstOfItsKind = isFirstOccurrence(current, context);
 
   /* Result — the search has landed. */
   if (hasFound(frame)) {
@@ -222,7 +260,12 @@ export function deriveOperation(
         lines.push({ kind: "formula", text: `${label} = mid - 1` });
       }
       lines.push({ kind: "substitution", text: `${was} → ${ptr.index}` });
-      if (frame.decision?.detail) lines.push({ kind: "note", text: frame.decision.detail });
+      /* The complexity insight teaches once. Later eliminations keep the live
+         candidate count but drop the repeated O(log n) sentence. */
+      if (frame.decision?.detail) {
+        const detail = frame.decision.detail;
+        lines.push({ kind: "note", text: firstOfItsKind ? detail : firstSentence(detail) });
+      }
       return {
         kind: "boundary",
         title: "Boundary update",

@@ -52,7 +52,9 @@ export function AlgorithmWorldPanel({
      step for diffing), so seek, autoplay and rapid stepping cannot strand a
      stale value or formula. */
   const variables = deriveVariables(step, prevStep);
-  const operation = deriveOperation(step, prevStep);
+  /* The canonical run slice lets the operation panel teach the complexity
+     insight once, derived from history rather than from a mutable UI flag. */
+  const operation = deriveOperation(step, prevStep, run ? { steps: run.steps, index } : undefined);
   const reasoning = deriveReasoning(step, prevStep, index + 1);
   const showTeachingRow = variables.length > 0 || operation !== null;
 
@@ -84,7 +86,10 @@ export function AlgorithmWorldPanel({
       {/* One scroll column: the frame, then the panels that read it. The group is
           centred in the card so leftover height is shared above and below rather
           than pooling into one dead region under the content. */}
-      <div className="relative mt-4 flex min-h-0 flex-1 flex-col justify-center gap-6 overflow-y-auto overflow-x-hidden">
+      {/* Top-aligned with one measured offset: the data structure sits high in
+          the card instead of floating in the middle of leftover height, while
+          keeping breathing room above the target chip. */}
+      <div className="relative mt-4 flex min-h-0 flex-1 flex-col justify-start gap-6 overflow-y-auto overflow-x-hidden pt-2">
         <div className="flex shrink-0 justify-center">
           {frame ? (
             frame.kind === "array" ? (

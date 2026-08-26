@@ -1,18 +1,11 @@
 import * as React from "react";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { activeNodeIndex, buildTimelineNodes } from "@/lib/timeline";
 import { usePlayerStore } from "@/stores/playerStore";
 
 export interface StepTimelineProps {
   className?: string;
-}
-
-interface TimelineNode {
-  label: string;
-  /** First step index in this phase group — where clicking the node seeks. */
-  from: number;
-  to: number;
-  /** True when any step in the group is a milestone. */
-  milestone: boolean;
 }
 
 /**
@@ -26,25 +19,22 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
   const run = usePlayerStore((s) => s.run);
   const index = usePlayerStore((s) => s.index);
   const seek = usePlayerStore((s) => s.seek);
+  const pause = usePlayerStore((s) => s.pause);
   const activeRef = React.useRef<HTMLButtonElement | null>(null);
 
-  const nodes = React.useMemo<TimelineNode[]>(() => {
-    if (!run) return [];
-    const out: TimelineNode[] = [];
-    run.steps.forEach((step, i) => {
-      const label = step.timelineLabel ?? step.phase;
-      const last = out[out.length - 1];
-      if (last && last.label === label && last.to === i - 1) {
-        last.to = i;
-        last.milestone = last.milestone || Boolean(step.isMilestone);
-      } else {
-        out.push({ label, from: i, to: i, milestone: Boolean(step.isMilestone) });
-      }
-    });
-    return out;
-  }, [run]);
+  /* Seeking is a deliberate manual move: playback stops and the pending autoplay
+     advance is invalidated by the index change, so nothing arrives late. */
+  const seekTo = React.useCallback(
+    (target: number) => {
+      pause();
+      seek(target);
+    },
+    [pause, seek],
+  );
 
-  const activeNode = nodes.findIndex((nd) => index >= nd.from && index <= nd.to);
+  const nodes = React.useMemo(() => (run ? buildTimelineNodes(run.steps) : []), [run]);
+
+  const activeNode = activeNodeIndex(nodes, index);
 
   React.useEffect(() => {
     activeRef.current?.scrollIntoView({ block: "nearest", inline: "center" });
@@ -76,7 +66,7 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
               <button
                 ref={isActive ? activeRef : undefined}
                 type="button"
-                onClick={() => seek(node.from)}
+                onClick={() => seekTo(node.from)}
                 aria-current={isActive ? "step" : undefined}
                 aria-label={`Phase ${i + 1}: ${node.label}`}
                 className={cn(
@@ -88,19 +78,28 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                       : "border-hairline bg-card hover:border-primary/30",
                 )}
               >
-                {/* The marker is a small dot: the concept name carries the meaning. */}
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "shrink-0 rounded-full transition-colors duration-300 ease-out",
-                    node.milestone ? "size-2.5" : "size-1.5",
-                    isActive || isPast
-                      ? "bg-primary"
-                      : node.milestone
-                        ? "bg-primary/30"
-                        : "bg-hairline",
-                  )}
-                />
+                {/* Completed phases carry a check; the current phase carries a
+                    ringed marker. Milestones stay slightly stronger. No new colour. */}
+                {isPast ? (
+                  <Check
+                    aria-hidden="true"
+                    size={12}
+                    strokeWidth={2}
+                    className="shrink-0 text-primary/70"
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "shrink-0 rounded-full transition-colors duration-300 ease-out",
+                      isActive
+                        ? "size-2.5 bg-primary ring-2 ring-primary/25"
+                        : node.milestone
+                          ? "size-2.5 bg-primary/30"
+                          : "size-1.5 bg-hairline",
+                    )}
+                  />
+                )}
                 <span
                   className={cn(
                     "max-w-[96px] truncate font-mono text-[10px] uppercase tracking-[0.06em] transition-colors duration-300 ease-out",

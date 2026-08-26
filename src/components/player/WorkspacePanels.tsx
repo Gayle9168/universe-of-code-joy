@@ -236,7 +236,9 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
 
       {/* No aria-live here: the workspace already announces one concise summary
           per step, and four regions talking at once is unusable on autoplay. */}
-      <div ref={bodyRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3.5">
+      {/* Spacing, not type size, is what makes an ordinary run fit without a
+          scrollbar — the DESIGN_SYSTEM type scale is untouched. */}
+      <div ref={bodyRef} className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-4 py-3">
         <div>
           <h3 className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
             What happened
