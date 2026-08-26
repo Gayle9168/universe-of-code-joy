@@ -44,7 +44,6 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
     return out;
   }, [run]);
 
-
   const activeNode = nodes.findIndex((nd) => index >= nd.from && index <= nd.to);
 
   React.useEffect(() => {
@@ -120,7 +119,6 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
           );
         })}
       </ol>
-
     </div>
   );
 }

@@ -232,7 +232,6 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
         aria-atomic="true"
         className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3.5"
       >
-
         <div>
           <h3 className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
             What happened
