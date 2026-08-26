@@ -234,7 +234,7 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
       >
 
         <div>
-          <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+          <h3 className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
             What happened
           </h3>
           {/* Keyed on the step so only the text cross-fades — the panel stays put. */}
@@ -248,7 +248,7 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
 
         {step.detail ? (
           <div>
-            <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+            <h3 className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
               Why
             </h3>
             <p
@@ -262,7 +262,7 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
 
         {invariant ? (
           <div>
-            <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+            <h3 className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
               Invariant
             </h3>
             <p
@@ -275,7 +275,7 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
         ) : null}
 
         {nextStep ? (
-          <div className="flex items-center justify-between gap-3 border-t border-hairline pt-3">
+          <div className="flex items-center justify-between gap-3 border-t border-hairline pt-2.5">
             <p
               key={`next-${index}`}
               className="min-w-0 flex-1 font-sans text-[12px] leading-relaxed text-slate"
