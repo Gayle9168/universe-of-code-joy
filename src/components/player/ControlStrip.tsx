@@ -59,10 +59,21 @@ export function ControlStrip({ className }: ControlStripProps): React.ReactEleme
           )}
           {isPlaying ? "Pause" : isEnded ? "Replay" : "Play"}
         </button>
+        <button
+          type="button"
+          aria-label="Restart from the first step (R)"
+          onClick={reset}
+          disabled={total === 0}
+          className={side}
+        >
+          <RotateCcw size={16} strokeWidth={1.5} />
+          Restart
+        </button>
         <span className="font-mono text-[12px] tabular-nums text-slate">
           {total === 0 ? "0 / 0" : `${index + 1} / ${total}`}
         </span>
       </div>
+
 
       <div className="flex items-center gap-4">
         <div className="hidden items-center gap-2 sm:flex">
