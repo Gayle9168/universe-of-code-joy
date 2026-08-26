@@ -13,10 +13,7 @@ export interface ComparisonCardProps {
  * asking, as one mono expression. Height and opacity are reserved so a step
  * without a comparison never shifts the row. Pure presentation.
  */
-export function ComparisonCard({
-  comparison,
-  className,
-}: ComparisonCardProps): React.ReactElement {
+export function ComparisonCard({ comparison, className }: ComparisonCardProps): React.ReactElement {
   const expression = comparison
     ? `${comparison.left} ${comparison.op} ${comparison.right} ?`
     : "\u00a0";

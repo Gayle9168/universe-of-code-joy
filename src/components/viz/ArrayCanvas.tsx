@@ -165,7 +165,10 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
       {frame.target ? (
         <span className="inline-flex h-8 w-fit items-center rounded-lg border border-primary/25 bg-tint px-3 font-mono text-[13px] text-accent-strong">
           {frame.target.label.toLowerCase()} ={" "}
-          <span key={String(frame.target.value)} className="viz-swap ml-1 font-semibold tabular-nums">
+          <span
+            key={String(frame.target.value)}
+            className="viz-swap ml-1 font-semibold tabular-nums"
+          >
             {String(frame.target.value)}
           </span>
         </span>

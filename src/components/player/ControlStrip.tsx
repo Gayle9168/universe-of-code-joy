@@ -78,7 +78,11 @@ export function ControlStrip({ children, className }: ControlStripProps): React.
         </button>
       </div>
 
-      {children ? <div className="flex min-w-0 flex-1 justify-center">{children}</div> : <div className="flex-1" />}
+      {children ? (
+        <div className="flex min-w-0 flex-1 justify-center">{children}</div>
+      ) : (
+        <div className="flex-1" />
+      )}
 
       <div className="flex shrink-0 items-center gap-4">
         <span className="font-mono text-[12px] tabular-nums text-slate">
