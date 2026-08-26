@@ -72,14 +72,14 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                 onClick={() => seek(node.from)}
                 aria-current={isActive ? "step" : undefined}
                 aria-label={`Phase ${i + 1}: ${node.label}`}
-                className="group flex w-[84px] flex-col items-center gap-1.5 rounded-lg px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                className="group flex shrink-0 items-center gap-2 rounded-full px-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               >
                 <span
                   className={cn(
-                    "flex size-7 shrink-0 items-center justify-center rounded-full border font-mono text-[11px] tabular-nums",
-                    "transition-[background-color,border-color,color,transform] duration-300 ease-out",
+                    "flex size-6 shrink-0 items-center justify-center rounded-full border font-mono text-[11px] tabular-nums",
+                    "transition-[background-color,border-color,color] duration-300 ease-out",
                     isActive
-                      ? "scale-110 border-primary bg-primary text-primary-foreground"
+                      ? "border-primary bg-primary text-primary-foreground"
                       : isPast
                         ? "border-primary/40 bg-tint text-primary"
                         : "border-hairline bg-card text-slate group-hover:border-primary/40",
@@ -87,15 +87,14 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                 >
                   {i + 1}
                 </span>
-                <span
-                  className={cn(
-                    "w-full truncate text-center font-mono text-[10px] uppercase tracking-[0.08em] transition-colors duration-300 ease-out",
-                    isActive ? "text-ink" : "text-slate",
-                  )}
-                  title={node.label}
-                >
-                  {node.label}
-                </span>
+                {isActive ? (
+                  <span
+                    className="max-w-[140px] truncate font-mono text-[11px] uppercase tracking-[0.08em] text-ink"
+                    title={node.label}
+                  >
+                    {node.label}
+                  </span>
+                ) : null}
               </button>
             </li>
           );
