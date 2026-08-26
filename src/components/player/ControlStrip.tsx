@@ -18,11 +18,13 @@ export function ControlStrip({ className }: ControlStripProps): React.ReactEleme
   const toggle = usePlayerStore((s) => s.toggle);
   const next = usePlayerStore((s) => s.next);
   const prev = usePlayerStore((s) => s.prev);
+  const reset = usePlayerStore((s) => s.reset);
   const index = usePlayerStore((s) => s.index);
   const total = usePlayerStore((s) => s.run?.steps.length ?? 0);
   const canBack = useCanStepBack();
   const canForward = useCanStepForward();
   const isEnded = total > 0 && index >= total - 1;
+
 
   const side =
     "inline-flex h-9 items-center gap-1.5 rounded-lg border border-hairline bg-card px-3 font-sans text-[13px] font-medium text-ink transition-colors hover:bg-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-40";
