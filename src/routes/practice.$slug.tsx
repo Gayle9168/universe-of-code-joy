@@ -357,6 +357,10 @@ function PracticeChallenge() {
   const runner = useTestRunner(problem.tests, problem.io);
   /** The worker executes JavaScript only; Python is editable but not runnable. */
   const langRunnable = lang !== "py";
+  /* Only shown when the learner actually arrived from a lesson and the named
+     algorithm resolves in the catalog. */
+  const lessonAlgorithm =
+    search.from === "lesson" && search.algorithm ? getAlgorithm(search.algorithm) : undefined;
   const solved = hydrated && Boolean(stored?.solvedAt);
   const attempts = hydrated ? (stored?.attempts ?? 0) : 0;
   const xpOffer = useMemo(
@@ -470,10 +474,6 @@ function PracticeChallenge() {
   ]);
 
   const algorithm = getAlgorithm(problem.algorithmSlug);
-  /* Only shown when the learner actually arrived from a lesson and the named
-     algorithm resolves in the catalog. */
-  const lessonAlgorithm =
-    search.from === "lesson" && search.algorithm ? getAlgorithm(search.algorithm) : undefined;
   const rawCategory = algorithm?.category ?? "Practice";
   const category = rawCategory.charAt(0).toUpperCase() + rawCategory.slice(1);
   const statementParagraphs = problem.statementMarkdown.split("\n\n");
