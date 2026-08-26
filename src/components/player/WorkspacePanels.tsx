@@ -261,7 +261,6 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
   );
 }
 
-
 /* ---------------- input tab ---------------- */
 
 function randomValue(field: InputField): string {

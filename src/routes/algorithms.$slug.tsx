@@ -20,7 +20,6 @@ import { GoldenWorkspace } from "@/components/workspace/GoldenWorkspace";
 import { LessonContextRow } from "@/components/workspace/LessonContextRow";
 import { LessonStageStrip } from "@/components/workspace/LessonStageStrip";
 
-
 import { Button } from "@/components/common/Button";
 import { Chip } from "@/components/common/Chip";
 import { ComplexityTag } from "@/components/common/ComplexityTag";
@@ -207,7 +206,6 @@ function AlgorithmWorkspace(): React.ReactElement {
   });
   /* Mastery only reads after hydration so SSR and the first client paint agree. */
   const masteryPct = hydrated ? lessonMastery : 0;
-
 
   const completeLesson = useProgressStore((s) => s.completeLesson);
   const awardXp = useProgressStore((s) => s.awardXp);
@@ -426,7 +424,6 @@ function AlgorithmWorkspace(): React.ReactElement {
             {/* Golden workspace: algorithm world | code + reasoning, playback band below */}
             <GoldenWorkspace algo={algo} module={mod} slug={modSlug} />
           </main>
-
         </div>
       </DesktopScaleFrame>
 

@@ -30,7 +30,10 @@ export function ExpressionBlock({
         Midpoint calculation
       </h3>
       <p className="font-mono text-[12px] text-slate">{expression?.formula ?? "\u00a0"}</p>
-      <p key={expression?.substitution ?? "none"} className="viz-swap font-mono text-[14px] font-semibold tabular-nums text-ink">
+      <p
+        key={expression?.substitution ?? "none"}
+        className="viz-swap font-mono text-[14px] font-semibold tabular-nums text-ink"
+      >
         {expression?.substitution ?? "\u00a0"}
       </p>
     </section>
