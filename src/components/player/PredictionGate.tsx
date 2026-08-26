@@ -84,11 +84,14 @@ export function PredictionGate({
 
       <p className="font-sans text-[13px] leading-relaxed text-ink">{prediction.question}</p>
 
-      <ul className="flex flex-col gap-1 font-mono text-[11px] text-slate-soft">
-        {prediction.context.map((line) => (
-          <li key={line}>{line}</li>
-        ))}
-      </ul>
+      {/* The evidence rows the learner reasons from are already on screen in the
+          Variable Board and the comparison card, so the gate repeats only the
+          comparison line and stays inside the reasoning card without pushing the
+          options and Check answer below the fold. The full evidence still reaches
+          screen readers through the accessible prompt. */}
+      <p className="font-mono text-[11px] text-slate-soft">
+        {prediction.context[prediction.context.length - 1]}
+      </p>
 
       {resolvedView ? null : (
         <div
@@ -102,10 +105,11 @@ export function PredictionGate({
               <label
                 key={option.id}
                 className={cn(
-                  "flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 transition-colors",
+                  "flex min-h-9 cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-1.5 transition-colors",
                   active ? "border-primary bg-tint" : "border-hairline bg-card hover:bg-tint/60",
                 )}
               >
+
                 <input
                   type="radio"
                   name={`prediction-${id}`}
