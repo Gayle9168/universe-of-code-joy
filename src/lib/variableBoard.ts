@@ -17,7 +17,6 @@ export interface VariableRow {
   previous?: string;
 }
 
-
 export interface MidExpression {
   formula: string;
   substitution: string;
@@ -61,7 +60,6 @@ export function variableRows(frame: Frame, prev?: Frame | null): VariableRow[] {
       ...(changed ? { previous: String(before) } : {}),
     };
   });
-
 
   if (f.target) {
     rows.push({

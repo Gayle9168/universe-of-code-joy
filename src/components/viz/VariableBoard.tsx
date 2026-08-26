@@ -51,7 +51,6 @@ export function VariableBoard({ rows, className }: VariableBoardProps): React.Re
                 {row.value}
               </span>
             </dd>
-
           </div>
         ))}
       </dl>

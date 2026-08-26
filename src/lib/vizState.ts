@@ -73,7 +73,9 @@ export function changedPointers(
 ): string[] {
   if (!previous || previous.length === 0) return [];
   const before = new Map(previous.map((p) => [p.name, p.index]));
-  return current.filter((p) => before.has(p.name) && before.get(p.name) !== p.index).map((p) => p.name);
+  return current
+    .filter((p) => before.has(p.name) && before.get(p.name) !== p.index)
+    .map((p) => p.name);
 }
 
 /**

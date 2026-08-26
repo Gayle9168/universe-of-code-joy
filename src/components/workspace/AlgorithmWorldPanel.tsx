@@ -13,7 +13,6 @@ import { changedPointers } from "@/lib/vizState";
 import { cn } from "@/lib/utils";
 import { usePlayerStore, useCurrentStep } from "@/stores/playerStore";
 
-
 export interface AlgorithmWorldPanelProps {
   /** Undefined means this slug has no engine module yet. */
   module: AlgorithmModule | undefined;
@@ -112,7 +111,6 @@ export function AlgorithmWorldPanel({
           </div>
         ) : null}
       </div>
-
     </section>
   );
 }

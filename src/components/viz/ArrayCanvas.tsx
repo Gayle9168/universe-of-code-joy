@@ -38,7 +38,6 @@ const EMPHASIS: Partial<Record<CellState, string>> = {
   active: "font-semibold shadow-sm",
 };
 
-
 function stateOf(frame: ArrayFrame, index: number): CellState {
   return frame.states[index] ?? "idle";
 }
@@ -133,7 +132,6 @@ export function ArrayCanvas({
   const [rowRef, rowWidth] = useMeasuredWidth<HTMLDivElement>();
   const cols: React.CSSProperties = { gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` };
   const moved = React.useMemo(() => new Set(movedPointers ?? []), [movedPointers]);
-
 
   /* Every pointer the run has shown so far keeps a mounted marker, so a marker
      travels to its new cell instead of unmounting and reappearing. */
@@ -245,15 +243,12 @@ export function ArrayCanvas({
               <span
                 className={cn(
                   "mt-1 font-sans text-[13px] transition-colors duration-300 ease-out",
-                  moved.has(m.name)
-                    ? "font-semibold text-accent-strong"
-                    : "font-semibold text-ink",
+                  moved.has(m.name) ? "font-semibold text-accent-strong" : "font-semibold text-ink",
                 )}
               >
                 {pointerLabel(m.name)}
               </span>
               <span className="font-mono text-[12px] tabular-nums text-slate">({m.index})</span>
-
             </span>
           ))}
         </div>
