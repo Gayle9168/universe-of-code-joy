@@ -19,6 +19,12 @@ export interface AlgorithmSearch {
    * canvas plays. The second job is why it must never be dropped from the URL.
    */
   problem?: string;
+  /**
+   * Which lesson stage the workspace renders. Absent means the guided
+   * visualizer; `trace` swaps the workspace for the hand-trace exercise while
+   * the header, lesson context row and stage strip stay put.
+   */
+  stage?: "trace";
 }
 
 /**

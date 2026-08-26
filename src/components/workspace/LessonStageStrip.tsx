@@ -26,6 +26,10 @@ export interface LessonStageStripProps {
   active: LessonStage;
   /** Question slug for the Solve stage; null disables it. */
   practiceSlug: string | null;
+  /** Algorithm the Trace and Visualize links point at. */
+  algorithmSlug?: string;
+  /** True when this algorithm has a hand-trace exercise; false keeps it inert. */
+  traceAvailable?: boolean;
   className?: string;
 }
 
@@ -37,6 +41,8 @@ export interface LessonStageStripProps {
 export function LessonStageStrip({
   active,
   practiceSlug,
+  algorithmSlug,
+  traceAvailable = false,
   className,
 }: LessonStageStripProps): React.ReactElement {
   return (
@@ -57,6 +63,24 @@ export function LessonStageStrip({
             >
               {stage.label}
             </span>
+          );
+        }
+        /* Trace and Visualize are the same route with a different stage param,
+           so the header, lesson context row and this strip never remount. */
+        if (algorithmSlug && (stage.id === "trace" ? traceAvailable : stage.id === "visualize")) {
+          return (
+            <Link
+              key={stage.id}
+              to="/algorithms/$slug"
+              params={{ slug: algorithmSlug }}
+              search={(prev: Record<string, unknown>) => ({
+                ...prev,
+                ...(stage.id === "trace" ? { stage: "trace" as const } : { stage: undefined }),
+              })}
+              className={cn(base, "text-slate hover:bg-tint hover:text-ink")}
+            >
+              {stage.label}
+            </Link>
           );
         }
         if (stage.id === "solve" && practiceSlug) {
