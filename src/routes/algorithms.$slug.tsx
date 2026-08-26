@@ -42,6 +42,7 @@ import { usePlayerKeys } from "@/hooks/usePlayerKeys";
 import { useSession } from "@/hooks/useSession";
 import {
   isImplementationSolved,
+  isTransferSolved,
   resolveImplementationSlug,
   resolveTransferSlug,
 } from "@/lib/lesson-stages";
@@ -239,6 +240,11 @@ function AlgorithmWorkspace(): React.ReactElement {
      existing source of truth — never from a separate lesson-stage flag. */
   const codeSolved = useProgressStore((s) => isImplementationSolved(codeSlug, s));
   const codeComplete = hydrated && codeSolved;
+
+  /* SOLVE completion reads the transfer question's own solved state: opening it,
+     running tests or a failed submit all leave this false. */
+  const transferSolved = useProgressStore((s) => isTransferSolved(practiceSlug, s));
+  const solveComplete = hydrated && transferSolved;
 
   const completeLesson = useProgressStore((s) => s.completeLesson);
   const awardXp = useProgressStore((s) => s.awardXp);
@@ -438,6 +444,7 @@ function AlgorithmWorkspace(): React.ReactElement {
                   traceAvailable={traceExercise !== undefined}
                   codeSlug={codeSlug}
                   codeComplete={codeComplete}
+                  solveComplete={solveComplete}
                 />
                 <button
                   type="button"

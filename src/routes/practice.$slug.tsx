@@ -452,6 +452,7 @@ function PracticeChallenge() {
       solvedToday: useProgressStore.getState().activity[dayKey()]?.solved ?? 0,
       ...(search.from === "lesson" ? { from: "lesson" as const } : {}),
       ...(lessonAlgorithm ? { algorithmSlug: lessonAlgorithm.slug } : {}),
+      ...(search.stage ? { stage: search.stage } : {}),
     });
     void navigate({ to: "/practice/results" });
   }, [
@@ -469,6 +470,7 @@ function PracticeChallenge() {
     runner,
     setLastResult,
     search.from,
+    search.stage,
     stored,
     touchStreak,
   ]);
@@ -522,7 +524,11 @@ function PracticeChallenge() {
                   </Link>
                   <span aria-hidden="true">·</span>
                   <span className="whitespace-nowrap">
-                    {search.stage === "code" ? "Code stage" : "Lesson"} — now implement it
+                    {search.stage === "solve"
+                      ? "Solve stage \u00b7 Apply the pattern"
+                      : search.stage === "code"
+                        ? "Code stage \u2014 now implement it"
+                        : "Lesson"}
                   </span>
                 </div>
               )}

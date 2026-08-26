@@ -52,6 +52,13 @@ export interface Algorithm {
    * algorithms without a canonical implementation exercise hide the stage.
    */
   implementationProblemSlug?: string;
+  /**
+   * The Golden Lesson's SOLVE stage: a *different* question that applies the
+   * technique rather than restating it. Must never equal
+   * `implementationProblemSlug`; when absent, Solve falls back to the easiest
+   * linked question that is not the implementation challenge.
+   */
+  transferProblemSlug?: string;
 }
 
 export interface LessonSection {

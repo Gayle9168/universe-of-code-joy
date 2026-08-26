@@ -117,6 +117,7 @@ export const AlgorithmSchema = z.object({
   estMinutes: z.number().int().positive("estMinutes must be a positive integer"),
   xp: z.number().int().positive("xp must be a positive integer"),
   implementationProblemSlug: SlugSchema.optional(),
+  transferProblemSlug: SlugSchema.optional(),
 });
 
 // ============================================================================

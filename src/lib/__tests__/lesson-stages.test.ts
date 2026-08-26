@@ -4,6 +4,7 @@ import { getProblem, getProblemsByAlgorithm } from "@/content/problems";
 import type { Problem } from "@/content/types";
 import {
   isImplementationSolved,
+  isTransferSolved,
   resolveImplementationSlug,
   resolveTransferSlug,
 } from "@/lib/lesson-stages";
@@ -119,5 +120,75 @@ describe("validatePracticeSearch", () => {
 
   it("drops an algorithm slug that is not in the catalog even with from=lesson", () => {
     expect(validatePracticeSearch({ from: "lesson", algorithm: "🙈" })).toEqual({ from: "lesson" });
+  });
+});
+
+describe("solve stage / transfer problem (Phase 9)", () => {
+  const CODE = "binary-search-classic";
+  const SOLVE = "search-insert-position";
+
+  it("maps binary search to a curated transfer problem distinct from Code", () => {
+    expect(getAlgorithm("binary-search")?.transferProblemSlug).toBe(SOLVE);
+    expect(resolveTransferSlug("binary-search")).toBe(SOLVE);
+    expect(resolveTransferSlug("binary-search")).not.toBe(resolveImplementationSlug("binary-search"));
+  });
+
+  it("the transfer problem exists, is easy and is linked to binary search", () => {
+    const p = getProblem(SOLVE)!;
+    expect(p.title).toBe("Search Insert Position");
+    expect(p.difficulty).toBe("easy");
+    expect(p.algorithmSlug).toBe("binary-search");
+    expect(p.tests.length).toBeGreaterThanOrEqual(6);
+    expect(p.tests.some((t) => t.hidden)).toBe(true);
+  });
+
+  it("hints reveal the pattern progressively without naming the algorithm first", () => {
+    const hints = getProblem(SOLVE)!.hints;
+    expect(hints.length).toBeGreaterThanOrEqual(4);
+    expect(hints[0]!.toLowerCase()).not.toContain("binary search");
+    expect(hints[0]).toContain("sorted");
+    expect(hints[1]).toContain("low");
+    expect(hints.at(-1)!.toLowerCase()).toContain("insertion position");
+    for (const h of hints) expect(h).not.toContain("return low;");
+  });
+
+  it("statement never instructs the learner to use binary search", () => {
+    expect(getProblem(SOLVE)!.statementMarkdown.toLowerCase()).not.toContain("binary search");
+  });
+
+  it("ignores a curated mapping that points at the implementation challenge", () => {
+    const bad = { ...getAlgorithm("binary-search")!, transferProblemSlug: CODE };
+    expect(resolveTransferSlug("binary-search", undefined, undefined, CODE, bad)).not.toBe(CODE);
+  });
+
+  it("ignores a curated mapping the catalog does not have", () => {
+    const bad = { ...getAlgorithm("binary-search")!, transferProblemSlug: "nope" };
+    const slug = resolveTransferSlug("binary-search", undefined, undefined, CODE, bad);
+    expect(slug).not.toBeNull();
+    expect(getProblem(slug!)).toBeDefined();
+  });
+
+  it("Code solved alone gives CODE complete and SOLVE incomplete", () => {
+    const progress = progressWith([CODE]);
+    expect(isImplementationSolved(CODE, progress)).toBe(true);
+    expect(isTransferSolved(SOLVE, progress)).toBe(false);
+  });
+
+  it("accepted transfer submission completes SOLVE", () => {
+    expect(isTransferSolved(SOLVE, progressWith([CODE, SOLVE]))).toBe(true);
+  });
+
+  it("opening or failing the transfer challenge never completes SOLVE", () => {
+    const attemptedOnly = {
+      problems: { [SOLVE]: { attempts: 4 } } as unknown as ProgressData["problems"],
+    };
+    expect(isTransferSolved(SOLVE, { problems: {} })).toBe(false);
+    expect(isTransferSolved(SOLVE, attemptedOnly)).toBe(false);
+  });
+
+  it("solve-stage practice search is preserved", () => {
+    expect(
+      validatePracticeSearch({ from: "lesson", algorithm: "binary-search", stage: "solve" }),
+    ).toEqual({ from: "lesson", algorithm: "binary-search", stage: "solve" });
   });
 });

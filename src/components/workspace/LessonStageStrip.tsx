@@ -35,6 +35,8 @@ export interface LessonStageStripProps {
   codeSlug?: string | null;
   /** True when that implementation challenge is already solved. */
   codeComplete?: boolean;
+  /** True when the transfer challenge behind Solve is already solved. */
+  solveComplete?: boolean;
   className?: string;
 }
 
@@ -50,6 +52,7 @@ export function LessonStageStrip({
   traceAvailable = false,
   codeSlug = null,
   codeComplete = false,
+  solveComplete = false,
   className,
 }: LessonStageStripProps): React.ReactElement {
   return (
@@ -116,15 +119,29 @@ export function LessonStageStrip({
             </Link>
           );
         }
+        /* Solve opens the transfer question — a different problem from Code —
+           and shows a check only once that question is actually accepted. */
         if (stage.id === "solve" && practiceSlug) {
           return (
             <Link
               key={stage.id}
               to="/practice/$slug"
               params={{ slug: practiceSlug }}
-              className={cn(base, "text-slate hover:bg-tint hover:text-ink")}
+              search={{
+                from: "lesson" as const,
+                ...(algorithmSlug ? { algorithm: algorithmSlug } : {}),
+                stage: "solve" as const,
+              }}
+              className={cn(
+                base,
+                "gap-1.5",
+                solveComplete
+                  ? "text-primary hover:bg-tint"
+                  : "text-slate hover:bg-tint hover:text-ink",
+              )}
             >
               {stage.label}
+              {solveComplete ? <Check aria-label="complete" size={12} strokeWidth={2.4} /> : null}
             </Link>
           );
         }
