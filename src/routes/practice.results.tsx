@@ -367,7 +367,9 @@ function ChallengeResults() {
             )}
             {solveDone && (
               <div className="mt-4 rounded-2xl border border-hairline bg-card px-5 py-3.5">
-                <h2 className="text-[14px] font-semibold text-foreground">Why the pattern worked</h2>
+                <h2 className="text-[14px] font-semibold text-foreground">
+                  Why the pattern worked
+                </h2>
                 <ul className="mt-1.5 space-y-1 font-mono text-[12.5px] leading-[1.6] text-muted-foreground">
                   <li>the candidate indices were ordered,</li>
                   <li>each comparison removed one side,</li>

@@ -130,7 +130,9 @@ describe("solve stage / transfer problem (Phase 9)", () => {
   it("maps binary search to a curated transfer problem distinct from Code", () => {
     expect(getAlgorithm("binary-search")?.transferProblemSlug).toBe(SOLVE);
     expect(resolveTransferSlug("binary-search")).toBe(SOLVE);
-    expect(resolveTransferSlug("binary-search")).not.toBe(resolveImplementationSlug("binary-search"));
+    expect(resolveTransferSlug("binary-search")).not.toBe(
+      resolveImplementationSlug("binary-search"),
+    );
   });
 
   it("the transfer problem exists, is easy and is linked to binary search", () => {
