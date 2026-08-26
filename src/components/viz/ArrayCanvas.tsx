@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import type { ArrayFrame, CellState } from "@/engine/types";
 import { pointerLabel } from "@/lib/pointerLabels";
 import { StateIcon } from "@/components/viz/StateIcon";
-import { cellCenter, scaleXFor, windowExtentPx } from "@/lib/vizTransitions";
+import { cellCenter, clampToRow, scaleXFor, windowExtentPx } from "@/lib/vizTransitions";
 import { cellTreatment } from "@/lib/vizState";
 
 /**
@@ -222,7 +222,7 @@ export function ArrayCanvas({
               className="absolute left-0 top-0 flex flex-col items-center gap-0.5 leading-none transition-[transform,opacity] duration-300 ease-out will-change-transform"
               style={{
                 opacity: m.active ? 1 : 0,
-                transform: `translateX(${cellCenter(m.index, rowWidth, n, CELL_GAP) + m.lane}px) translateX(-50%)`,
+                transform: `translateX(${clampToRow(cellCenter(m.index, rowWidth, n, CELL_GAP) + m.lane, rowWidth, 22)}px) translateX(-50%)`,
               }}
             >
               <svg
@@ -269,7 +269,7 @@ export function ArrayCanvas({
             className="absolute left-0 top-0 whitespace-nowrap font-mono text-[13px] text-accent-strong transition-[transform,opacity] duration-300 ease-out will-change-transform"
             style={{
               opacity: win ? 1 : 0,
-              transform: `translateX(${extent.center}px) translateX(-50%)`,
+              transform: `translateX(${clampToRow(extent.center, rowWidth, 90)}px) translateX(-50%)`,
             }}
           >
             Current search range{" "}
