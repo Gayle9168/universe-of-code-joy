@@ -11,13 +11,16 @@ interface TimelineNode {
   /** First step index in this phase group — where clicking the node seeks. */
   from: number;
   to: number;
+  /** True when any step in the group is a milestone. */
+  milestone: boolean;
 }
 
 /**
  * The meaningful timeline: one node per *phase group* rather than per step, so a
  * run reads as Setup → Find mid → Compare → Eliminate → Found instead of an
  * anonymous strip of dozens of ticks. Clicking a node seeks to the first step of
- * that phase; the node stays active for every step inside it.
+ * that phase; the node stays active for every step inside it. The concept label
+ * is the primary element on every node — the step number is secondary.
  */
 export function StepTimeline({ className }: StepTimelineProps): React.ReactElement | null {
   const run = usePlayerStore((s) => s.run);
@@ -31,8 +34,12 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
     run.steps.forEach((step, i) => {
       const label = step.timelineLabel ?? step.phase;
       const last = out[out.length - 1];
-      if (last && last.label === label && last.to === i - 1) last.to = i;
-      else out.push({ label, from: i, to: i });
+      if (last && last.label === label && last.to === i - 1) {
+        last.to = i;
+        last.milestone = last.milestone || Boolean(step.isMilestone);
+      } else {
+        out.push({ label, from: i, to: i, milestone: Boolean(step.isMilestone) });
+      }
     });
     return out;
   }, [run]);
@@ -61,7 +68,7 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "h-px w-5 shrink-0 transition-colors duration-300 ease-out",
+                    "h-px w-3 shrink-0 transition-colors duration-300 ease-out",
                     isPast || isActive ? "bg-primary/40" : "bg-hairline",
                   )}
                 />
@@ -72,29 +79,41 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
                 onClick={() => seek(node.from)}
                 aria-current={isActive ? "step" : undefined}
                 aria-label={`Phase ${i + 1}: ${node.label}`}
-                className="group flex shrink-0 items-center gap-2 rounded-full px-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                className={cn(
+                  "group flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 transition-colors duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+                  isActive
+                    ? "border-primary bg-tint"
+                    : isPast
+                      ? "border-primary/25 bg-card hover:bg-tint"
+                      : "border-hairline bg-card hover:border-primary/30",
+                )}
               >
+                {/* The marker is a small dot: the concept name carries the meaning. */}
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "shrink-0 rounded-full transition-colors duration-300 ease-out",
+                    node.milestone ? "size-2.5" : "size-1.5",
+                    isActive || isPast
+                      ? "bg-primary"
+                      : node.milestone
+                        ? "bg-primary/30"
+                        : "bg-hairline",
+                  )}
+                />
                 <span
                   className={cn(
-                    "flex size-6 shrink-0 items-center justify-center rounded-full border font-mono text-[11px] tabular-nums",
-                    "transition-[background-color,border-color,color] duration-300 ease-out",
+                    "max-w-[96px] truncate font-mono text-[10px] uppercase tracking-[0.06em] transition-colors duration-300 ease-out",
                     isActive
-                      ? "border-primary bg-primary text-primary-foreground"
+                      ? "font-semibold text-ink"
                       : isPast
-                        ? "border-primary/40 bg-tint text-primary"
-                        : "border-hairline bg-card text-slate group-hover:border-primary/40",
+                        ? "text-slate"
+                        : "text-slate-soft group-hover:text-slate",
                   )}
+                  title={node.label}
                 >
-                  {i + 1}
+                  {node.label}
                 </span>
-                {isActive ? (
-                  <span
-                    className="max-w-[140px] truncate font-mono text-[11px] uppercase tracking-[0.08em] text-ink"
-                    title={node.label}
-                  >
-                    {node.label}
-                  </span>
-                ) : null}
               </button>
             </li>
           );

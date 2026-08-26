@@ -219,20 +219,21 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
     <div
       className={cn("flex flex-col rounded-xl border border-hairline bg-card shadow-sm", className)}
     >
-      <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
+      <div className="flex items-center justify-between border-b border-hairline px-4 py-2.5">
         <h2 className="font-sans text-[14px] font-medium text-ink">Reasoning</h2>
-        <span className="font-mono text-[12px] text-slate">
-          Step {index + 1} of {run.steps.length}
+        {/* Step counting is secondary information next to the reasoning itself. */}
+        <span className="font-mono text-[11px] text-slate-soft">
+          Step {index + 1} / {run.steps.length}
         </span>
       </div>
 
       <div
         aria-live="polite"
         aria-atomic="true"
-        className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5"
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3.5"
       >
         <div>
-          <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+          <h3 className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
             What happened
           </h3>
           {/* Keyed on the step so only the text cross-fades — the panel stays put. */}
@@ -246,7 +247,7 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
 
         {step.detail ? (
           <div>
-            <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+            <h3 className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
               Why
             </h3>
             <p
@@ -260,7 +261,7 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
 
         {invariant ? (
           <div>
-            <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+            <h3 className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
               Invariant
             </h3>
             <p
@@ -273,7 +274,7 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
         ) : null}
 
         {nextStep ? (
-          <div className="flex items-center justify-between gap-3 border-t border-hairline pt-3">
+          <div className="flex items-center justify-between gap-3 border-t border-hairline pt-2.5">
             <p
               key={`next-${index}`}
               className="min-w-0 flex-1 font-sans text-[12px] leading-relaxed text-slate"
