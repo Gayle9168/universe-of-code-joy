@@ -70,7 +70,9 @@ describe("resolveTransferSlug", () => {
 
   it("returns null when the implementation challenge is the only linked question", () => {
     const only = [getProblem("binary-search-classic")!] as Problem[];
-    expect(resolveTransferSlug("binary-search", undefined, only, "binary-search-classic")).toBeNull();
+    expect(
+      resolveTransferSlug("binary-search", undefined, only, "binary-search-classic"),
+    ).toBeNull();
   });
 });
 
@@ -89,9 +91,9 @@ describe("isImplementationSolved", () => {
   });
 
   it("is true once the mapped problem has a solvedAt", () => {
-    expect(isImplementationSolved("binary-search-classic", progressWith(["binary-search-classic"]))).toBe(
-      true,
-    );
+    expect(
+      isImplementationSolved("binary-search-classic", progressWith(["binary-search-classic"])),
+    ).toBe(true);
   });
 
   it("is not satisfied by solving a different problem", () => {

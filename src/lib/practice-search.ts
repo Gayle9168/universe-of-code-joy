@@ -24,7 +24,11 @@ export function validatePracticeSearch(search: Record<string, unknown>): Practic
       ? search.algorithm
       : undefined;
   const stage =
-    search.stage === "code" ? ("code" as const) : search.stage === "solve" ? ("solve" as const) : undefined;
+    search.stage === "code"
+      ? ("code" as const)
+      : search.stage === "solve"
+        ? ("solve" as const)
+        : undefined;
   return {
     ...(from ? { from } : {}),
     ...(algorithm ? { algorithm } : {}),

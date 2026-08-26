@@ -731,29 +731,29 @@ function PracticeChallenge() {
                 </p>
               )}
               <div className="flex items-center">
-              <button
-                type="button"
-                onClick={handleRun}
-                disabled={runner.status === "running" || !langRunnable}
-                className="inline-flex h-11 items-center gap-2.5 rounded-xl border border-primary bg-card px-6 font-sans text-[14px] font-medium text-primary hover:bg-primary-tint disabled:opacity-60"
-              >
-                <Play className="h-4 w-4 fill-current" strokeWidth={0} />{" "}
-                {runner.status === "running" ? "Running…" : "Run"}
-              </button>
-              <div className="ml-auto flex items-center gap-4">
-                <span className="inline-flex h-10 items-center gap-2 rounded-xl border border-primary/40 bg-card px-4 font-mono text-[12.5px] text-primary">
-                  <Star className="h-3.5 w-3.5" strokeWidth={1.8} />{" "}
-                  {solved ? "Solved" : `+${xpOffer} XP`}
-                </span>
                 <button
                   type="button"
-                  onClick={handleSubmit}
+                  onClick={handleRun}
                   disabled={runner.status === "running" || !langRunnable}
-                  className="inline-flex h-11 items-center gap-2.5 rounded-xl bg-primary px-7 font-sans text-[14px] font-medium text-primary-foreground hover:bg-primary-glow disabled:opacity-60"
+                  className="inline-flex h-11 items-center gap-2.5 rounded-xl border border-primary bg-card px-6 font-sans text-[14px] font-medium text-primary hover:bg-primary-tint disabled:opacity-60"
                 >
-                  Submit <Send className="h-4 w-4" strokeWidth={1.9} />
+                  <Play className="h-4 w-4 fill-current" strokeWidth={0} />{" "}
+                  {runner.status === "running" ? "Running…" : "Run"}
                 </button>
-              </div>
+                <div className="ml-auto flex items-center gap-4">
+                  <span className="inline-flex h-10 items-center gap-2 rounded-xl border border-primary/40 bg-card px-4 font-mono text-[12.5px] text-primary">
+                    <Star className="h-3.5 w-3.5" strokeWidth={1.8} />{" "}
+                    {solved ? "Solved" : `+${xpOffer} XP`}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={runner.status === "running" || !langRunnable}
+                    className="inline-flex h-11 items-center gap-2.5 rounded-xl bg-primary px-7 font-sans text-[14px] font-medium text-primary-foreground hover:bg-primary-glow disabled:opacity-60"
+                  >
+                    Submit <Send className="h-4 w-4" strokeWidth={1.9} />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
