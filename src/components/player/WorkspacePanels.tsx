@@ -22,6 +22,17 @@ import { usePrefsStore, type CodeLanguage } from "@/stores/prefsStore";
 
 /* ---------------- code tab ---------------- */
 
+/** Token colours, all from the theme tokens — the palette stays teal + ink. */
+const TOKEN_CLASS: Record<TokenKind, string> = {
+  keyword: "text-accent-strong",
+  number: "text-ink",
+  string: "text-accent-strong/80",
+  comment: "text-slate-soft italic",
+  fn: "text-ink font-medium",
+  punct: "text-slate",
+  plain: "",
+};
+
 const LANGS: { id: CodeLanguage; label: string; name: string }[] = [
   { id: "js", label: "JS", name: "JavaScript" },
   { id: "ts", label: "TS", name: "TypeScript" },
