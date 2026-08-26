@@ -199,6 +199,10 @@ function AlgorithmWorkspace(): React.ReactElement {
     lesson ? Boolean(s.lessons[lesson.slug]?.completedAt) : false,
   );
   const lessonDone = hydrated && lessonCompleted;
+  const lessonMastery = useProgressStore((s) => (lesson ? (s.lessons[lesson.slug]?.score ?? 0) : 0));
+  /* Mastery only reads after hydration so SSR and the first client paint agree. */
+  const masteryPct = hydrated ? lessonMastery : 0;
+
   const completeLesson = useProgressStore((s) => s.completeLesson);
   const awardXp = useProgressStore((s) => s.awardXp);
   const touchStreak = useProgressStore((s) => s.touchStreak);
