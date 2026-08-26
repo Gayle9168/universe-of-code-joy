@@ -23,6 +23,11 @@ export function ControlStrip({ children, className }: ControlStripProps): React.
   const reset = usePlayerStore((s) => s.reset);
   const index = usePlayerStore((s) => s.index);
   const total = usePlayerStore((s) => s.run?.steps.length ?? 0);
+  /* The semantic phase of the canonical current step — same source as the timeline. */
+  const phaseLabel = usePlayerStore((s) => {
+    const step = s.run?.steps[s.index];
+    return step ? (step.timelineLabel ?? step.phase) : null;
+  });
   const canBack = useCanStepBack();
   const canForward = useCanStepForward();
   const isEnded = total > 0 && index >= total - 1;
