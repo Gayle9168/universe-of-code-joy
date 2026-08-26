@@ -19,15 +19,18 @@ export function ExpressionBlock({
   return (
     <section
       aria-label="Midpoint calculation"
-      aria-hidden={expression ? undefined : true}
       className={cn(
-        "flex w-full flex-col gap-3 rounded-xl border border-hairline bg-card px-4 py-3 transition-opacity duration-300 ease-out",
+        "flex w-full flex-col gap-3 rounded-xl border border-hairline bg-card px-4 py-3",
         className,
       )}
-      style={{ opacity: expression ? 1 : 0 }}
     >
       <h3 className="font-sans text-[13px] font-medium text-ink">Midpoint Calculation</h3>
-      <div className="flex flex-col gap-1.5">
+      {/* The card keeps its frame on steps with no midpoint; only the maths fades. */}
+      <div
+        className="flex flex-col gap-1.5 transition-opacity duration-300 ease-out"
+        style={{ opacity: expression ? 1 : 0 }}
+        aria-hidden={expression ? undefined : true}
+      >
         <p className="font-mono text-[13px] text-slate">{expression?.formula ?? "\u00a0"}</p>
         <p
           key={expression?.substitution ?? "none"}
