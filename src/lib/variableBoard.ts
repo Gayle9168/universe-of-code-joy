@@ -13,6 +13,8 @@ export interface VariableRow {
   value: string;
   /** True when this row's value differs from the previous step's. */
   changed: boolean;
+  /** The previous step's value, present only when this row changed. */
+  previous?: string;
 }
 
 export interface MidExpression {
@@ -50,10 +52,12 @@ export function variableRows(frame: Frame, prev?: Frame | null): VariableRow[] {
 
   const rows: VariableRow[] = f.pointers.map((ptr) => {
     const before = p ? pointerIndex(p, ptr.name) : null;
+    const changed = before !== null && before !== ptr.index;
     return {
       name: ptr.name,
       value: String(ptr.index),
-      changed: before !== null && before !== ptr.index,
+      changed,
+      ...(changed ? { previous: String(before) } : {}),
     };
   });
 

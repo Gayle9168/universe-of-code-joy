@@ -2,7 +2,9 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import type { ArrayFrame, CellState } from "@/engine/types";
 import { pointerLabel } from "@/lib/pointerLabels";
-import { cellCenter, scaleXFor, windowExtentPx } from "@/lib/vizTransitions";
+import { StateIcon } from "@/components/viz/StateIcon";
+import { cellCenter, clampToRow, scaleXFor, windowExtentPx } from "@/lib/vizTransitions";
+import { cellTreatment } from "@/lib/vizState";
 
 /**
  * DOM (not SVG) canvas for searching-style array frames: a `target = n` chip,
@@ -20,11 +22,11 @@ const MAX_CELL = 88;
 
 const CELL_SURFACE: Record<CellState, string> = {
   idle: "border-hairline bg-card text-ink",
-  active: "border-primary/35 bg-tint/55 text-ink",
+  active: "border-[1.5px] border-accent-strong bg-tint text-accent-strong",
   visited: "border-hairline bg-card text-slate-soft",
-  frontier: "border-primary/35 bg-tint/55 text-ink",
+  frontier: "border-primary/45 bg-tint/70 text-ink",
   found: "border-[1.5px] border-accent-strong bg-tint text-accent-strong",
-  excluded: "border-hairline bg-card text-slate-soft",
+  excluded: "border-dashed border-hairline bg-paper text-slate-soft",
   compare: "border-[1.5px] border-accent-strong bg-tint text-accent-strong",
   sorted: "border-primary/35 bg-tint/55 text-ink",
 };
@@ -33,6 +35,7 @@ const CELL_SURFACE: Record<CellState, string> = {
 const EMPHASIS: Partial<Record<CellState, string>> = {
   found: "font-semibold shadow-sm",
   compare: "font-semibold shadow-sm",
+  active: "font-semibold shadow-sm",
 };
 
 function stateOf(frame: ArrayFrame, index: number): CellState {
@@ -91,30 +94,44 @@ const ValueCell = React.memo(function ValueCell({
   value: string | number;
   state: CellState;
 }): React.ReactElement {
+  const treatment = cellTreatment(state);
   return (
     <div
       className={cn(
-        "flex h-[60px] items-center justify-center rounded-xl border font-mono text-[21px] tabular-nums xl:h-[62px]",
-        "transition-[background-color,border-color,color,box-shadow] duration-300 ease-out",
+        "relative flex h-[60px] items-center justify-center rounded-xl border font-mono text-[21px] tabular-nums xl:h-[62px]",
+        "transition-[background-color,border-color,color,box-shadow,opacity] duration-300 ease-out",
         CELL_SURFACE[state],
         EMPHASIS[state],
+        treatment.dim && "opacity-55",
       )}
     >
       {String(value)}
+      {treatment.mark ? (
+        <span className="pointer-events-none absolute right-1 top-1 opacity-80">
+          <StateIcon state={state} size={11} />
+        </span>
+      ) : null}
     </div>
   );
 });
 
 export interface ArrayCanvasProps {
   frame: ArrayFrame;
+  /** Pointer names whose index moved on this step — only those get emphasis. */
+  movedPointers?: readonly string[];
   className?: string;
 }
 
-export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.ReactElement {
+export function ArrayCanvas({
+  frame,
+  movedPointers,
+  className,
+}: ArrayCanvasProps): React.ReactElement {
   const n = Math.max(1, frame.values.length);
   const win = windowExtent(frame);
   const [rowRef, rowWidth] = useMeasuredWidth<HTMLDivElement>();
   const cols: React.CSSProperties = { gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` };
+  const moved = React.useMemo(() => new Set(movedPointers ?? []), [movedPointers]);
 
   /* Every pointer the run has shown so far keeps a mounted marker, so a marker
      travels to its new cell instead of unmounting and reappearing. */
@@ -128,13 +145,16 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
   }, [frame.pointers]);
 
   /* Last known index per marker: a marker the current frame omits fades out in
-     place rather than snapping to index 0. */
+     place rather than snapping to index 0. The label keeps the pointer's real
+     index (it can run one past the row when the window empties) while the
+     position clamps into the row. */
   const lastIndexRef = React.useRef<Record<string, number>>({});
   const baseMarkers = names.map((name) => {
     const live = frame.pointers.find((p) => p.name === name);
-    if (live) lastIndexRef.current[name] = Math.max(0, Math.min(live.index, n - 1));
+    if (live) lastIndexRef.current[name] = live.index;
     const index = lastIndexRef.current[name] ?? 0;
-    return { name, index, active: Boolean(live) };
+    const slot = Math.max(0, Math.min(index, n - 1));
+    return { name, index, slot, active: Boolean(live) };
   });
 
   /* Markers that land on the same cell share the slot side by side instead of
@@ -142,15 +162,15 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
   const lanes = new Map<number, string[]>();
   for (const m of baseMarkers) {
     if (!m.active) continue;
-    const bucket = lanes.get(m.index);
+    const bucket = lanes.get(m.slot);
     if (bucket) bucket.push(m.name);
-    else lanes.set(m.index, [m.name]);
+    else lanes.set(m.slot, [m.name]);
   }
   const markers = baseMarkers.map((m) => {
-    const bucket = lanes.get(m.index);
+    const bucket = lanes.get(m.slot);
     if (!bucket || bucket.length < 2) return { ...m, lane: 0 };
     const k = bucket.indexOf(m.name);
-    return { ...m, lane: (k - (bucket.length - 1) / 2) * 30 };
+    return { ...m, lane: (k - (bucket.length - 1) / 2) * 44 };
   });
 
   const extent = win
@@ -205,7 +225,7 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
               className="absolute left-0 top-0 flex flex-col items-center gap-0.5 leading-none transition-[transform,opacity] duration-300 ease-out will-change-transform"
               style={{
                 opacity: m.active ? 1 : 0,
-                transform: `translateX(${cellCenter(m.index, rowWidth, n, CELL_GAP) + m.lane}px) translateX(-50%)`,
+                transform: `translateX(${clampToRow(cellCenter(m.slot, rowWidth, n, CELL_GAP), rowWidth, 22 + Math.abs(m.lane)) + m.lane}px) translateX(-50%)`,
               }}
             >
               <svg
@@ -223,7 +243,12 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
                 <path d="M7 15V2" />
                 <path d="M2.5 6.5 7 2l4.5 4.5" />
               </svg>
-              <span className="mt-1 font-sans text-[13px] font-semibold text-ink">
+              <span
+                className={cn(
+                  "mt-1 font-sans text-[13px] transition-colors duration-300 ease-out",
+                  moved.has(m.name) ? "font-semibold text-accent-strong" : "font-semibold text-ink",
+                )}
+              >
                 {pointerLabel(m.name)}
               </span>
               <span className="font-mono text-[12px] tabular-nums text-slate">({m.index})</span>
@@ -247,7 +272,7 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
             className="absolute left-0 top-0 whitespace-nowrap font-mono text-[13px] text-accent-strong transition-[transform,opacity] duration-300 ease-out will-change-transform"
             style={{
               opacity: win ? 1 : 0,
-              transform: `translateX(${extent.center}px) translateX(-50%)`,
+              transform: `translateX(${clampToRow(extent.center, rowWidth, 90)}px) translateX(-50%)`,
             }}
           >
             Current search range{" "}

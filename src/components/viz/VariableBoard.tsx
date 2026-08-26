@@ -31,12 +31,22 @@ export function VariableBoard({ rows, className }: VariableBoardProps): React.Re
             <dt className="truncate font-mono text-[12px] text-slate">{pointerLabel(row.name)}</dt>
             <dd
               className={cn(
-                "flex h-9 w-full items-center justify-center rounded-lg border font-mono text-[15px] tabular-nums transition-colors duration-300 ease-out",
+                "flex h-9 w-full items-center justify-center gap-1 rounded-lg border font-mono text-[15px] tabular-nums transition-colors duration-300 ease-out",
                 row.changed
                   ? "border-[1.5px] border-accent-strong bg-tint font-semibold text-accent-strong"
                   : "border-hairline bg-card text-ink",
               )}
             >
+              {row.previous !== undefined ? (
+                <span className="text-[12px] font-normal text-slate line-through">
+                  {row.previous}
+                </span>
+              ) : null}
+              {row.previous !== undefined ? (
+                <span aria-hidden="true" className="text-[11px] text-slate">
+                  &rarr;
+                </span>
+              ) : null}
               <span key={row.value} className="viz-swap">
                 {row.value}
               </span>

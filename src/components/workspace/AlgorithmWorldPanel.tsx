@@ -3,11 +3,13 @@ import { MonitorPlay } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { ArrayCanvas } from "@/components/viz/ArrayCanvas";
 import { ComparisonCard } from "@/components/viz/ComparisonCard";
+import { DecisionNote } from "@/components/viz/DecisionNote";
 import { ExpressionBlock } from "@/components/viz/ExpressionBlock";
 import { FrameView } from "@/components/viz/FrameView";
 import { VariableBoard } from "@/components/viz/VariableBoard";
 import type { AlgorithmModule } from "@/engine/types";
 import { midExpression, variableRows } from "@/lib/variableBoard";
+import { changedPointers } from "@/lib/vizState";
 import { cn } from "@/lib/utils";
 import { usePlayerStore, useCurrentStep } from "@/stores/playerStore";
 
@@ -51,8 +53,15 @@ export function AlgorithmWorldPanel({
 
   const hasExpression = Boolean(expression);
   const hasComparison = Boolean(frame?.kind === "array" && frame.comparison);
+  const decision = frame?.kind === "array" ? (frame.decision ?? null) : null;
   const showTeachingRow =
     frame?.kind === "array" && (rows.length > 0 || hasExpression || hasComparison);
+
+  /* Only the boundary that actually moved on this step gets emphasis. */
+  const moved =
+    frame?.kind === "array"
+      ? changedPointers(prevFrame?.kind === "array" ? prevFrame.pointers : null, frame.pointers)
+      : [];
 
   return (
     <section
@@ -77,7 +86,7 @@ export function AlgorithmWorldPanel({
         <div className="flex shrink-0 justify-center">
           {frame ? (
             frame.kind === "array" ? (
-              <ArrayCanvas frame={frame} />
+              <ArrayCanvas frame={frame} movedPointers={moved} />
             ) : (
               <FrameView frame={frame} />
             )
@@ -86,14 +95,19 @@ export function AlgorithmWorldPanel({
           )}
         </div>
 
-        {showTeachingRow ? (
-          <div className="flex shrink-0 items-stretch gap-4">
-            <VariableBoard rows={rows} className="flex-[1.35]" />
-            <ExpressionBlock expression={expression} className="flex-[1.4]" />
-            <ComparisonCard
-              comparison={hasComparison ? (frame.comparison ?? null) : null}
-              className="flex-[0.85]"
-            />
+        {showTeachingRow || decision ? (
+          <div className="flex shrink-0 flex-col gap-3">
+            {showTeachingRow ? (
+              <div className="flex items-stretch gap-4">
+                <VariableBoard rows={rows} className="flex-[1.35]" />
+                <ExpressionBlock expression={expression} className="flex-[1.4]" />
+                <ComparisonCard
+                  comparison={hasComparison ? (frame.comparison ?? null) : null}
+                  className="flex-[0.85]"
+                />
+              </div>
+            ) : null}
+            <DecisionNote decision={decision} />
           </div>
         ) : null}
       </div>

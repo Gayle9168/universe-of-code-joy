@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { cellCenter, rowGeometry, scaleXFor, windowExtentPx } from "@/lib/vizTransitions";
+import {
+  cellCenter,
+  clampToRow,
+  rowGeometry,
+  scaleXFor,
+  windowExtentPx,
+} from "@/lib/vizTransitions";
 
 describe("rowGeometry", () => {
   it("splits the row into equal cells minus the gaps", () => {
@@ -56,5 +62,21 @@ describe("scaleXFor", () => {
 
   it("falls back to 1 before measurement", () => {
     expect(scaleXFor(100, 0)).toBe(1);
+  });
+});
+
+describe("clampToRow", () => {
+  it("keeps a label inside the row", () => {
+    expect(clampToRow(-10, 400, 20)).toBe(20);
+    expect(clampToRow(398, 400, 20)).toBe(380);
+    expect(clampToRow(200, 400, 20)).toBe(200);
+  });
+
+  it("centres when the row is narrower than the label", () => {
+    expect(clampToRow(0, 30, 20)).toBe(15);
+  });
+
+  it("passes through before the row is measured", () => {
+    expect(clampToRow(12, 0, 20)).toBe(12);
   });
 });
