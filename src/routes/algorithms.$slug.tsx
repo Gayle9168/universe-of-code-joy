@@ -15,15 +15,11 @@ import {
 import { toast } from "sonner";
 import { useHeaderStats } from "@/components/app-shell";
 import { AlgoraGlyph } from "@/components/site-chrome";
-import {
-  VisualStage,
-  CodePane,
-  ExplainPane,
-  InputPane,
-  AboutPane,
-} from "@/components/player/WorkspacePanels";
 import { CustomInputModal } from "@/components/player/CustomInputModal";
-import type { AlgorithmModule } from "@/engine/types";
+import { GoldenWorkspace } from "@/components/workspace/GoldenWorkspace";
+import { LessonContextRow } from "@/components/workspace/LessonContextRow";
+import { LessonStageStrip } from "@/components/workspace/LessonStageStrip";
+
 
 import { Button } from "@/components/common/Button";
 import { Chip } from "@/components/common/Chip";
