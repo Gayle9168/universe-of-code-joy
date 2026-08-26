@@ -118,6 +118,5 @@ export function usePlayerKeys(enabled: boolean = true): void {
   }, [enabled, isBlocking, storeApi]);
 }
 
-}
 
 export default usePlayerKeys;
