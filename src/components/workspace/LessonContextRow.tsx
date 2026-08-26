@@ -2,6 +2,7 @@ import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Clock } from "lucide-react";
 import { DifficultyBadge } from "@/components/common/DifficultyBadge";
+import { MasteryRing } from "@/components/common/MasteryRing";
 import { cn } from "@/lib/utils";
 import type { Algorithm, Difficulty } from "@/content/types";
 
