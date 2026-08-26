@@ -11,9 +11,10 @@ At the first branch comparison (e.g. `16 < 23` TRUE):
 - Visible: array with indices/values, official range `[0..9]`, target, low/mid/high on the Variable Board, the comparison expression with TRUE/FALSE, the active comparison code line.
 - Hidden: decision preview tint and `Preview: [5..9] would survive`, the `Discard the left half` decision line in Current Operation, Why, Invariant, and `Next:` in Reasoning.
 - The Reasoning card becomes `Your turn`: a radio group (`low = mid + 1`, `high = mid - 1`, `return mid`, `target not found`) plus **Check answer**.
-- Correct → calm check mark, one-sentence causal explanation, **Continue**. Continue resolves the gate in place (does not auto-advance), so the now-revealed preview / Why / Invariant / Next become visible on the same step; the learner then steps to Eliminate.
-- Incorrect → calm, non-red "Not quite" with a misconception sentence for the chosen option, **Try again**, plus a quiet **Show answer**. The step never advances.
-- Show answer → correct option marked, explanation shown, outcome recorded as `revealed`.
+- Correct → calm check mark, one-sentence causal explanation, **Continue**. Continue resolves the gate **on the same Compare step**: it never touches `currentStepIndex`. The revealed preview / decision / Why / Invariant / Next appear on that same step, and the learner uses the existing Next/Play to enter Eliminate. Sequence: `Compare → Prediction → Correct → Continue → reveal on Compare → Next → Eliminate`.
+- Incorrect → calm, non-red "Not quite" with a misconception sentence for the chosen option, **Try again** (restores the answer interaction), plus a quiet **Show answer**. `selected` and `incorrect` both stay **blocking**: nothing advances, and no preview / decision / Why / Invariant / Next is exposed.
+- Show answer → correct option marked, explanation shown, outcome recorded as `revealed` (never `correct`).
+
 
 ## Checkpoint derivation (pure, deterministic)
 
