@@ -35,7 +35,6 @@ export function DesktopScaleFrame({
     >
       {isScaled ? (
         <div className="shrink-0" style={{ height: scaledHeight(scale, designHeight) }}>
-
           <div
             style={{
               width: designWidth,
