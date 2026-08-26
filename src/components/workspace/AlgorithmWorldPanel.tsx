@@ -62,7 +62,7 @@ export function AlgorithmWorldPanel({
 
       {/* items-start: when the reserved comparison/decision slots make the world
           taller than the card, centering would clip the target label at the top. */}
-      <div className="relative flex min-h-0 flex-1 items-start justify-center overflow-y-auto overflow-x-hidden px-6 pb-3 pt-6">
+      <div className="relative flex min-h-0 flex-1 items-start justify-center overflow-y-auto overflow-x-hidden px-6 pb-2 pt-4">
 
         {frame ? (
           frame.kind === "array" ? (
@@ -76,7 +76,7 @@ export function AlgorithmWorldPanel({
       </div>
 
       {frame?.kind === "array" ? (
-        <div className="flex shrink-0 flex-wrap items-stretch gap-3 border-t border-hairline px-6 py-3">
+        <div className="flex shrink-0 flex-wrap items-stretch gap-3 border-t border-hairline px-6 py-2">
           <VariableBoard rows={rows} className="min-w-[220px] flex-1" />
           <ExpressionBlock expression={expression} className="min-w-[220px] flex-1" />
         </div>
