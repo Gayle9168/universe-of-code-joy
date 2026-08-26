@@ -242,10 +242,18 @@ export function ArrayCanvas({
                 <path d="M7 15V2" />
                 <path d="M2.5 6.5 7 2l4.5 4.5" />
               </svg>
-              <span className="mt-1 font-sans text-[13px] font-semibold text-ink">
+              <span
+                className={cn(
+                  "mt-1 font-sans text-[13px] transition-colors duration-300 ease-out",
+                  moved.has(m.name)
+                    ? "font-semibold text-accent-strong"
+                    : "font-semibold text-ink",
+                )}
+              >
                 {pointerLabel(m.name)}
               </span>
               <span className="font-mono text-[12px] tabular-nums text-slate">({m.index})</span>
+
             </span>
           ))}
         </div>
