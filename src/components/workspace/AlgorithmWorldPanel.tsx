@@ -60,7 +60,10 @@ export function AlgorithmWorldPanel({
         {step ? `Step ${index + 1} of ${run?.steps.length ?? 0}: ${step.narration}` : ""}
       </div>
 
-      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-y-auto overflow-x-hidden px-6 pb-3 pt-6">
+      {/* items-start: when the reserved comparison/decision slots make the world
+          taller than the card, centering would clip the target label at the top. */}
+      <div className="relative flex min-h-0 flex-1 items-start justify-center overflow-y-auto overflow-x-hidden px-6 pb-3 pt-6">
+
         {frame ? (
           frame.kind === "array" ? (
             <ArrayCanvas frame={frame} />
