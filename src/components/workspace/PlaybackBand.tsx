@@ -8,20 +8,21 @@ export interface PlaybackBandProps {
 }
 
 /**
- * The full-width band under both workspace columns: the meaningful phase
- * timeline over one row of playback controls.
+ * The full-width band under both workspace columns: one compact row with the
+ * transport controls wrapped around the phase timeline.
  */
 export function PlaybackBand({ className }: PlaybackBandProps): React.ReactElement {
   return (
     <section
       aria-label="Playback"
       className={cn(
-        "flex shrink-0 flex-col gap-2 rounded-2xl border border-hairline bg-card px-6 py-3 shadow-sm",
+        "flex shrink-0 items-center rounded-2xl border border-hairline bg-card px-5 py-2.5 shadow-sm",
         className,
       )}
     >
-      <StepTimeline />
-      <ControlStrip />
+      <ControlStrip>
+        <StepTimeline />
+      </ControlStrip>
     </section>
   );
 }
