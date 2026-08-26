@@ -511,19 +511,18 @@ function PracticeChallenge() {
 
             <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-4">
               {lessonAlgorithm && (
-                <div className="mb-3 flex items-center gap-2 font-mono text-[11.5px] text-muted-foreground">
+                <div className="mb-3 flex flex-wrap items-center gap-x-2 font-mono text-[11.5px] text-muted-foreground">
                   <Link
                     to="/algorithms/$slug"
                     params={{ slug: lessonAlgorithm.slug }}
-                    className="inline-flex items-center gap-1.5 text-primary hover:underline"
+                    className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-primary hover:underline"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.8} />
                     {lessonAlgorithm.name}
                   </Link>
                   <span aria-hidden="true">·</span>
-                  <span>
-                    {search.stage === "code" ? "Code stage" : "Lesson"} — you learned it, now
-                    implement it
+                  <span className="whitespace-nowrap">
+                    {search.stage === "code" ? "Code stage" : "Lesson"} — now implement it
                   </span>
                 </div>
               )}
