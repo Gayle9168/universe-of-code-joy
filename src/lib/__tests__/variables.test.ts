@@ -5,7 +5,7 @@ import type { AlgorithmRun, ArrayFrame, Step } from "@/engine/types";
 
 function run(values: string, target: string): AlgorithmRun {
   const mod = resolveModule("binary-search")!;
-  const validation = mod.validate({ array: values, target });
+  const validation = mod.validate({ values, target });
   if (!validation.ok) throw new Error(validation.error);
   return mod.run(validation.parsed);
 }
