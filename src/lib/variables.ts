@@ -149,11 +149,15 @@ function comparisonLines(frame: ArrayFrame): ExpressionLine[] {
 export function deriveOperation(
   current: Step | null | undefined,
   previous?: Step | null,
+  context?: OperationContext,
 ): Operation | null {
   const frame = asArrayFrame(current);
   if (!frame) return null;
   const prev = asArrayFrame(previous);
   const tone: OperationTone = frame.comparison?.tone ?? frame.decision?.tone ?? "accent";
+  /* Derived from the canonical run, never from a component-local flag, so
+     Previous, seek and Replay all agree about what the learner has seen. */
+  const firstOfItsKind = isFirstOccurrence(current, context);
 
   /* Result — the search has landed. */
   if (hasFound(frame)) {
