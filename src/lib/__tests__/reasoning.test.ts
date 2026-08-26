@@ -100,14 +100,17 @@ describe("deriveReasoning — comparisons", () => {
     expect(r.invariant).toBe(`Any occurrence of 9 must be to the left of index ${mid}.`);
   });
 
-  it("only adds the misconception line on milestone steps", () => {
+  it("names the misconception on the first elimination only", () => {
     const compares = FOUND.steps
       .map((s, i) => ({ s, i }))
       .filter(({ s }) => s.phase === "compare" && frameOf(s).comparison?.op !== "=");
     for (const { s, i } of compares) {
+      const full = pointer(s, "lo") === 0 && pointer(s, "hi") === frameOf(s).values.length - 1;
       const r = reasoningAt(FOUND, i);
-      expect(r.why?.includes("We are not guessing")).toBe(s.isMilestone === true);
+      expect(r.why?.includes("We are not guessing")).toBe(full || s.isMilestone === true);
     }
+    const first = indexOf(FOUND, "compare");
+    expect(reasoningAt(FOUND, first).why).toContain("We are not guessing");
   });
 });
 

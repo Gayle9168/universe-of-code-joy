@@ -149,12 +149,16 @@ export function deriveReasoning(
     }
 
     const smaller = c.op === "<" || c.op === "<=";
+    const firstElimination = lo === 0 && hi === frame.values.length - 1;
     const happened = smaller
       ? `${c.left} is smaller than the target ${c.right}.`
       : `${c.left} is larger than the target ${c.right}.`;
     const why = [
       `Because the array is sorted, every value ${smaller ? "at or left of" : "at or right of"} index ${mid} is also ${smaller ? "too small" : "too large"}.`,
-      milestone
+      /* The misconception is worth naming on the first elimination — when the
+         window is still the whole array — and on milestone steps. Semantic
+         state decides this; it never changes which branch runs. */
+      firstElimination || milestone
         ? "We are not guessing which side holds the target — sorted order proves the other side cannot."
         : "",
     ]
