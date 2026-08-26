@@ -27,7 +27,18 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
   const run = usePlayerStore((s) => s.run);
   const index = usePlayerStore((s) => s.index);
   const seek = usePlayerStore((s) => s.seek);
+  const pause = usePlayerStore((s) => s.pause);
   const activeRef = React.useRef<HTMLButtonElement | null>(null);
+
+  /* Seeking is a deliberate manual move: playback stops and the pending autoplay
+     advance is invalidated by the index change, so nothing arrives late. */
+  const seekTo = React.useCallback(
+    (target: number) => {
+      pause();
+      seek(target);
+    },
+    [pause, seek],
+  );
 
   const nodes = React.useMemo<TimelineNode[]>(() => {
     if (!run) return [];
