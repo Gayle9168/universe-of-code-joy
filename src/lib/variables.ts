@@ -139,6 +139,40 @@ function comparisonLines(frame: ArrayFrame): ExpressionLine[] {
 }
 
 /**
+ * The canonical run slice a step belongs to. Passing it lets the panel say
+ * something *about the run so far* (is this the first elimination?) without
+ * keeping mutable UI state that Previous, seek or Replay could invalidate.
+ */
+export interface OperationContext {
+  steps: readonly Step[];
+  index: number;
+}
+
+/**
+ * True when no earlier step in the canonical run carries the same semantic
+ * label. Generic: it compares `timelineLabel`, falling back to `phase`.
+ */
+export function isFirstOccurrence(
+  current: Step | null | undefined,
+  context?: OperationContext,
+): boolean {
+  if (!current) return true;
+  if (!context) return true;
+  const key = current.timelineLabel ?? current.phase;
+  for (let i = 0; i < context.index && i < context.steps.length; i += 1) {
+    const step = context.steps[i]!;
+    if ((step.timelineLabel ?? step.phase) === key) return false;
+  }
+  return true;
+}
+
+/** Keeps the leading sentence of a note and drops the rest. */
+function firstSentence(text: string): string {
+  const match = /^[^.!?]*[.!?]/.exec(text.trim());
+  return match ? match[0] : text.trim();
+}
+
+/**
  * The single calculation, comparison, boundary move or result this step is
  * about — one reusable operation instead of three permanently mounted cards.
  *
