@@ -47,14 +47,12 @@ export function AlgorithmWorldPanel({
   }
 
   const frame = step?.frame;
-  const rows = frame ? variableRows(frame, prevFrame) : [];
-  const expression = frame ? midExpression(frame) : null;
-
-  const hasExpression = Boolean(expression);
-  const hasComparison = Boolean(frame?.kind === "array" && frame.comparison);
-  const decision = frame?.kind === "array" ? (frame.decision ?? null) : null;
-  const showTeachingRow =
-    frame?.kind === "array" && (rows.length > 0 || hasExpression || hasComparison);
+  /* Everything below is a pure function of the current step (plus the previous
+     step for diffing), so seek, autoplay and rapid stepping cannot strand a
+     stale value or formula. */
+  const variables = deriveVariables(step, prevStep);
+  const operation = deriveOperation(step, prevStep);
+  const showTeachingRow = variables.length > 0 || operation !== null;
 
   /* Only the boundary that actually moved on this step gets emphasis. */
   const moved =
