@@ -69,10 +69,11 @@ export function AlgorithmWorldPanel({
         Algorithm World
       </h2>
 
-      {/* One scroll column: the frame, then the panels that read it — the two
-          stay together instead of being pushed to opposite edges. The column
-          grows with its content and only scrolls when the viewport is short. */}
-      <div className="relative mt-4 flex min-h-0 flex-col gap-6 overflow-y-auto overflow-x-hidden">
+      {/* One scroll column: the frame, then the panels that read it. The group is
+          centred in the card so leftover height is shared above and below rather
+          than pooling into one dead region under the content. */}
+      <div className="relative mt-4 flex min-h-0 flex-1 flex-col justify-center gap-6 overflow-y-auto overflow-x-hidden">
+
         <div className="flex shrink-0 justify-center">
           {frame ? (
             frame.kind === "array" ? (
