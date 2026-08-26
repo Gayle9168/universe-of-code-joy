@@ -3,6 +3,8 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { activeNodeIndex, buildTimelineNodes } from "@/lib/timeline";
 import { usePlayerStore } from "@/stores/playerStore";
+import { usePredictionGate } from "@/hooks/usePredictionGate";
+
 
 export interface StepTimelineProps {
   className?: string;
@@ -20,17 +22,22 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
   const index = usePlayerStore((s) => s.index);
   const seek = usePlayerStore((s) => s.seek);
   const pause = usePlayerStore((s) => s.pause);
+  const { skipCrossedForward } = usePredictionGate();
   const activeRef = React.useRef<HTMLButtonElement | null>(null);
 
   /* Seeking is a deliberate manual move: playback stops and the pending autoplay
-     advance is invalidated by the index change, so nothing arrives late. */
+     advance is invalidated by the index change, so nothing arrives late. Jumping
+     *forward* past an open prediction checkpoint records it as skipped — never as
+     solved. Backward seeks and landing on the checkpoint itself change nothing. */
   const seekTo = React.useCallback(
     (target: number) => {
       pause();
+      skipCrossedForward(target);
       seek(target);
     },
-    [pause, seek],
+    [pause, seek, skipCrossedForward],
   );
+
 
   const nodes = React.useMemo(() => (run ? buildTimelineNodes(run.steps) : []), [run]);
 

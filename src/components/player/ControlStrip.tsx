@@ -2,6 +2,8 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight, Pause, Play, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePlayerStore, useCanStepBack, useCanStepForward } from "@/stores/playerStore";
+import { usePredictionGate } from "@/hooks/usePredictionGate";
+
 import { SpeedControl } from "@/components/player/SpeedControl";
 
 /**
@@ -30,7 +32,11 @@ export function ControlStrip({ children, className }: ControlStripProps): React.
   });
   const canBack = useCanStepBack();
   const canForward = useCanStepForward();
+  /* An unresolved prediction checkpoint owns the forward action: the gate is the
+     primary control, while Previous and Restart stay available. */
+  const { isBlocking } = usePredictionGate();
   const isEnded = total > 0 && index >= total - 1;
+
 
   const side =
     "inline-flex h-9 items-center gap-1.5 rounded-lg border border-hairline bg-card px-3 font-sans text-[13px] font-medium text-ink transition-colors hover:bg-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-40";
@@ -51,7 +57,7 @@ export function ControlStrip({ children, className }: ControlStripProps): React.
           type="button"
           aria-label={`${isPlaying ? "Pause" : isEnded ? "Replay" : "Play"} (Space)`}
           onClick={toggle}
-          disabled={total === 0}
+          disabled={total === 0 || isBlocking}
           className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 font-sans text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-40"
         >
           {isPlaying ? (
@@ -65,13 +71,16 @@ export function ControlStrip({ children, className }: ControlStripProps): React.
         </button>
         <button
           type="button"
-          aria-label="Next step (→)"
+          aria-label={
+            isBlocking ? "Answer the prediction to continue" : "Next step (→)"
+          }
           onClick={next}
-          disabled={!canForward}
+          disabled={!canForward || isBlocking}
           className={cn(side, "w-9 justify-center px-0")}
         >
           <ChevronRight size={16} strokeWidth={1.5} />
         </button>
+
         <button
           type="button"
           aria-label="Restart from the first step (R)"

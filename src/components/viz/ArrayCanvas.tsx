@@ -121,14 +121,22 @@ export interface ArrayCanvasProps {
   frame: ArrayFrame;
   /** Pointer names whose index moved on this step — only those get emphasis. */
   movedPointers?: readonly string[];
+  /**
+   * False while a prediction checkpoint is unresolved: the surviving-side
+   * preview is withheld so the canvas cannot answer the question for the
+   * learner. Everything else (values, range, pointers) stays.
+   */
+  revealDecision?: boolean;
   className?: string;
 }
 
 export function ArrayCanvas({
   frame,
   movedPointers,
+  revealDecision = true,
   className,
 }: ArrayCanvasProps): React.ReactElement {
+
   const n = Math.max(1, frame.values.length);
   const win = windowExtent(frame);
   const [rowRef, rowWidth] = useMeasuredWidth<HTMLDivElement>();
@@ -174,8 +182,10 @@ export function ArrayCanvas({
     : { offset: 0, width: rowWidth, center: rowWidth / 2 };
 
   /* A decision in progress: the surviving side is highlighted but the official
-     range has NOT moved yet. Only shown when the frame proves it. */
-  const preview = decisionPreview(frame);
+     range has NOT moved yet. Only shown when the frame proves it, and never
+     while a prediction checkpoint is still open. */
+  const preview = revealDecision ? decisionPreview(frame) : null;
+
 
   return (
     <div className={cn("flex w-full flex-col", className)}>
