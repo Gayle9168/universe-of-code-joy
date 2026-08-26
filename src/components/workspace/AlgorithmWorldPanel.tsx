@@ -51,7 +51,8 @@ export function AlgorithmWorldPanel({
 
   const hasExpression = Boolean(expression);
   const hasComparison = Boolean(frame?.kind === "array" && frame.comparison);
-  const showTeachingRow = frame?.kind === "array" && (rows.length > 0 || hasExpression || hasComparison);
+  const showTeachingRow =
+    frame?.kind === "array" && (rows.length > 0 || hasExpression || hasComparison);
 
   return (
     <section
@@ -73,7 +74,6 @@ export function AlgorithmWorldPanel({
           centred in the card so leftover height is shared above and below rather
           than pooling into one dead region under the content. */}
       <div className="relative mt-4 flex min-h-0 flex-1 flex-col justify-center gap-6 overflow-y-auto overflow-x-hidden">
-
         <div className="flex shrink-0 justify-center">
           {frame ? (
             frame.kind === "array" ? (
@@ -100,6 +100,5 @@ export function AlgorithmWorldPanel({
     </section>
   );
 }
-
 
 export default AlgorithmWorldPanel;
