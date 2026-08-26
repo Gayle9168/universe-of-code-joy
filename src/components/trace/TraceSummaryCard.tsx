@@ -16,7 +16,6 @@ export interface TraceSummaryCardProps {
   /** Algorithm this trace belongs to, used for the CTA label and origin context. */
   algorithmSlug?: string;
   algoName?: string;
-  onRestart2?: never;
   className?: string;
 }
 
