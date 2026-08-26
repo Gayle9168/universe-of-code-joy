@@ -9,14 +9,6 @@ export interface StepTimelineProps {
   className?: string;
 }
 
-interface TimelineNode {
-  label: string;
-  /** First step index in this phase group — where clicking the node seeks. */
-  from: number;
-  to: number;
-  /** True when any step in the group is a milestone. */
-  milestone: boolean;
-}
 
 /**
  * The meaningful timeline: one node per *phase group* rather than per step, so a
