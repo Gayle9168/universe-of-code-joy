@@ -104,7 +104,7 @@ export function ReviewSession({
   };
 
   if (done || !item) {
-    const correctCount = outcomes.filter((o) => o === "first-try" || o === "retry").length;
+    const firstTry = outcomes.filter((o) => o === "first-try").length;
     return (
       <section
         aria-labelledby="review-complete-heading"
@@ -120,7 +120,7 @@ export function ReviewSession({
           {algorithmName} review complete
         </h1>
         <p className="mt-2 font-mono text-[13px] text-slate">
-          {correctCount} of {total} recalled without help.
+          {firstTry} of {total} recalled on the first try.
         </p>
         {practiceOnly ? (
           <p className="mt-2 font-mono text-[12.5px] text-slate-soft">
