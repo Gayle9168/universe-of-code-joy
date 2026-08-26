@@ -88,7 +88,7 @@ export function GoldenWorkspace({
   className,
 }: GoldenWorkspaceProps): React.ReactElement {
   return (
-    <div className={cn("flex min-h-0 flex-1 flex-col gap-4", className)}>
+    <div className={cn("flex min-h-0 flex-1 flex-col gap-3", className)}>
       <div className="grid min-h-0 flex-1 grid-cols-[58fr_42fr] gap-4">
         <AlgorithmWorldPanel module={mod} algoName={algo.name} className="min-h-0" />
         <RightColumn algo={algo} module={mod} slug={slug} />

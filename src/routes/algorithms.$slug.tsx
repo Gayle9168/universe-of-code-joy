@@ -386,7 +386,7 @@ function AlgorithmWorkspace(): React.ReactElement {
           </header>
 
           {/* Main Workspace */}
-          <main className="flex min-h-0 flex-1 flex-col px-4 py-3 lg:px-8 xl:px-12 2xl:px-20">
+          <main className="flex min-h-0 flex-1 flex-col px-4 py-2 lg:px-8 xl:px-12 2xl:px-20">
             {/* One compact lesson context row, then the learning-stage strip */}
             <div className="mb-3 flex shrink-0 flex-col gap-2">
               <LessonContextRow

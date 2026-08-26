@@ -16,7 +16,7 @@ export function PlaybackBand({ className }: PlaybackBandProps): React.ReactEleme
     <section
       aria-label="Playback"
       className={cn(
-        "flex shrink-0 flex-col gap-3 rounded-2xl border border-hairline bg-card px-6 py-4 shadow-sm",
+        "flex shrink-0 flex-col gap-2 rounded-2xl border border-hairline bg-card px-6 py-3 shadow-sm",
         className,
       )}
     >
