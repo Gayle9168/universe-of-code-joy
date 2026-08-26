@@ -1,26 +1,15 @@
 import type { ArrayFrame, Frame } from "@/engine/types";
 
 /**
- * Pure derivations for the Golden Visualizer teaching panels: the variable
- * board, the midpoint expression and the loop invariant.
+ * Pure derivations for the Golden Visualizer: the active search window and the
+ * loop invariant. The variable board and the expression panel live in
+ * `src/lib/variables.ts`.
  *
  * Everything here is derived from frame data the engine already emits — no new
  * Step fields, no algorithm logic. No React, no DOM, no stores.
  */
 
-export interface VariableRow {
-  name: string;
-  value: string;
-  /** True when this row's value differs from the previous step's. */
-  changed: boolean;
-  /** The previous step's value, present only when this row changed. */
-  previous?: string;
-}
 
-export interface MidExpression {
-  formula: string;
-  substitution: string;
-}
 
 function asArrayFrame(frame: Frame | undefined | null): ArrayFrame | null {
   return frame && frame.kind === "array" ? frame : null;
