@@ -62,7 +62,7 @@ export function PredictionGate({
       aria-labelledby={`prediction-heading-${id}`}
       data-player-keys="off"
       data-prediction-gate={status}
-      className={cn("flex flex-col gap-2.5", className)}
+      className={cn("flex flex-col gap-2", className)}
     >
       <div className="flex items-center gap-1.5">
         {resolvedView ? (
