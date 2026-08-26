@@ -39,7 +39,14 @@ const LANGS: { id: CodeLanguage; label: string; name: string }[] = [
   { id: "py", label: "PY", name: "Python" },
 ];
 
-export function CodePane({ className }: { className?: string }): React.ReactElement | null {
+export function CodePane({
+  className,
+  /** Hides the pane's own heading when a tab strip already names it. */
+  hideTitle = false,
+}: {
+  className?: string;
+  hideTitle?: boolean;
+}): React.ReactElement | null {
   const run = usePlayerStore((s) => s.run);
   const index = usePlayerStore((s) => s.index);
   const language = usePrefsStore((s) => s.language);
