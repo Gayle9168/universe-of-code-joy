@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { cellCenter, clampToRow, rowGeometry, scaleXFor, windowExtentPx } from "@/lib/vizTransitions";
+import {
+  cellCenter,
+  clampToRow,
+  rowGeometry,
+  scaleXFor,
+  windowExtentPx,
+} from "@/lib/vizTransitions";
 
 describe("rowGeometry", () => {
   it("splits the row into equal cells minus the gaps", () => {
