@@ -85,7 +85,7 @@ describe("isImplementationSolved", () => {
     expect(isImplementationSolved("binary-search-classic", { problems: {} })).toBe(false);
     expect(
       isImplementationSolved("binary-search-classic", {
-        problems: { "binary-search-classic": { attempts: 3 } } as ProgressData["problems"],
+        problems: { "binary-search-classic": { attempts: 3 } } as unknown as ProgressData["problems"],
       }),
     ).toBe(false);
   });
