@@ -170,7 +170,7 @@ export function ArrayCanvas({
     const bucket = lanes.get(m.slot);
     if (!bucket || bucket.length < 2) return { ...m, lane: 0 };
     const k = bucket.indexOf(m.name);
-    return { ...m, lane: (k - (bucket.length - 1) / 2) * 30 };
+    return { ...m, lane: (k - (bucket.length - 1) / 2) * 44 };
   });
 
   const extent = win
