@@ -84,7 +84,7 @@ function AlgorithmReview({ slug }: { slug: string }) {
       touchStreak();
       setLabel(nextReviewLabel(useProgressStore.getState().reviewCards[slug]));
       toast.success(`Review complete — +${gained} XP`, {
-        description: `${items.length} ${algo?.name ?? slug} prompts recalled.`,
+        description: `${items.length} ${algo?.name ?? slug} prompts answered.`,
       });
     },
     [algo?.name, awardXp, gradeCard, items.length, practiceOnly, slug, touchStreak],
