@@ -4,11 +4,9 @@ import { cn } from "@/lib/utils";
 import { activeNodeIndex, buildTimelineNodes } from "@/lib/timeline";
 import { usePlayerStore } from "@/stores/playerStore";
 
-
 export interface StepTimelineProps {
   className?: string;
 }
-
 
 /**
  * The meaningful timeline: one node per *phase group* rather than per step, so a
