@@ -78,3 +78,15 @@ export function scaleXFor(width: number, containerWidth: number): number {
   if (!Number.isFinite(containerWidth) || containerWidth <= 0) return 1;
   return Math.max(0, width) / containerWidth;
 }
+
+/**
+ * Keeps a centred overlay label inside the measured row. Markers that land on
+ * the first or last cell (and share a lane offset) would otherwise be clipped
+ * by the workspace's horizontal overflow guard.
+ */
+export function clampToRow(x: number, containerWidth: number, halfLabel: number): number {
+  if (!Number.isFinite(containerWidth) || containerWidth <= 0) return x;
+  const inset = Math.max(0, halfLabel);
+  if (containerWidth <= inset * 2) return containerWidth / 2;
+  return Math.max(inset, Math.min(x, containerWidth - inset));
+}
