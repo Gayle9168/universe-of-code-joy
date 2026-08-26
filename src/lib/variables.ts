@@ -260,7 +260,12 @@ export function deriveOperation(
         lines.push({ kind: "formula", text: `${label} = mid - 1` });
       }
       lines.push({ kind: "substitution", text: `${was} → ${ptr.index}` });
-      if (frame.decision?.detail) lines.push({ kind: "note", text: frame.decision.detail });
+      /* The complexity insight teaches once. Later eliminations keep the live
+         candidate count but drop the repeated O(log n) sentence. */
+      if (frame.decision?.detail) {
+        const detail = frame.decision.detail;
+        lines.push({ kind: "note", text: firstOfItsKind ? detail : firstSentence(detail) });
+      }
       return {
         kind: "boundary",
         title: "Boundary update",
