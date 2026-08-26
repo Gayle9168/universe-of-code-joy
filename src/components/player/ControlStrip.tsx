@@ -15,7 +15,7 @@ export interface ControlStripProps {
   className?: string;
 }
 
-export function ControlStrip({ className }: ControlStripProps): React.ReactElement {
+export function ControlStrip({ children, className }: ControlStripProps): React.ReactElement {
   const isPlaying = usePlayerStore((s) => s.isPlaying);
   const toggle = usePlayerStore((s) => s.toggle);
   const next = usePlayerStore((s) => s.next);
