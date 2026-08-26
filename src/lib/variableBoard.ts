@@ -13,7 +13,10 @@ export interface VariableRow {
   value: string;
   /** True when this row's value differs from the previous step's. */
   changed: boolean;
+  /** The previous step's value, present only when this row changed. */
+  previous?: string;
 }
+
 
 export interface MidExpression {
   formula: string;
