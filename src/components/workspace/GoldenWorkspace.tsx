@@ -66,7 +66,7 @@ function RightColumn({
         </div>
       </div>
 
-      <ExplainPane className="flex min-h-0 flex-[4] flex-col rounded-2xl border border-hairline bg-card shadow-sm" />
+      <ExplainPane className="flex min-h-0 flex-[45] flex-col rounded-2xl border border-hairline bg-card shadow-sm" />
     </div>
   );
 }
