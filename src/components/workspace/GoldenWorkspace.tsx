@@ -28,7 +28,7 @@ function RightColumn({
 
   return (
     <div className="flex min-h-0 w-full min-w-0 flex-col gap-4">
-      <div className="flex min-h-0 flex-[6] flex-col overflow-hidden rounded-2xl border border-hairline bg-card shadow-sm">
+      <div className="flex min-h-0 flex-[55] flex-col overflow-hidden rounded-2xl border border-hairline bg-card shadow-sm">
         <div
           role="tablist"
           aria-label="Code and settings"
