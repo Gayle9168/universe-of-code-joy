@@ -92,19 +92,10 @@ export function AlgorithmWorldPanel({
           )}
         </div>
 
-        {showTeachingRow || decision ? (
-          <div className="flex shrink-0 flex-col gap-3">
-            {showTeachingRow ? (
-              <div className="flex items-stretch gap-4">
-                <VariableBoard rows={rows} className="flex-[1.35]" />
-                <ExpressionBlock expression={expression} className="flex-[1.4]" />
-                <ComparisonCard
-                  comparison={hasComparison ? (frame.comparison ?? null) : null}
-                  className="flex-[0.85]"
-                />
-              </div>
-            ) : null}
-            <DecisionNote decision={decision} />
+        {showTeachingRow ? (
+          <div className="flex shrink-0 flex-col items-stretch gap-4 lg:flex-row">
+            <VariableBoard variables={variables} className="lg:flex-[0.9]" />
+            <CurrentOperation operation={operation} className="lg:flex-[1.1]" />
           </div>
         ) : null}
       </div>
