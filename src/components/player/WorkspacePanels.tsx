@@ -149,7 +149,15 @@ export function CodePane({ className }: { className?: string }): React.ReactElem
               ) : (
                 <span className="w-6 shrink-0 select-none text-right text-slate">{lineNo}</span>
               )}
-              <code className="whitespace-pre">{line === "" ? " " : line}</code>
+              <code className="whitespace-pre">
+                {line === ""
+                  ? " "
+                  : tokenizeLine(line).map((t, ti) => (
+                      <span key={ti} className={TOKEN_CLASS[t.kind]}>
+                        {t.text}
+                      </span>
+                    ))}
+              </code>
             </div>
           );
         })}
