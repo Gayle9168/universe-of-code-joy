@@ -65,25 +65,29 @@ export function AlgorithmWorldPanel({
         Algorithm World
       </h2>
 
-      <div className="relative mt-4 flex min-h-0 flex-1 items-start justify-center overflow-y-auto overflow-x-hidden">
-        {frame ? (
-          frame.kind === "array" ? (
-            <ArrayCanvas frame={frame} />
+      {/* One scroll column: the frame, then the panels that read it — the two
+          stay together instead of being pushed to opposite edges. */}
+      <div className="relative mt-4 flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
+        <div className="flex shrink-0 justify-center">
+          {frame ? (
+            frame.kind === "array" ? (
+              <ArrayCanvas frame={frame} />
+            ) : (
+              <FrameView frame={frame} />
+            )
           ) : (
-            <FrameView frame={frame} className="max-h-full" />
-          )
-        ) : (
-          <p className="t-small text-slate">Preparing the visualization…</p>
-        )}
-      </div>
-
-      {frame?.kind === "array" ? (
-        <div className="mt-4 flex shrink-0 items-stretch gap-4">
-          <VariableBoard rows={rows} className="flex-[1.35]" />
-          <ExpressionBlock expression={expression} className="flex-[1.4]" />
-          <ComparisonCard comparison={frame.comparison ?? null} className="flex-[0.85]" />
+            <p className="t-small text-slate">Preparing the visualization…</p>
+          )}
         </div>
-      ) : null}
+
+        {frame?.kind === "array" ? (
+          <div className="mt-7 flex shrink-0 items-stretch gap-4">
+            <VariableBoard rows={rows} className="flex-[1.35]" />
+            <ExpressionBlock expression={expression} className="flex-[1.4]" />
+            <ComparisonCard comparison={frame.comparison ?? null} className="flex-[0.85]" />
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }
