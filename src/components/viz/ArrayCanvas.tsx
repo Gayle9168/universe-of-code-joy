@@ -288,16 +288,13 @@ export function ArrayCanvas({
         {/* Decision preview: the side that would survive this comparison. The
             row is always reserved so the canvas keeps one height, and the
             wording is explicit that the range above has not changed yet. */}
-        <div className="relative mt-1.5 h-[16px] w-full">
+        <div className="mt-1.5 flex h-[16px] w-full items-start justify-center">
           <span
-            className="absolute left-0 top-0 whitespace-nowrap font-mono text-[12px] text-slate transition-[transform,opacity] duration-300 ease-out will-change-transform"
-            style={{
-              opacity: preview ? 1 : 0,
-              transform: `translateX(${clampToRow(previewExtent?.center ?? extent.center, rowWidth, 210)}px) translateX(-50%)`,
-            }}
+            className="whitespace-nowrap font-mono text-[12px] text-slate transition-opacity duration-300 ease-out"
+            style={{ opacity: preview ? 1 : 0 }}
           >
-            Decision preview — {preview ? `[${preview.from}..${preview.to}]` : "—"} would survive;
-            range not changed yet
+            Preview: {preview ? `[${preview.from}..${preview.to}]` : "—"} would survive — range not
+            changed yet
           </span>
         </div>
       </div>
