@@ -13,6 +13,9 @@ import { useTraceStoreApi } from "@/stores/traceStore";
 export interface TraceWorkspaceProps {
   exercise: TraceExercise | undefined;
   algoName: string;
+  /** Implementation challenge the completion CTA opens; null hides it. */
+  codeSlug?: string | null;
+  algorithmSlug?: string;
   className?: string;
 }
 
@@ -34,6 +37,8 @@ function movedBetween(prev: TraceView | null, next: TraceView): string[] {
 export function TraceWorkspace({
   exercise,
   algoName,
+  codeSlug = null,
+  algorithmSlug,
   className,
 }: TraceWorkspaceProps): React.ReactElement {
   const storeApi = useTraceStoreApi();
@@ -118,6 +123,9 @@ export function TraceWorkspace({
                 steps={total}
                 hintsUsed={hintsUsed}
                 onRestart={() => storeApi.getState().restart()}
+                codeSlug={codeSlug}
+                algorithmSlug={algorithmSlug}
+                algoName={algoName}
               />
             ) : (
               <TraceMove

@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Check, RotateCcw } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ArrowRight, Check, RotateCcw } from "lucide-react";
 import type { TraceSession } from "@/lib/trace";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +11,12 @@ export interface TraceSummaryCardProps {
   steps: number;
   hintsUsed: number;
   onRestart: () => void;
+  /** Implementation challenge to hand off to; null hides the Code CTA. */
+  codeSlug?: string | null;
+  /** Algorithm this trace belongs to, used for the CTA label and origin context. */
+  algorithmSlug?: string;
+  algoName?: string;
+  onRestart2?: never;
   className?: string;
 }
 
@@ -23,6 +30,9 @@ export function TraceSummaryCard({
   steps,
   hintsUsed,
   onRestart,
+  codeSlug = null,
+  algorithmSlug,
+  algoName = "this algorithm",
   className,
 }: TraceSummaryCardProps): React.ReactElement {
   const { summary } = session;
@@ -76,14 +86,45 @@ export function TraceSummaryCard({
         ))}
       </dl>
 
-      <button
-        type="button"
-        onClick={onRestart}
-        className="inline-flex h-9 w-fit items-center gap-1.5 rounded-lg border border-primary/30 bg-card px-3 font-sans text-[13px] font-medium text-primary transition-colors hover:bg-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-      >
-        <RotateCcw aria-hidden="true" size={14} strokeWidth={1.6} />
-        Trace again
-      </button>
+      {/* The handoff: tracing asked the learner each decision, code asks them to
+          express the same transitions themselves. One obvious next action. */}
+      {codeSlug ? (
+        <p className="font-sans text-[12.5px] leading-relaxed text-slate">
+          You just tracked low, mid and high by hand. Now express those same state transitions in
+          code.
+        </p>
+      ) : null}
+
+      <div className="flex flex-wrap items-center gap-2">
+        {codeSlug ? (
+          <Link
+            to="/practice/$slug"
+            params={{ slug: codeSlug }}
+            search={{
+              from: "lesson" as const,
+              ...(algorithmSlug ? { algorithm: algorithmSlug } : {}),
+              stage: "code" as const,
+            }}
+            className="inline-flex h-9 w-fit items-center gap-1.5 rounded-lg bg-primary px-3.5 font-sans text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+          >
+            Implement {algoName}
+            <ArrowRight aria-hidden="true" size={14} strokeWidth={1.8} />
+          </Link>
+        ) : null}
+        <button
+          type="button"
+          onClick={onRestart}
+          className={cn(
+            "inline-flex h-9 w-fit items-center gap-1.5 rounded-lg border px-3 font-sans text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+            codeSlug
+              ? "border-hairline bg-card text-slate hover:bg-tint hover:text-ink"
+              : "border-primary/30 bg-card text-primary hover:bg-tint",
+          )}
+        >
+          <RotateCcw aria-hidden="true" size={14} strokeWidth={1.6} />
+          Trace again
+        </button>
+      </div>
     </section>
   );
 }
