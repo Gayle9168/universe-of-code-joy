@@ -68,9 +68,13 @@ export function AlgorithmWorldPanel({
         className,
       )}
     >
+      {/* The one live region for the whole workspace: a single concise execution
+          summary per step, instead of code, variables, operation and reasoning
+          each announcing themselves. */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {step ? `Step ${index + 1} of ${run?.steps.length ?? 0}: ${step.narration}` : ""}
+        {reasoning?.accessibleSummary ?? ""}
       </div>
+
 
       <h2 className="shrink-0 font-display text-[19px] font-semibold tracking-tight text-ink">
         Algorithm World
