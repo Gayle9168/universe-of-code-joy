@@ -95,30 +95,45 @@ const ValueCell = React.memo(function ValueCell({
   value: string | number;
   state: CellState;
 }): React.ReactElement {
+  const treatment = cellTreatment(state);
   return (
     <div
       className={cn(
-        "flex h-[60px] items-center justify-center rounded-xl border font-mono text-[21px] tabular-nums xl:h-[62px]",
-        "transition-[background-color,border-color,color,box-shadow] duration-300 ease-out",
+        "relative flex h-[60px] items-center justify-center rounded-xl border font-mono text-[21px] tabular-nums xl:h-[62px]",
+        "transition-[background-color,border-color,color,box-shadow,opacity] duration-300 ease-out",
         CELL_SURFACE[state],
         EMPHASIS[state],
+        treatment.dim && "opacity-55",
       )}
     >
       {String(value)}
+      {treatment.mark ? (
+        <span className="pointer-events-none absolute right-1 top-1 opacity-80">
+          <StateIcon state={state} size={11} />
+        </span>
+      ) : null}
     </div>
   );
 });
 
 export interface ArrayCanvasProps {
   frame: ArrayFrame;
+  /** Pointer names whose index moved on this step — only those get emphasis. */
+  movedPointers?: readonly string[];
   className?: string;
 }
 
-export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.ReactElement {
+export function ArrayCanvas({
+  frame,
+  movedPointers,
+  className,
+}: ArrayCanvasProps): React.ReactElement {
   const n = Math.max(1, frame.values.length);
   const win = windowExtent(frame);
   const [rowRef, rowWidth] = useMeasuredWidth<HTMLDivElement>();
   const cols: React.CSSProperties = { gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` };
+  const moved = React.useMemo(() => new Set(movedPointers ?? []), [movedPointers]);
+
 
   /* Every pointer the run has shown so far keeps a mounted marker, so a marker
      travels to its new cell instead of unmounting and reappearing. */
