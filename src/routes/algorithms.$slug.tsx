@@ -40,6 +40,7 @@ import { useAutoplay } from "@/hooks/useAutoplay";
 import { useHydrated } from "@/hooks/useHydrated";
 import { usePlayerKeys } from "@/hooks/usePlayerKeys";
 import { useSession } from "@/hooks/useSession";
+import { hasReviewSet, reviewStageState } from "@/lib/algorithm-review";
 import {
   isImplementationSolved,
   isTransferSolved,
@@ -246,6 +247,12 @@ function AlgorithmWorkspace(): React.ReactElement {
   const transferSolved = useProgressStore((s) => isTransferSolved(practiceSlug, s));
   const solveComplete = hydrated && transferSolved;
 
+  /* REVIEW reports the existing SRS card's schedule — due, scheduled or graded
+     today — and stays inert for algorithms without a curated recall set. */
+  const reviewAvailable = React.useMemo(() => hasReviewSet(slug), [slug]);
+  const reviewCard = useProgressStore((s) => s.reviewCards[slug]);
+  const reviewState = hydrated ? reviewStageState(reviewCard) : "none";
+
   const completeLesson = useProgressStore((s) => s.completeLesson);
   const awardXp = useProgressStore((s) => s.awardXp);
   const touchStreak = useProgressStore((s) => s.touchStreak);
@@ -445,6 +452,8 @@ function AlgorithmWorkspace(): React.ReactElement {
                   codeSlug={codeSlug}
                   codeComplete={codeComplete}
                   solveComplete={solveComplete}
+                  reviewAvailable={reviewAvailable}
+                  reviewState={reviewState}
                 />
                 <button
                   type="button"

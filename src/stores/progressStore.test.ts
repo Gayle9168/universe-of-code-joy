@@ -90,7 +90,7 @@ describe("xp and mastery", () => {
     expect(third.leveledUp).toBe(false);
   });
 
-  it("masteryPct is 0 fresh and 100 fully complete", () => {
+  it("masteryPct is 0 fresh, short of 100 on activity alone, and 100 with retention", () => {
     const lesson = getLessons()[0]!;
     const algoSlug = lesson.algorithmSlug;
     const related = getProblems().filter((p) => p.algorithmSlug === algoSlug);
@@ -108,6 +108,13 @@ describe("xp and mastery", () => {
       },
     }));
     store.getState().recordStepsWatched(algoSlug, 1); // re-derives masteryPct
+    // Every stage completed once is "practiced", not "mastered": retention is missing.
+    expect(store.getState().algorithms[algoSlug]!.masteryPct).toBe(75);
+    expect(store.getState().algorithms[algoSlug]!.status).toBe("practiced");
+
+    // Two successful reviews supply the retention quarter.
+    store.getState().gradeCard(algoSlug, 3);
+    store.getState().gradeCard(algoSlug, 3);
     expect(store.getState().algorithms[algoSlug]!.masteryPct).toBe(100);
     expect(store.getState().algorithms[algoSlug]!.status).toBe("mastered");
     expect(related.length).toBeGreaterThanOrEqual(0);

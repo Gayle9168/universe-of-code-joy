@@ -930,3 +930,56 @@ export function validateMarketingClaim(claim: unknown): {
     ? { success: true, data: parsed.data as MarketingClaim }
     : { success: false, error: parsed.error };
 }
+
+// ============================================================================
+// Review item schemas (active recall)
+// ============================================================================
+
+export const REVIEW_ITEM_KINDS = [
+  "concept",
+  "boundary",
+  "midpoint",
+  "termination",
+  "code",
+  "pattern",
+] as const;
+export const ReviewItemKindSchema = z.enum(REVIEW_ITEM_KINDS);
+
+export const ReviewChoiceSchema = z.object({
+  id: z.string().min(1, "Choice id is required"),
+  label: z.string().min(1, "Choice label is required"),
+  misconception: z.string().min(1, "misconception cannot be empty when present").optional(),
+});
+
+export const ReviewItemSchema = z
+  .object({
+    id: z.string().min(1, "Review item id is required"),
+    algorithmSlug: SlugSchema,
+    kind: ReviewItemKindSchema,
+    prompt: z.string().min(1, "Review prompt is required"),
+    given: z.array(z.string().min(1, "Given line cannot be empty")),
+    choices: z.array(ReviewChoiceSchema).min(2, "A review item needs at least 2 choices"),
+    answerId: z.string().min(1, "answerId is required"),
+    explanation: z.string().min(1, "Review explanation is required"),
+    hint: z.string().min(1, "hint cannot be empty when present").optional(),
+  })
+  .refine((item) => item.choices.some((c) => c.id === item.answerId), {
+    message: "answerId must match one of the choices",
+    path: ["answerId"],
+  })
+  .refine((item) => new Set(item.choices.map((c) => c.id)).size === item.choices.length, {
+    message: "Choice ids must be unique",
+    path: ["choices"],
+  })
+  .refine((item) => item.choices.every((c) => (c.id === item.answerId) === !c.misconception), {
+    message: "Every distractor needs a misconception, and the correct choice must not have one",
+    path: ["choices"],
+  });
+
+export function validateReviewItem(item: unknown): {
+  success: boolean;
+  error?: z.ZodError;
+} {
+  const parsed = ReviewItemSchema.safeParse(item);
+  return parsed.success ? { success: true } : { success: false, error: parsed.error };
+}

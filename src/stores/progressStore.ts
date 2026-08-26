@@ -142,17 +142,39 @@ export function calendarDaysBetween(fromISO: string, toDate: Date, timeZone?: st
 
 /* ---------------- mastery (always derived) ---------------- */
 
-export function computeMasteryPct(entry: {
-  stepsWatched: number;
-  lessonDone: boolean;
-  quizScore: number | null;
-  problemsSolved: string[];
-}): number {
-  const watched = entry.stepsWatched > 0 ? 20 : 0;
-  const lesson = entry.lessonDone ? 30 : 0;
-  const quiz = ((entry.quizScore ?? 0) / 100) * 20;
-  const solved = Math.min(entry.problemsSolved.length / 3, 1) * 30;
-  return Math.round(Math.min(100, Math.max(0, watched + lesson + quiz + solved)));
+/**
+ * How much of mastery each kind of evidence can account for. Activity alone
+ * (watching, reading, one accepted submission) can never reach 100: the last
+ * quarter is retention, which only successful later reviews can supply.
+ */
+export const MASTERY_WEIGHTS = {
+  watched: 15,
+  lesson: 20,
+  quiz: 15,
+  solved: 25,
+  retention: 25,
+} as const;
+
+/** Successful review repetitions needed for full retention credit. */
+export const MASTERY_RETENTION_REPS = 2;
+
+export function computeMasteryPct(
+  entry: {
+    stepsWatched: number;
+    lessonDone: boolean;
+    quizScore: number | null;
+    problemsSolved: string[];
+  },
+  card?: Pick<ReviewCard, "reps" | "lapses">,
+): number {
+  const watched = entry.stepsWatched > 0 ? MASTERY_WEIGHTS.watched : 0;
+  const lesson = entry.lessonDone ? MASTERY_WEIGHTS.lesson : 0;
+  const quiz = ((entry.quizScore ?? 0) / 100) * MASTERY_WEIGHTS.quiz;
+  const solved = Math.min(entry.problemsSolved.length / 3, 1) * MASTERY_WEIGHTS.solved;
+  const successfulReviews = card ? Math.max(0, Math.round(card.reps) - Math.round(card.lapses)) : 0;
+  const retention =
+    Math.min(successfulReviews / MASTERY_RETENTION_REPS, 1) * MASTERY_WEIGHTS.retention;
+  return Math.round(Math.min(100, Math.max(0, watched + lesson + quiz + solved + retention)));
 }
 
 function statusFor(entry: AlgorithmProgress): AlgorithmStatus {
@@ -315,7 +337,7 @@ export const useProgressStore = create<ProgressState>()(
           const current = s.algorithms[slug] ?? blankAlgorithm(nowISO);
           const next = mutate({ ...current, problemsSolved: [...current.problemsSolved] });
           next.lastSeenISO = nowISO;
-          next.masteryPct = computeMasteryPct(next);
+          next.masteryPct = computeMasteryPct(next, s.reviewCards[slug]);
           next.status = statusFor(next);
           return {
             algorithms: { ...s.algorithms, [slug]: next },
@@ -528,18 +550,29 @@ export const useProgressStore = create<ProgressState>()(
             );
             const intervalDays = lapsed ? 1 : Math.max(1, Math.round(prev.intervalDays * ease));
             const due = new Date(Date.now() + intervalDays * 86_400_000).toISOString();
+            const card: ReviewCard = {
+              ease,
+              intervalDays,
+              dueISO: due,
+              reps: prev.reps + 1,
+              lapses: prev.lapses + (lapsed ? 1 : 0),
+              lastGradedISO: new Date().toISOString(),
+            };
+            /* Retention is part of mastery, so a graded card re-derives the
+               algorithm row it belongs to — never a duplicate mastery flag. */
+            const entry = s.algorithms[cardId];
+            const algorithms = entry
+              ? {
+                  ...s.algorithms,
+                  [cardId]: (() => {
+                    const next = { ...entry, masteryPct: computeMasteryPct(entry, card) };
+                    return { ...next, status: statusFor(next) };
+                  })(),
+                }
+              : s.algorithms;
             return {
-              reviewCards: {
-                ...s.reviewCards,
-                [cardId]: {
-                  ease,
-                  intervalDays,
-                  dueISO: due,
-                  reps: prev.reps + 1,
-                  lapses: prev.lapses + (lapsed ? 1 : 0),
-                  lastGradedISO: new Date().toISOString(),
-                },
-              },
+              reviewCards: { ...s.reviewCards, [cardId]: card },
+              algorithms,
               activity: touchActivity(s),
             };
           });

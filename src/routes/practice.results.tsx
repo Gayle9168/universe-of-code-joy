@@ -6,6 +6,7 @@ import { getAlgorithm } from "@/content/algorithms";
 import { getProblem, getProblems } from "@/content/problems";
 import useHydrated from "@/hooks/useHydrated";
 import { useDueCardCount } from "@/hooks/useProgress";
+import { hasReviewSet } from "@/lib/algorithm-review";
 import { resolveTransferSlug } from "@/lib/lesson-stages";
 import { xpAtLevelStart, xpForLevel } from "@/lib/xp";
 import { baselineProgress, dayKey, useProgressStore } from "@/stores/progressStore";
@@ -407,6 +408,14 @@ function ChallengeResults() {
                 >
                   Apply {lessonAlgorithm?.name} to a new problem{" "}
                   <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                </Link>
+              ) : solveDone && lessonAlgorithm && hasReviewSet(lessonAlgorithm.slug) ? (
+                <Link
+                  to="/review"
+                  search={{ algorithm: lessonAlgorithm.slug }}
+                  className="inline-flex h-11 items-center gap-2.5 rounded-xl bg-primary px-7 font-sans text-[14px] font-medium text-primary-foreground hover:bg-primary-glow"
+                >
+                  Continue to Review <ArrowRight className="h-4 w-4" strokeWidth={2} />
                 </Link>
               ) : solveDone ? (
                 <Link

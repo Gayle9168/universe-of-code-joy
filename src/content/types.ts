@@ -44,3 +44,5 @@ export type {
   SettingsNavKey,
   SettingsNavItem,
 } from "./nav";
+
+export type { ReviewItemKind, ReviewChoice, ReviewItem } from "@/data/types";

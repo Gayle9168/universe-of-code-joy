@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { Check, Dot } from "lucide-react";
+import type { ReviewStageState } from "@/lib/algorithm-review";
 import { cn } from "@/lib/utils";
 
 export type LessonStage =
@@ -10,7 +11,8 @@ export type LessonStage =
   | "predict"
   | "trace"
   | "code"
-  | "solve";
+  | "solve"
+  | "review";
 
 const STAGES: Array<{ id: LessonStage; label: string }> = [
   { id: "concept", label: "Concept" },
@@ -20,6 +22,7 @@ const STAGES: Array<{ id: LessonStage; label: string }> = [
   { id: "trace", label: "Trace" },
   { id: "code", label: "Code" },
   { id: "solve", label: "Solve" },
+  { id: "review", label: "Review" },
 ];
 
 export interface LessonStageStripProps {
@@ -37,13 +40,20 @@ export interface LessonStageStripProps {
   codeComplete?: boolean;
   /** True when the transfer challenge behind Solve is already solved. */
   solveComplete?: boolean;
+  /** True when this algorithm has a curated recall set; false keeps Review inert. */
+  reviewAvailable?: boolean;
+  /**
+   * Review's scheduling state, never a mastery claim: `due` shows a dot,
+   * `reviewed` (graded today) and `scheduled` show a check.
+   */
+  reviewState?: ReviewStageState;
   className?: string;
 }
 
 /**
  * The learning-journey strip: Concept — Watch — Visualize — Predict — Trace —
- * Code — Solve. Stages without their own screen yet render as inert labels
- * rather than dead links.
+ * Code — Solve — Review. Stages without their own screen yet render as inert
+ * labels rather than dead links.
  */
 export function LessonStageStrip({
   active,
@@ -53,6 +63,8 @@ export function LessonStageStrip({
   codeSlug = null,
   codeComplete = false,
   solveComplete = false,
+  reviewAvailable = false,
+  reviewState = "none",
   className,
 }: LessonStageStripProps): React.ReactElement {
   return (
@@ -142,6 +154,32 @@ export function LessonStageStrip({
             >
               {stage.label}
               {solveComplete ? <Check aria-label="complete" size={12} strokeWidth={2.4} /> : null}
+            </Link>
+          );
+        }
+        /* Review opens the curated recall set. Its marker reports scheduling
+           only — a dot when due now, a check once graded — never mastery. */
+        if (stage.id === "review" && reviewAvailable && algorithmSlug) {
+          const reviewed = reviewState === "reviewed" || reviewState === "scheduled";
+          return (
+            <Link
+              key={stage.id}
+              to="/review"
+              search={{ algorithm: algorithmSlug }}
+              className={cn(
+                base,
+                "gap-1",
+                reviewState === "none"
+                  ? "text-slate hover:bg-tint hover:text-ink"
+                  : "text-primary hover:bg-tint",
+              )}
+            >
+              {stage.label}
+              {reviewState === "due" ? (
+                <Dot aria-label="due for review" size={14} strokeWidth={4} />
+              ) : reviewed ? (
+                <Check aria-label="reviewed" size={12} strokeWidth={2.4} />
+              ) : null}
             </Link>
           );
         }

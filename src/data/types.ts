@@ -204,3 +204,44 @@ export interface LegalDocument {
   summaryMarkdown: string;
   sections: LegalSection[];
 }
+
+/**
+ * Which retention skill a review prompt tests. Deliberately small: the Golden
+ * template needs coverage of the reasoning that makes binary search valid, not
+ * twenty trivia variants.
+ */
+export type ReviewItemKind =
+  | "concept"
+  | "boundary"
+  | "midpoint"
+  | "termination"
+  | "code"
+  | "pattern";
+
+export interface ReviewChoice {
+  id: string;
+  label: string;
+  /**
+   * The corrective sentence shown when this wrong choice is picked. Absent on
+   * the correct choice, where the item's `explanation` is used instead.
+   */
+  misconception?: string;
+}
+
+/**
+ * One active-recall prompt. Linked to its algorithm the same way problems are —
+ * by `algorithmSlug` — so no new catalog field is needed to resolve a set.
+ */
+export interface ReviewItem {
+  id: string;
+  algorithmSlug: string;
+  kind: ReviewItemKind;
+  prompt: string;
+  /** Monospace state lines shown above the choices. Must never leak the answer. */
+  given: string[];
+  choices: ReviewChoice[];
+  answerId: string;
+  explanation: string;
+  /** One small nudge, offered only after an incorrect attempt. */
+  hint?: string;
+}
