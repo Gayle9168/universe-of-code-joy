@@ -19,7 +19,8 @@ describe("tokenizeLine", () => {
     expect(kindOf(line, "const")).toBe("keyword");
     expect(kindOf(line, "floor")).toBe("fn");
     expect(kindOf(line, "2")).toBe("number");
-    expect(kindOf(line, "mid")).toBe("plain");
+    /* Plain runs absorb the surrounding whitespace — one span, not three. */
+    expect(kindOf(line, " mid ")).toBe("plain");
   });
 
   it("treats trailing comments as one comment token", () => {
