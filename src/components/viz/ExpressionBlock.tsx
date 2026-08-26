@@ -9,34 +9,31 @@ export interface ExpressionBlockProps {
 
 /**
  * The midpoint calculation: the formula, then the same formula with the current
- * numbers substituted in. Height is reserved so a step without an expression
- * does not shift the canvas. Pure presentation.
+ * numbers substituted in. Rendered only on steps that actually have a midpoint —
+ * an empty card teaches nothing, so the row reflows instead. Pure presentation.
  */
 export function ExpressionBlock({
   expression,
   className,
-}: ExpressionBlockProps): React.ReactElement {
+}: ExpressionBlockProps): React.ReactElement | null {
+  if (!expression) return null;
+
   return (
     <section
       aria-label="Midpoint calculation"
       className={cn(
-        "flex w-full flex-col gap-3 rounded-xl border border-hairline bg-card px-4 py-3",
+        "flex w-full flex-col gap-2 rounded-xl border border-hairline bg-card px-4 py-3",
         className,
       )}
     >
       <h3 className="font-sans text-[13px] font-medium text-ink">Midpoint Calculation</h3>
-      {/* The card keeps its frame on steps with no midpoint; only the maths fades. */}
-      <div
-        className="flex flex-col gap-1.5 transition-opacity duration-300 ease-out"
-        style={{ opacity: expression ? 1 : 0 }}
-        aria-hidden={expression ? undefined : true}
-      >
-        <p className="font-mono text-[13px] text-slate">{expression?.formula ?? "\u00a0"}</p>
+      <div className="flex flex-col gap-1">
+        <p className="font-mono text-[13px] text-slate">{expression.formula}</p>
         <p
-          key={expression?.substitution ?? "none"}
+          key={expression.substitution}
           className="viz-swap font-mono text-[13px] tabular-nums text-ink"
         >
-          {expression?.substitution ?? "\u00a0"}
+          {expression.substitution}
         </p>
       </div>
     </section>
