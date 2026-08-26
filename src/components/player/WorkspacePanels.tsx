@@ -87,8 +87,15 @@ export function CodePane({
         className,
       )}
     >
-      <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
-        <h2 className="font-sans text-[14px] font-medium text-ink">Code ({activeLang.name})</h2>
+      <div
+        className={cn(
+          "flex items-center border-b border-hairline px-4 py-3",
+          hideTitle ? "justify-end" : "justify-between",
+        )}
+      >
+        {hideTitle ? null : (
+          <h2 className="font-sans text-[14px] font-medium text-ink">Code ({activeLang.name})</h2>
+        )}
         <div className="flex items-center gap-4">
           <div className="relative">
             <select
