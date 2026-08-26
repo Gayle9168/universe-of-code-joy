@@ -21,17 +21,18 @@ export function ComparisonCard({ comparison, className }: ComparisonCardProps): 
   return (
     <section
       aria-label="Comparison"
-      aria-hidden={comparison ? undefined : true}
       className={cn(
-        "flex w-full flex-col gap-3 rounded-xl border border-hairline bg-card px-4 py-3 transition-opacity duration-300 ease-out",
+        "flex w-full flex-col gap-3 rounded-xl border border-hairline bg-card px-4 py-3",
         className,
       )}
-      style={{ opacity: comparison ? 1 : 0 }}
     >
       <h3 className="font-sans text-[13px] font-medium text-ink">Comparison</h3>
+      {/* The frame stays; only the question fades when a step asks none. */}
       <span
         key={expression}
-        className="viz-swap inline-flex h-9 w-fit items-center rounded-lg border border-primary/25 bg-tint px-3 font-mono text-[15px] tabular-nums text-ink"
+        aria-hidden={comparison ? undefined : true}
+        className="viz-swap inline-flex h-9 w-fit items-center rounded-lg border border-primary/25 bg-tint px-3 font-mono text-[15px] tabular-nums text-ink transition-opacity duration-300 ease-out"
+        style={{ opacity: comparison ? 1 : 0 }}
       >
         {expression}
       </span>
