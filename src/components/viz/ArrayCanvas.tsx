@@ -293,7 +293,7 @@ export function ArrayCanvas({
             className="absolute left-0 top-0 whitespace-nowrap font-mono text-[12px] text-slate transition-[transform,opacity] duration-300 ease-out will-change-transform"
             style={{
               opacity: preview ? 1 : 0,
-              transform: `translateX(${clampToRow(previewExtent?.center ?? extent.center, rowWidth, 110)}px) translateX(-50%)`,
+              transform: `translateX(${clampToRow(previewExtent?.center ?? extent.center, rowWidth, 210)}px) translateX(-50%)`,
             }}
           >
             Decision preview — {preview ? `[${preview.from}..${preview.to}]` : "—"} would survive;
