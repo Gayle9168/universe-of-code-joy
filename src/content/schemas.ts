@@ -116,6 +116,7 @@ export const AlgorithmSchema = z.object({
   commonMistakes: z.array(z.string().min(1, "Common mistake cannot be empty")),
   estMinutes: z.number().int().positive("estMinutes must be a positive integer"),
   xp: z.number().int().positive("xp must be a positive integer"),
+  implementationProblemSlug: SlugSchema.optional(),
 });
 
 // ============================================================================

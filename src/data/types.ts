@@ -45,6 +45,13 @@ export interface Algorithm {
   commonMistakes: string[];
   estMinutes: number;
   xp: number;
+  /**
+   * The coding challenge that IS this algorithm — the Golden Lesson's CODE
+   * stage. Distinct from transfer questions that merely apply the technique,
+   * which the Solve stage resolves from `Problem.algorithmSlug`. Optional:
+   * algorithms without a canonical implementation exercise hide the stage.
+   */
+  implementationProblemSlug?: string;
 }
 
 export interface LessonSection {
