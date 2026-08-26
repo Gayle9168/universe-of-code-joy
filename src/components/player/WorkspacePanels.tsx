@@ -14,6 +14,7 @@ import type { Algorithm } from "@/content/types";
 import type { AlgorithmModule, InputField, AuxPanel } from "@/engine/types";
 import { cn } from "@/lib/utils";
 import { invariantFor } from "@/lib/variableBoard";
+import { tokenizeLine, type TokenKind } from "@/lib/syntaxHighlight";
 
 import { useIsReducedMotion } from "@/hooks/useReducedMotionSync";
 import { usePlayerStore, useCurrentStep } from "@/stores/playerStore";
@@ -21,13 +22,31 @@ import { usePrefsStore, type CodeLanguage } from "@/stores/prefsStore";
 
 /* ---------------- code tab ---------------- */
 
+/** Token colours, all from the theme tokens — the palette stays teal + ink. */
+const TOKEN_CLASS: Record<TokenKind, string> = {
+  keyword: "text-accent-strong",
+  number: "text-ink",
+  string: "text-accent-strong/80",
+  comment: "text-slate-soft italic",
+  fn: "text-ink font-medium",
+  punct: "text-slate",
+  plain: "",
+};
+
 const LANGS: { id: CodeLanguage; label: string; name: string }[] = [
   { id: "js", label: "JS", name: "JavaScript" },
   { id: "ts", label: "TS", name: "TypeScript" },
   { id: "py", label: "PY", name: "Python" },
 ];
 
-export function CodePane({ className }: { className?: string }): React.ReactElement | null {
+export function CodePane({
+  className,
+  /** Hides the pane's own heading when a tab strip already names it. */
+  hideTitle = false,
+}: {
+  className?: string;
+  hideTitle?: boolean;
+}): React.ReactElement | null {
   const run = usePlayerStore((s) => s.run);
   const index = usePlayerStore((s) => s.index);
   const language = usePrefsStore((s) => s.language);
@@ -68,8 +87,15 @@ export function CodePane({ className }: { className?: string }): React.ReactElem
         className,
       )}
     >
-      <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
-        <h2 className="font-sans text-[14px] font-medium text-ink">Code ({activeLang.name})</h2>
+      <div
+        className={cn(
+          "flex items-center border-b border-hairline px-4 py-3",
+          hideTitle ? "justify-end" : "justify-between",
+        )}
+      >
+        {hideTitle ? null : (
+          <h2 className="font-sans text-[14px] font-medium text-ink">Code ({activeLang.name})</h2>
+        )}
         <div className="flex items-center gap-4">
           <div className="relative">
             <select
@@ -149,7 +175,15 @@ export function CodePane({ className }: { className?: string }): React.ReactElem
               ) : (
                 <span className="w-6 shrink-0 select-none text-right text-slate">{lineNo}</span>
               )}
-              <code className="whitespace-pre">{line === "" ? " " : line}</code>
+              <code className="whitespace-pre">
+                {line === ""
+                  ? " "
+                  : tokenizeLine(line).map((t, ti) => (
+                      <span key={ti} className={TOKEN_CLASS[t.kind]}>
+                        {t.text}
+                      </span>
+                    ))}
+              </code>
             </div>
           );
         })}

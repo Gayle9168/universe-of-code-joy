@@ -28,7 +28,7 @@ function RightColumn({
 
   return (
     <div className="flex min-h-0 w-full min-w-0 flex-col gap-4">
-      <div className="flex min-h-0 flex-[6] flex-col overflow-hidden rounded-2xl border border-hairline bg-card shadow-sm">
+      <div className="flex min-h-0 flex-[55] flex-col overflow-hidden rounded-2xl border border-hairline bg-card shadow-sm">
         <div
           role="tablist"
           aria-label="Code and settings"
@@ -58,13 +58,15 @@ function RightColumn({
           aria-labelledby={`golden-tab-${tab}`}
           className="min-h-0 flex-1 overflow-y-auto"
         >
-          {tab === "code" && <CodePane className="h-full rounded-none border-0 shadow-none" />}
+          {tab === "code" && (
+            <CodePane hideTitle className="h-full rounded-none border-0 shadow-none" />
+          )}
           {tab === "input" && mod && <InputPane module={mod} slug={slug} />}
           {tab === "about" && <AboutPane algo={algo} />}
         </div>
       </div>
 
-      <ExplainPane className="flex min-h-0 flex-[4] flex-col rounded-2xl border border-hairline bg-card shadow-sm" />
+      <ExplainPane className="flex min-h-0 flex-[45] flex-col rounded-2xl border border-hairline bg-card shadow-sm" />
     </div>
   );
 }

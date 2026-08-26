@@ -5,15 +5,17 @@ import { usePlayerStore, useCanStepBack, useCanStepForward } from "@/stores/play
 import { SpeedControl } from "@/components/player/SpeedControl";
 
 /**
- * The single-row control strip under the timeline: Previous, Play/Pause, Next,
- * Speed. Deliberately smaller than `PlaybackBar` — the reference workspace gives
- * the canvas the height, so the controls stay one compact row.
+ * The single compact playback row: transport controls on the left, an optional
+ * centred slot (the phase timeline) and speed plus Next on the right. The canvas
+ * gets the height, so this stays one row.
  */
 export interface ControlStripProps {
+  /** Rendered centred between the two control clusters — the phase timeline. */
+  children?: React.ReactNode;
   className?: string;
 }
 
-export function ControlStrip({ className }: ControlStripProps): React.ReactElement {
+export function ControlStrip({ children, className }: ControlStripProps): React.ReactElement {
   const isPlaying = usePlayerStore((s) => s.isPlaying);
   const toggle = usePlayerStore((s) => s.toggle);
   const next = usePlayerStore((s) => s.next);
@@ -29,19 +31,17 @@ export function ControlStrip({ className }: ControlStripProps): React.ReactEleme
     "inline-flex h-9 items-center gap-1.5 rounded-lg border border-hairline bg-card px-3 font-sans text-[13px] font-medium text-ink transition-colors hover:bg-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-40";
 
   return (
-    <div className={cn("flex w-full items-center justify-between gap-4", className)}>
-      <button
-        type="button"
-        aria-label="Previous step (←)"
-        onClick={prev}
-        disabled={!canBack}
-        className={side}
-      >
-        <ChevronLeft size={16} strokeWidth={1.5} />
-        Previous
-      </button>
-
-      <div className="flex items-center gap-3">
+    <div className={cn("flex w-full items-center gap-5", className)}>
+      <div className="flex shrink-0 items-center gap-2">
+        <button
+          type="button"
+          aria-label="Previous step (←)"
+          onClick={prev}
+          disabled={!canBack}
+          className={cn(side, "w-9 justify-center px-0")}
+        >
+          <ChevronLeft size={16} strokeWidth={1.5} />
+        </button>
         <button
           type="button"
           aria-label={`${isPlaying ? "Pause" : isEnded ? "Replay" : "Play"} (Space)`}
@@ -60,34 +60,38 @@ export function ControlStrip({ className }: ControlStripProps): React.ReactEleme
         </button>
         <button
           type="button"
+          aria-label="Next step (→)"
+          onClick={next}
+          disabled={!canForward}
+          className={cn(side, "w-9 justify-center px-0")}
+        >
+          <ChevronRight size={16} strokeWidth={1.5} />
+        </button>
+        <button
+          type="button"
           aria-label="Restart from the first step (R)"
           onClick={reset}
           disabled={total === 0}
-          className={side}
+          className={cn(side, "w-9 justify-center px-0")}
         >
           <RotateCcw size={16} strokeWidth={1.5} />
-          Restart
         </button>
+      </div>
+
+      {children ? (
+        <div className="flex min-w-0 flex-1 justify-center">{children}</div>
+      ) : (
+        <div className="flex-1" />
+      )}
+
+      <div className="flex shrink-0 items-center gap-4">
         <span className="font-mono text-[12px] tabular-nums text-slate">
           {total === 0 ? "0 / 0" : `${index + 1} / ${total}`}
         </span>
-      </div>
-
-      <div className="flex items-center gap-4">
         <div className="hidden items-center gap-2 sm:flex">
           <span className="font-sans text-[13px] font-medium text-slate">Speed</span>
           <SpeedControl />
         </div>
-        <button
-          type="button"
-          aria-label="Next step (→)"
-          onClick={next}
-          disabled={!canForward}
-          className={side}
-        >
-          Next
-          <ChevronRight size={16} strokeWidth={1.5} />
-        </button>
       </div>
     </div>
   );
