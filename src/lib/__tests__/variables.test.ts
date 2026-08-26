@@ -65,12 +65,15 @@ describe("deriveVariables", () => {
   it("leaks nothing when nothing moved, and stepping back restores the earlier state", () => {
     const same = deriveVariables(steps[1]!, steps[1]!);
     expect(same.every((v) => !v.changed && v.previous === undefined)).toBe(true);
-    const forward = deriveVariables(steps[2]!, steps[1]!);
-    const back = deriveVariables(steps[1]!, steps[2]!);
-    expect(back.map((v) => v.current)).toEqual(
-      deriveVariables(steps[1]!).map((v) => v.current),
-    );
-    expect(forward.map((v) => v.current)).not.toEqual(back.map((v) => v.current));
+
+    /* The first step where `lo` actually moves: forward shows the movement,
+       stepping back shows the earlier value with the arrow reversed. */
+    const i = steps.findIndex((s, k) => k > 0 && pointer(s, "lo") !== pointer(steps[k - 1]!, "lo"));
+    const forward = deriveVariables(steps[i]!, steps[i - 1]!).find((v) => v.label === "low")!;
+    const back = deriveVariables(steps[i - 1]!, steps[i]!).find((v) => v.label === "low")!;
+    expect(forward.current).toBe(back.previous);
+    expect(back.current).toBe(forward.previous);
+    expect(deriveVariables(steps[i - 1]!).find((v) => v.label === "low")!.previous).toBeUndefined();
   });
 
   it("reads a module's key-value panel when one is supplied", () => {
