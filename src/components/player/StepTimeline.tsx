@@ -42,23 +42,9 @@ export function StepTimeline({ className }: StepTimelineProps): React.ReactEleme
     [pause, seek],
   );
 
-  const nodes = React.useMemo<TimelineNode[]>(() => {
-    if (!run) return [];
-    const out: TimelineNode[] = [];
-    run.steps.forEach((step, i) => {
-      const label = step.timelineLabel ?? step.phase;
-      const last = out[out.length - 1];
-      if (last && last.label === label && last.to === i - 1) {
-        last.to = i;
-        last.milestone = last.milestone || Boolean(step.isMilestone);
-      } else {
-        out.push({ label, from: i, to: i, milestone: Boolean(step.isMilestone) });
-      }
-    });
-    return out;
-  }, [run]);
+  const nodes = React.useMemo(() => (run ? buildTimelineNodes(run.steps) : []), [run]);
 
-  const activeNode = nodes.findIndex((nd) => index >= nd.from && index <= nd.to);
+  const activeNode = activeNodeIndex(nodes, index);
 
   React.useEffect(() => {
     activeRef.current?.scrollIntoView({ block: "nearest", inline: "center" });
