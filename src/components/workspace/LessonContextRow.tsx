@@ -43,13 +43,7 @@ export function LessonContextRow({
       <div className="ml-auto flex shrink-0 items-center gap-4">
         <span className="inline-flex items-center gap-2 font-mono text-[12px] text-slate">
           Mastery
-          <span className="h-1.5 w-24 overflow-hidden rounded-full bg-hairline">
-            <span
-              className="block h-full rounded-full bg-primary transition-[width] duration-300 ease-out"
-              style={{ width: `${Math.max(0, Math.min(100, masteryPct))}%` }}
-            />
-          </span>
-          <span className="tabular-nums font-medium text-ink">{Math.round(masteryPct)}%</span>
+          <MasteryRing pct={masteryPct} />
         </span>
         <Link
           to="/practice/$slug"
