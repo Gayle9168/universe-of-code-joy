@@ -13,7 +13,7 @@ import { getAlgorithm } from "@/content/algorithms";
 import type { Algorithm } from "@/content/types";
 import type { AlgorithmModule, InputField, AuxPanel } from "@/engine/types";
 import { cn } from "@/lib/utils";
-import { invariantFor } from "@/lib/variableBoard";
+import { deriveReasoning } from "@/lib/reasoning";
 import { tokenizeLine, type TokenKind } from "@/lib/syntaxHighlight";
 
 import { useIsReducedMotion } from "@/hooks/useReducedMotionSync";
@@ -199,21 +199,28 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
   const index = usePlayerStore((s) => s.index);
   const step = useCurrentStep();
   const goNext = usePlayerStore((s) => s.next);
+  const bodyRef = React.useRef<HTMLDivElement | null>(null);
 
-  if (!run || !step) {
+  const prevStep = run && index > 0 ? (run.steps[index - 1] ?? null) : null;
+  /* Reasoning is derived from the same canonical step the canvas, the variable
+     board and the code pane read, so the panel can never disagree with them. */
+  const reasoning = deriveReasoning(step, prevStep, index + 1);
+
+  /* A new step starts at the beginning of its explanation instead of inheriting
+     the previous step's scroll position. Never moves focus. */
+  React.useEffect(() => {
+    if (bodyRef.current) bodyRef.current.scrollTop = 0;
+  }, [index]);
+
+  if (!run || !step || !reasoning) {
     return (
       <div className="rounded-2xl border border-hairline bg-card p-6 shadow-sm">
-        <p className="t-body text-slate" aria-live="polite" aria-atomic="true">
-          Run the algorithm to see the explanation.
-        </p>
+        <p className="t-body text-slate">Run the algorithm to see the explanation.</p>
       </div>
     );
   }
 
-  const nextStep = run.steps[index + 1];
-  /* Every section reads the frame the canvas is drawing, so the reasoning can
-     never disagree with what is on screen. Empty sections are not rendered. */
-  const invariant = invariantFor(step.frame);
+  const hasNextStep = index + 1 < run.steps.length;
 
   return (
     <div
@@ -227,11 +234,9 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
         </span>
       </div>
 
-      <div
-        aria-live="polite"
-        aria-atomic="true"
-        className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3.5"
-      >
+      {/* No aria-live here: the workspace already announces one concise summary
+          per step, and four regions talking at once is unusable on autoplay. */}
+      <div ref={bodyRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3.5">
         <div>
           <h3 className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
             What happened
@@ -241,45 +246,48 @@ export function ExplainPane({ className }: { className?: string }): React.ReactE
             key={`happened-${index}`}
             className="viz-swap font-sans text-[13px] leading-relaxed text-ink"
           >
-            {step.narration}
+            {reasoning.happened}
           </p>
         </div>
 
-        {step.detail ? (
+        {reasoning.why ? (
           <div>
             <h3 className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
               Why
             </h3>
+            {/* Why is the reasoning that matters most, so it keeps ink weight. */}
             <p
               key={`why-${index}`}
-              className="viz-swap font-sans text-[13px] leading-relaxed text-slate"
+              className="viz-swap font-sans text-[13px] leading-relaxed text-ink"
             >
-              {step.detail}
+              {reasoning.why}
             </p>
           </div>
         ) : null}
 
-        {invariant ? (
+        {reasoning.invariant ? (
           <div>
             <h3 className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
-              Invariant
+              {reasoning.invariantLabel}
             </h3>
             <p
               key={`invariant-${index}`}
               className="viz-swap rounded-lg border border-primary/20 bg-tint px-3 py-2 font-sans text-[13px] leading-relaxed text-ink"
             >
-              {invariant}
+              {reasoning.invariant}
             </p>
           </div>
         ) : null}
 
-        {nextStep ? (
+        {/* Terminal steps have no Next: the section and its control both go away
+            rather than offering a stale action. */}
+        {reasoning.next && hasNextStep ? (
           <div className="flex items-center justify-between gap-3 border-t border-hairline pt-2.5">
             <p
               key={`next-${index}`}
               className="min-w-0 flex-1 font-sans text-[12px] leading-relaxed text-slate"
             >
-              Next: {nextStep.narration}
+              Next: {reasoning.next}
             </p>
             <button
               type="button"

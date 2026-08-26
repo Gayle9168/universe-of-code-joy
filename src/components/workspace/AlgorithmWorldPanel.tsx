@@ -6,6 +6,7 @@ import { CurrentOperation } from "@/components/viz/CurrentOperation";
 import { FrameView } from "@/components/viz/FrameView";
 import { VariableBoard } from "@/components/viz/VariableBoard";
 import type { AlgorithmModule } from "@/engine/types";
+import { deriveReasoning } from "@/lib/reasoning";
 import { deriveOperation, deriveVariables } from "@/lib/variables";
 import { changedPointers } from "@/lib/vizState";
 import { cn } from "@/lib/utils";
@@ -52,6 +53,7 @@ export function AlgorithmWorldPanel({
      stale value or formula. */
   const variables = deriveVariables(step, prevStep);
   const operation = deriveOperation(step, prevStep);
+  const reasoning = deriveReasoning(step, prevStep, index + 1);
   const showTeachingRow = variables.length > 0 || operation !== null;
 
   /* Only the boundary that actually moved on this step gets emphasis. */
@@ -68,8 +70,11 @@ export function AlgorithmWorldPanel({
         className,
       )}
     >
+      {/* The one live region for the whole workspace: a single concise execution
+          summary per step, instead of code, variables, operation and reasoning
+          each announcing themselves. */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {step ? `Step ${index + 1} of ${run?.steps.length ?? 0}: ${step.narration}` : ""}
+        {reasoning?.accessibleSummary ?? ""}
       </div>
 
       <h2 className="shrink-0 font-display text-[19px] font-semibold tracking-tight text-ink">
