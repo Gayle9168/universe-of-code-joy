@@ -263,7 +263,7 @@ export function ArrayCanvas({ frame, className }: ArrayCanvasProps): React.React
 
       {/* comparison strip — height reserved so frames never shift the layout */}
       <div
-        className="mt-4 flex w-full max-w-[520px] items-stretch rounded-xl border border-hairline bg-card transition-opacity duration-300 ease-out"
+        className="mt-3 flex w-full max-w-[520px] items-stretch rounded-xl border border-hairline bg-card transition-opacity duration-300 ease-out"
         style={{ opacity: frame.comparison ? 1 : 0 }}
         aria-hidden={frame.comparison ? undefined : true}
       >
